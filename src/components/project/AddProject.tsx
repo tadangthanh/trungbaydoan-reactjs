@@ -11,6 +11,7 @@ import InputSuggestion from '../input/InputSuggestion';
 
 export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => void, stopLoading: (success?: boolean, message?: string) => void }) => {
     const [categories, setCategories] = useState<Category[]>([]);
+    const [documentIds, setDocumentIds] = useState<number[]>([]);
     const [error, setError] = useState('');
     const [memberIds, setMemberIds] = useState<number[]>([]);
     const [projectName, setProjectName] = useState('');
@@ -32,6 +33,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     });
     useEffect(() => {
         document.title = "Thêm đồ án";
+        // console.log("useEffect");
         getAllCategory()
             .then(response => {
                 const data = response.data;
@@ -49,8 +51,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     };
     const handleAddProject = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("memberIds", memberIds)
-        console.log("mentorIds", mentorIds)
+        console.log("projectName", projectName);
         // setProjectCreate({
         //     name: projectName,
         //     startDate: new Date(startDate),
@@ -75,21 +76,21 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
         // });
         // stopLoading();
     }
-    useEffect(() => {
-        const handleKeyPress = (event: any) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                const button = document.querySelector('.btn-add-project') as HTMLButtonElement;
-                button.click();
-            }
-        };
+    // useEffect(() => {
+    //     const handleKeyPress = (event: any) => {
+    //         if (event.key === 'Enter') {
+    //             event.preventDefault();
+    //             const button = document.querySelector('.btn-add-project') as HTMLButtonElement;
+    //             button.click();
+    //         }
+    //     };
 
-        document.addEventListener('keydown', handleKeyPress);
+    //     document.addEventListener('keydown', handleKeyPress);
 
-        return () => {
-            document.removeEventListener('keydown', handleKeyPress);
-        };
-    }, []);
+    //     return () => {
+    //         document.removeEventListener('keydown', handleKeyPress);
+    //     };
+    // }, []);
     return (
         <div className="container mt-5">
             <a className="back-button">
@@ -101,6 +102,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
             <form id="projectForm" onSubmit={handleAddProject}>
                 <div className="form-group">
                     <label>Tên đồ án</label>
+                    <div id='editor'></div>
                     <MyEditor
                         data={projectName}
                         onChange={handleEditorChangeProjectName}

@@ -1,17 +1,17 @@
 import { getRefreshToken, getToken, setRefreshToken, setToken } from "./AuthenticationApi";
 
-export async function request(url: string) {
+export async function request(url: string, retryCount = 0): Promise<any> {
     try {
         let token = `${getToken()}`;
         let response = await fetchWithAuthorization(url, token);
 
-        if (response.status === 403) {
+        if (response.status === 403 && retryCount < 1) { // Giới hạn số lần thử làm mới token
             const { newAccessToken, newRefreshToken } = await refreshTokens();
             setToken(newAccessToken);
             setRefreshToken(newRefreshToken);
 
-            // Thực hiện lại request ban đầu với token mới
-            response = await fetchWithAuthorization(url, newAccessToken);
+            // Thực hiện lại request ban đầu với token mới và tăng số lần thử
+            return request(url, retryCount + 1);
         }
 
         return await response.json();
