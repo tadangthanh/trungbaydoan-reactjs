@@ -1,0 +1,56 @@
+/* HTML: <div class="loader"></div> */
+.loader {
+    width: fit-content;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 30px;
+    clip-path: inset(0 3ch 0 0);
+    animation: l4 1s steps(4) infinite;
+}
+
+.loader:before {
+    content: "Loading..."
+}
+
+@keyframes l4 {
+    to {
+        clip-path: inset(0 -1ch 0 0)
+    }
+}
+
+.upload-file-area {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+/* .upload-container {
+    width: fit-content;
+    padding: 1%;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+} */
+
+.upload-container h2 {
+    font-size: 1.5rem;
+    margin: 0;
+    color: #5c5ac6;
+}
+
+.upload-container h2 i {
+    display: inline-block;
+    margin-left: 10px;
+}
+
+#video-preview-upload {
+    display: none;
+}
+
+.btn-delete-video,
+.btn-upload-video {
+    display: none;
+}
+
+#progress-upload-video {
+    display: none;
+}

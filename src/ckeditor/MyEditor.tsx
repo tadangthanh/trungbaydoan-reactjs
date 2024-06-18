@@ -1,6 +1,7 @@
 import Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { getToken } from '../api/AuthenticationApi';
+import React from 'react';
 const baseViewUrl = 'http://localhost:8080/api/v1/documents/view/';
 class MyUploadAdapter {
     loader: any;
@@ -13,8 +14,10 @@ class MyUploadAdapter {
 
     // Starts the upload process.
     async upload() {
+        if (this.loader == null) {
+            return Promise.reject('Không cho phép upload ở đây');
+        }
         const file = await this.loader.file;
-
         const formData = new FormData();
         formData.append('file', file);
 
@@ -33,9 +36,11 @@ class MyUploadAdapter {
             }
 
             const result = await response.json();
-            console.log("url", baseViewUrl + result.data.id)
+            console.log("id", result.data.id)
             return {
-                default: baseViewUrl + result.data.id
+                default: baseViewUrl + result.data.id,
+                width: '500',
+                height: '500'
             };
         } catch (error: any) {
             if (error.name === 'AbortError') {
@@ -53,14 +58,23 @@ class MyUploadAdapter {
     }
 }
 
-function MyCustomUploadAdapterPlugin(editor: any) {
-    editor.plugins.get('FileRepository').createUploadAdapter = (loader: any) => {
-        return new MyUploadAdapter(loader);
-    };
+
+interface MyEditorProps {
+    data: string;
+    onChange: (event: any) => void;
+    uploadImage: boolean;
+
 }
 
-export default function MyEditor({ data, onChange }: { data: string, onChange: (event: any) => void }) {
-
+const MyEditor: React.FC<MyEditorProps> = ({ data, onChange, uploadImage }) => {
+    function MyCustomUploadAdapterPlugin(editor: any) {
+        editor.plugins.get('FileRepository').createUploadAdapter = (loader: any) => {
+            if (uploadImage) {
+                return new MyUploadAdapter(loader);
+            }
+            return new MyUploadAdapter(null);
+        };
+    }
     return (
         <CKEditor
             editor={Editor}
@@ -104,3 +118,4 @@ export default function MyEditor({ data, onChange }: { data: string, onChange: (
         />
     );
 }
+export default MyEditor;

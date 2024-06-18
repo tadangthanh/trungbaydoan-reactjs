@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { getRefreshToken, getToken, setRefreshToken, setToken } from "./AuthenticationApi";
 
 export async function request(url: string, retryCount = 0): Promise<any> {
@@ -59,3 +60,13 @@ export async function refreshTokens(): Promise<{ newAccessToken: string, newRefr
         throw new Error('Failed to refresh token');
     }
 }
+export const getEmailFromToken = (): string => {
+    const token = getToken() as string;
+    const payload = token.split('.')[1];
+    try {
+        return JSON.parse(atob(payload)).sub;
+    } catch (error) {
+        console.error('Invalid base64 string', error);
+        return '';
+    }
+};

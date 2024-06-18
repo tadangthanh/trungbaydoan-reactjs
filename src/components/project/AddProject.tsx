@@ -8,6 +8,7 @@ import { User } from '../../model/User';
 import MyEditor from '../../ckeditor/MyEditor';
 import DateInput from '../date/DateInput';
 import InputSuggestion from '../input/InputSuggestion';
+import { UploadFile } from './UploadFile';
 
 export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => void, stopLoading: (success?: boolean, message?: string) => void }) => {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -51,7 +52,6 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     };
     const handleAddProject = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("projectName", projectName);
         // setProjectCreate({
         //     name: projectName,
         //     startDate: new Date(startDate),
@@ -76,21 +76,6 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
         // });
         // stopLoading();
     }
-    // useEffect(() => {
-    //     const handleKeyPress = (event: any) => {
-    //         if (event.key === 'Enter') {
-    //             event.preventDefault();
-    //             const button = document.querySelector('.btn-add-project') as HTMLButtonElement;
-    //             button.click();
-    //         }
-    //     };
-
-    //     document.addEventListener('keydown', handleKeyPress);
-
-    //     return () => {
-    //         document.removeEventListener('keydown', handleKeyPress);
-    //     };
-    // }, []);
     return (
         <div className="container mt-5">
             <a className="back-button">
@@ -106,6 +91,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                     <MyEditor
                         data={projectName}
                         onChange={handleEditorChangeProjectName}
+                        uploadImage={false}
                     />
                 </div>
                 <div className="form-group">
@@ -113,6 +99,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                     <MyEditor
                         data={projectSummary}
                         onChange={handleEditorChangeProjectSummary}
+                        uploadImage={true}
                     />
                 </div>
                 <div className="row">
@@ -150,7 +137,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                 </div>
                 <div className='form-group'>
                     <InputSuggestion
-                        label='Người hướng dẫn'
+                        label='Giáo viên hướng dẫn'
                         data={mentorIds}
                         setData={setMentorIds}
                         request={findAllTeacherByEmail}
@@ -166,6 +153,14 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                         request={findAllStudentByEmail}
                         idPrefix='member'
                         placeholder='Nhập email thành viên'
+                    />
+
+
+                </div>
+                <div className='form-group'>
+                    <UploadFile
+                        documentIds={documentIds}
+                        setDocumentIds={setDocumentIds}
                     />
                 </div>
                 <span id="add-project-error">{error}</span>
