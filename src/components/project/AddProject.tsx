@@ -8,7 +8,8 @@ import { User } from '../../model/User';
 import MyEditor from '../../ckeditor/MyEditor';
 import DateInput from '../date/DateInput';
 import InputSuggestion from '../input/InputSuggestion';
-import { UploadFile } from './UploadFile';
+import { UploadVideo } from './UploadVideo';
+import { UploadDocument } from './UploadDocument';
 
 export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => void, stopLoading: (success?: boolean, message?: string) => void }) => {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -17,6 +18,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     const [memberIds, setMemberIds] = useState<number[]>([]);
     const [projectName, setProjectName] = useState('');
     const [projectSummary, setProjectSummary] = useState('');
+    const [description, setDescription] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [submissionDate, setSubmissionDate] = useState('');
@@ -34,7 +36,6 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     });
     useEffect(() => {
         document.title = "Thêm đồ án";
-        // console.log("useEffect");
         getAllCategory()
             .then(response => {
                 const data = response.data;
@@ -47,11 +48,15 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     const handleEditorChangeProjectSummary = (newContent: string) => {
         setProjectSummary(newContent);
     };
+    const handleEditorChangeDescription = (newContent: string) => {
+        setDescription(newContent);
+    }
     const handleEditorChangeProjectName = (newContent: string) => {
         setProjectName(newContent);
     };
     const handleAddProject = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        console.log("documentIds", documentIds);
         // setProjectCreate({
         //     name: projectName,
         //     startDate: new Date(startDate),
@@ -89,6 +94,8 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                     <label>Tên đồ án</label>
                     <div id='editor'></div>
                     <MyEditor
+                        documentIds={documentIds}
+                        setDocumentIds={setDocumentIds}
                         data={projectName}
                         onChange={handleEditorChangeProjectName}
                         uploadImage={false}
@@ -97,8 +104,20 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                 <div className="form-group">
                     <label>Bản tóm tắt đồ án</label>
                     <MyEditor
+                        documentIds={documentIds}
+                        setDocumentIds={setDocumentIds}
                         data={projectSummary}
                         onChange={handleEditorChangeProjectSummary}
+                        uploadImage={false}
+                    />
+                </div>
+                <div id='content' className="form-group">
+                    <label>Nội dung</label>
+                    <MyEditor
+                        documentIds={documentIds}
+                        setDocumentIds={setDocumentIds}
+                        data={projectSummary}
+                        onChange={handleEditorChangeDescription}
                         uploadImage={true}
                     />
                 </div>
@@ -157,11 +176,21 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
 
 
                 </div>
-                <div className='form-group'>
-                    <UploadFile
-                        documentIds={documentIds}
-                        setDocumentIds={setDocumentIds}
-                    />
+                <div className='row'>
+                    <div className='form-group col-md-6 col-12'>
+                        <UploadVideo
+                            label='Upload video'
+                            documentIds={documentIds}
+                            setDocumentIds={setDocumentIds}
+                        />
+                    </div>
+                    <div className='form-group col-md-6 col-12'>
+                        <UploadDocument
+                            label='Upload tài liệu'
+                            documentIds={documentIds}
+                            setDocumentIds={setDocumentIds}
+                        />
+                    </div>
                 </div>
                 <span id="add-project-error">{error}</span>
                 <button type="submit" className="btn btn-info btn-add-project">Thêm Đồ Án
