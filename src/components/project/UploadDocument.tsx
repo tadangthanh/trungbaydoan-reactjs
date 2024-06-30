@@ -16,10 +16,7 @@ interface UploadDocumentProps {
 export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, setDocumentIds, label }) => {
     const [files, setFiles] = useState<File[]>([]);
     const [error, setError] = useState<string>('');
-    const [progress, setProgress] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
-    const [stompClient, setStompClient] = useState<any>(null);
-    const [isConnected, setIsConnected] = useState<boolean>(false);
     const [isUpload, setIsUpload] = useState<boolean>(false);
     const [documentDTO, setDocumentDTO] = useState<DocumentDTO[]>([]);
     const [documentRemoveId, setDocumentRemoveId] = useState<number>(0);
@@ -59,39 +56,6 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, set
     useEffect(() => {
         if (!files) setError('');
     }, [files]);
-    // useEffect(() => {
-    //     if (isConnected || stompClient) {
-    //         // alert("Đã kết nối với server");
-    //         return;
-    //     };
-    //     const socket = new SockJS('http://localhost:8080/ws');
-    //     const client = over(socket);
-    //     const headers = {
-    //         Authorization: `Bearer ${getToken()}`
-    //     };
-
-    //     client.connect(headers, () => {
-    //         setIsConnected(true);
-    //         setStompClient(client);
-    //         console.log("Đã kết nối với server!!!!!!!!!!!");
-    //         client.subscribe('/topic/upload-progress/' + getEmailFromToken(), (message) => {
-    //             const receivedProgress = parseInt(message.body);
-    //             setProgress(receivedProgress);
-    //         });
-    //     }, (error) => {
-    //         console.error('không thể kết nối tới websocket:', error);
-    //         setIsConnected(false);
-    //     });
-
-    //     return () => {
-    //         if (stompClient) {
-    //             stompClient.disconnect(() => {
-    //                 setIsConnected(false);
-    //                 alert("Ngắt kết nối với server");
-    //             });
-    //         }
-    //     };
-    // }, [stompClient, isConnected]);
     const upload = async () => {
         if (files.length === 0) return;
         setIsUpload(true);

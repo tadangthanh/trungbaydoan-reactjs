@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 
-export default function InputSuggestion({ placeholder, label, data, setData, request, idPrefix }: { placeholder: string, label: string, data: any, setData: any, request: any, idPrefix: string }) {
+export default function InputSuggestion({ placeholder, label, required, data, setData, request, idPrefix }: { placeholder: string, label: string, data: any, setData: any, request: any, idPrefix: string, required: boolean }) {
     const [emailInput, setEmailInput] = useState('');
     const [idAdd, setIdAdd] = useState(0);
+    const [emailsIgnores, setEmailsIgnores] = useState<string[]>(['']);
     const [idRemove, setIdRemove] = useState(0);
     const [dataSuggestion, setDataSuggestion] = useState([] as any);
     const [suggestionsVisible, setSuggestionsVisible] = useState(false);
@@ -35,7 +36,7 @@ export default function InputSuggestion({ placeholder, label, data, setData, req
     useEffect(() => {
         if (debouncedEmail) {
             setSuggestionsVisible(true);
-            request(debouncedEmail)
+            request(debouncedEmail, emailsIgnores)
                 .then((response: any) => {
                     const data = response.data;
                     setDataSuggestion(data);
@@ -79,13 +80,14 @@ export default function InputSuggestion({ placeholder, label, data, setData, req
 
         if (suggestionsContainer && suggestionShow) {
             suggestionsContainer.innerHTML = '';
-            dataSuggestion.forEach((d: any) => {
+            dataSuggestion?.forEach((d: any) => {
                 const suggestion = document.createElement('li');
                 suggestion.innerText = d.email + '  (' + d.fullName + ')';
                 suggestion.title = d.fullName + ' - ' + d.email + ' - Chuyên ngành: ' + d.department + ' - K' + d.academicYear + ' - Khoa: ' + d.major;
                 suggestion.onclick = () => {
                     setEmailInput(d.email);
                     setIdAdd(d.id);
+                    setEmailsIgnores([...emailsIgnores, d.email]);
                     setEmailInput('');
                     focusInput();
                     const span = document.createElement('span');
@@ -101,6 +103,7 @@ export default function InputSuggestion({ placeholder, label, data, setData, req
                     btn.className = 'btn-remove-tag';
                     span.appendChild(btn);
                     span.onclick = () => {
+                        setEmailsIgnores(emailsIgnores.filter((email: string) => email !== d.email));
                         setEmailInput('');
                         setIdRemove(d.id);
                         span.remove();
@@ -113,7 +116,9 @@ export default function InputSuggestion({ placeholder, label, data, setData, req
 
     return (
         <div className="suggestion-container">
-            <label>{label}</label>
+            <label>
+                {label} {required && <span style={{ color: 'red' }}>*</span>}
+            </label>
             <div className="suggestion-show" id={`${idPrefix}-suggestion-show`}></div>
             <div className="tag-container">
                 <input

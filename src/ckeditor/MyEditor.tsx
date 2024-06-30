@@ -110,6 +110,7 @@ const MyEditor: React.FC<MyEditorProps> = ({ data, onChange, uploadImage, docume
                             'codeBlock'
                         ]
                     }
+
                 }}
                 onChange={(event, editor) => {
                     const data = editor.getData();

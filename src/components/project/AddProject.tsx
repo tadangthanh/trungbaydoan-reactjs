@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import '../css/addproject.css';
-import { getAllCategory } from '../../api/projectAPI/addproject';
+import { createProject, getAllCategory } from '../../api/projectAPI/addproject';
 import { Category } from '../../model/Category';
 import { findAllStudentByEmail, findAllTeacherByEmail } from '../../api/user/UserAPI';
 import { ProjectCreate } from '../../model/ProjectCreate';
@@ -22,7 +22,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [submissionDate, setSubmissionDate] = useState('');
-    const [categoryId, setCategoryId] = useState('');
+    const [categoryId, setCategoryId] = useState(0);
     const [mentorIds, setMentorIds] = useState<number[]>([]);
     const [projectCreate, setProjectCreate] = useState<ProjectCreate>({
         name: '',
@@ -30,9 +30,11 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
         endDate: new Date(),
         submissionDate: new Date(),
         categoryId: 0,
-        mentorId: 0,
+        mentorIds: [],
         summary: '',
-        memberIds: []
+        memberIds: [],
+        documentIds: [],
+        description: ''
     });
     useEffect(() => {
         document.title = "Thêm đồ án";
@@ -54,44 +56,64 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     const handleEditorChangeProjectName = (newContent: string) => {
         setProjectName(newContent);
     };
-    const handleAddProject = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleAddProject = (e: any) => {
         e.preventDefault();
-        console.log("documentIds", documentIds);
-        // setProjectCreate({
-        //     name: projectName,
-        //     startDate: new Date(startDate),
-        //     endDate: new Date(endDate),
-        //     submissionDate: new Date(submissionDate),
-        //     categoryId: Number(categoryId),
-        //     mentorEmail: mentorEmail,
-        //     summary: projectSummary
-        // });
-        // createProject(projectCreate).then(response => {
-        //     if (response.status !== 201) {
-        //         alert(response.message);
-        //         return;
-        //     }
-        //     console.log(response);
-        //     startLoading();
-        //     stopLoading(true, 'Thêm đồ án thành công');
-        // }).catch(error => {
-        //     alert(error.message);
-        //     startLoading();
-        //     stopLoading(false, 'Thêm đồ án thất bại');
-        // });
-        // stopLoading();
+        const project = {
+            name: projectName,
+            summary: projectSummary,
+            description: description,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+            submissionDate: new Date(submissionDate),
+            categoryId: categoryId,
+            mentorIds: mentorIds,
+            memberIds: memberIds,
+            documentIds: documentIds
+        }
+        console.log("projectCreate", projectCreate);
+        createProject(project).then((response: any) => {
+            if (response.status !== 201) {
+                alert(response.message);
+                return;
+            }
+            console.log(response);
+            startLoading();
+            stopLoading(true, 'Thêm đồ án thành công');
+            alert('Thêm thành công');
+            setProjectName('');
+            setProjectSummary('');
+            setDescription('');
+            setStartDate('');
+            setEndDate('');
+            setSubmissionDate('');
+            setCategoryId(0);
+            setMentorIds([]);
+            setMemberIds([]);
+            setDocumentIds([]);
+
+        }).catch((error: any) => {
+            alert(error.message);
+            startLoading();
+            stopLoading(false, 'Thêm đồ án thất bại');
+        });
+        stopLoading();
     }
+
+
+
     return (
-        <div className="container mt-5">
+        <div className="container mt-5 box-add-project">
             <a className="back-button">
                 <i className="fas fa-arrow-left"></i>
                 Quay lại trang chủ
             </a>
 
             <h2 id='title'>Thêm đồ án</h2>
-            <form id="projectForm" onSubmit={handleAddProject}>
+            <form id="projectForm">
                 <div className="form-group">
-                    <label>Tên đồ án</label>
+                    <label>
+                        Tên đồ án <span style={{ color: 'red' }}>*</span>
+                    </label>
                     <div id='editor'></div>
                     <MyEditor
                         documentIds={documentIds}
@@ -102,7 +124,9 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                     />
                 </div>
                 <div className="form-group">
-                    <label>Bản tóm tắt đồ án</label>
+                    <label>
+                        Bản tóm tắt <span style={{ color: 'red' }}>*</span>
+                    </label>
                     <MyEditor
                         documentIds={documentIds}
                         setDocumentIds={setDocumentIds}
@@ -112,11 +136,13 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                     />
                 </div>
                 <div id='content' className="form-group">
-                    <label>Nội dung</label>
+                    <label>
+                        Nội dung (mô tả) <span style={{ color: 'red' }}>*</span>
+                    </label>
                     <MyEditor
                         documentIds={documentIds}
                         setDocumentIds={setDocumentIds}
-                        data={projectSummary}
+                        data={description}
                         onChange={handleEditorChangeDescription}
                         uploadImage={true}
                     />
@@ -145,8 +171,11 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                     </div>
                 </div>
                 <div className="form-group">
-                    <label>Thể Loại</label>
-                    <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="form-control" id="categorySelect"  >
+                    <label>
+                        Thể loại <span style={{ color: 'red' }}>*</span>
+                    </label>
+                    <select value={categoryId} onChange={(e: any) => setCategoryId(e.target.value)
+                    } className="form-control" id="categorySelect"  >
                         <option value="">Chọn thể loại</option>
                         {categories.map((category, index) => (
                             <option key={index} value={category.id}>{category.name}</option>
@@ -156,6 +185,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                 </div>
                 <div className='form-group'>
                     <InputSuggestion
+                        required={true}
                         label='Giáo viên hướng dẫn'
                         data={mentorIds}
                         setData={setMentorIds}
@@ -166,6 +196,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                 </div>
                 <div className='form-group'>
                     <InputSuggestion
+                        required={false}
                         label='Thành viên thực hiện'
                         data={memberIds}
                         setData={setMemberIds}
@@ -193,7 +224,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                     </div>
                 </div>
                 <span id="add-project-error">{error}</span>
-                <button type="submit" className="btn btn-info btn-add-project">Thêm Đồ Án
+                <button type="submit" onClick={handleAddProject} className="btn btn-info btn-add-project">Thêm Đồ Án
                     <i className="button__icon fas fa-chevron-right"></i>
                 </button>
             </form>
