@@ -1,0 +1,31 @@
+.highlight {
+    font-weight: bold;
+    color: blue;
+}
+
+.blockquote-comment {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 1em;
+    margin-left: 40px;
+    margin-right: 40px;
+}
+
+.blockquote-comment i {
+    padding: 0 10px;
+    color: #846464
+}
+
+.comment-content {
+    word-wrap: break-word;
+    /* For legacy support */
+    overflow-wrap: break-word;
+    /* Modern browsers */
+    white-space: normal;
+    /* Allows text to wrap and collapse multiple spaces */
+    display: block;
+    /* Ensure it is treated as a block element */
+}
