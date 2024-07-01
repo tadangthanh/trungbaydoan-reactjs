@@ -97,7 +97,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId }) 
     return (
         <div className="justify-content-between">
             <div>
-                <div className="content-box">
+                <div className="content-box mt-2">
                     <div>
                         <div className="d-flex justify-content-between align-items-center">
                             <p className={authorEmail === comment.createdBy ? "mb-1 text-success highlight" : "mb-1"}>
@@ -140,7 +140,6 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId }) 
                 <button onClick={handleAddComment} className="btn btn-success mt-2">gửi</button>
                 <button className="btn btn-secondary mt-2" onClick={handleCancelReply}>Hủy</button>
             </div>}
-            <hr />
         </div>
     )
 }

@@ -10,13 +10,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-bottom: 1em;
-    margin-left: 40px;
     margin-right: 40px;
 }
 
 .blockquote-comment i {
     padding: 0 10px;
-    color: #846464
+    color: #846464;
+    font-size: 0.7rem;
 }
 
 .comment-content {
@@ -28,4 +28,10 @@
     /* Allows text to wrap and collapse multiple spaces */
     display: block;
     /* Ensure it is treated as a block element */
+}
+
+.content-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 10px
 }
