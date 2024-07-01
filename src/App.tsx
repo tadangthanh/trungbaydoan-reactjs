@@ -7,6 +7,7 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import { ForgotPassword } from './components/login/ForgotPassword';
 import { AddProject } from './components/project/AddProject';
 import { Comment } from './components/comment/Comment';
+import { ProjectDetail } from './components/project/ProjectDetail';
 function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -29,7 +30,7 @@ function App() {
       <div className="App">
         {isLoading && <LoadingSpinner isSuccess={isSuccess} successMessage={successMessage} />}
         <Routes>
-          <Route path="/comment" element={<Comment />} />
+          <Route path="/project/:id" element={<ProjectDetail />} />
           <Route path="/login" element={<Login startLoading={startLoading} stopLoading={stopLoading} />} />
           <Route path="/register" element={<Register startLoading={startLoading} stopLoading={stopLoading} />} />
           <Route path="/forgot-password" element={<ForgotPassword startLoading={startLoading} stopLoading={stopLoading} />} />

@@ -1,0 +1,10 @@
+figcaption {
+    font-style: italic;
+    /* In nghiêng */
+    text-align: center;
+    /* Căn giữa nội dung */
+    margin-top: 10px;
+    /* Khoảng cách phía trên */
+    color: #666;
+    /* Màu chữ */
+}

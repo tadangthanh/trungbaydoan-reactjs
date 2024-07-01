@@ -9,7 +9,7 @@ export async function request(url: string, retryCount = 0, method = 'GET'): Prom
         }
         return await response.json();
     } catch (error) {
-        console.error('Failed to make request:', error);
+        console.error('url request:', url, 'Failed to make request:', error);
         throw error;
     }
 }
