@@ -1,8 +1,8 @@
 import { getRefreshToken, getToken, setRefreshToken, setToken } from "./AuthenticationApi";
 
-export async function request(url: string, retryCount = 0): Promise<any> {
+export async function request(url: string, retryCount = 0, method = 'GET'): Promise<any> {
     try {
-        let response = await fetchWithAuthorization(url);
+        let response = await fetchWithAuthorization(url, method);
         if (response.status === 403 && retryCount < 1) {
             await refreshTokens();
             return request(url, retryCount + 1);
@@ -38,12 +38,13 @@ async function fetchWithPostAuthorization(url: string, body: any) {
         method: 'POST'
     });
 }
-async function fetchWithAuthorization(url: string) {
+async function fetchWithAuthorization(url: string, method = 'GET') {
     const token = getToken();
     return await fetch(url, {
         headers: {
             'Authorization': `Bearer ${token}`,
-        }
+        },
+        method: method
     });
 }
 

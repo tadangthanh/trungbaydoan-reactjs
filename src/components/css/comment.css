@@ -1,6 +1,6 @@
 .highlight {
-    font-weight: bold;
-    color: blue;
+    color: #4b0f0f;
+    background: rgba(140, 22, 22, 0.1)
 }
 
 .blockquote-comment {
@@ -11,6 +11,27 @@
     text-overflow: ellipsis;
     margin-bottom: 1em;
     margin-right: 40px;
+}
+
+.comment-child {
+    position: relative;
+    padding-left: 1.5rem;
+    border-left: 1px solid #ccc;
+}
+
+.comment-child::before {
+    content: '';
+    /* Thêm nội dung trống để tạo border */
+    position: absolute;
+    /* Đặt vị trí tuyệt đối cho border */
+    bottom: 0;
+    left: 0;
+    /* Dịch border sang trái 20px */
+    border-bottom: 1px solid #ccc;
+    /* Kiểu dáng của border */
+    width: 20px;
+    border-top-left-radius: 10px;
+    /* Chiều rộng của border */
 }
 
 .blockquote-comment i {
@@ -34,4 +55,28 @@
     border: 1px solid #ccc;
     padding: 10px;
     border-radius: 10px
+}
+
+.me-fullname {
+    font-weight: bold;
+    color: #4b0f0f;
+}
+
+.delete-btn {
+    align-items: center;
+}
+
+
+
+.delete-btn i {
+    color: rgb(79, 79, 111);
+    cursor: pointer;
+}
+
+.btn-reply {
+    padding: 0 1rem 0 1rem;
+}
+
+.time-created-comment {
+    font-size: .7rem;
 }

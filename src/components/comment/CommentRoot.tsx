@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { CommentDTO } from "../../model/CommentDTO"
 import { CommentElement } from "./CommentElement";
-import { createComment, getAllCommentChildByParentId } from "../../api/commentAPI/Comment";
+import { createComment, deleteComment, getAllCommentChildByParentId } from "../../api/commentAPI/Comment";
 import '../css/comment.css';
 import { getEmailFromToken } from "../../api/CommonApi";
 
 interface CommentRootProps {
     comment: CommentDTO,
-    projectId: number
+    projectId: number,
+    setComments: (comments: CommentDTO[]) => void
+    comments: CommentDTO[]
+
 }
-export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId }) => {
+export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId, setComments, comments }) => {
     function convertDateTime(inputDateTime: string) {
         const date = new Date(inputDateTime);
 
@@ -31,7 +34,8 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId }) 
     const [contentReply, setContentReply] = useState('');
     const [content, setContent] = useState('');
     const [receiverEmail, setReceiverEmail] = useState('');
-    const replyBoxRef = useRef<HTMLTextAreaElement>(null);
+    const replyBoxRef = useRef<HTMLDivElement>(null);
+    const [loading, setLoading] = useState(false);
     const [authorEmail, setAuthorEmail] = useState(getEmailFromToken());
     useEffect(() => {
         getAllCommentChildByParentId(comment.id, page, 5)
@@ -39,15 +43,18 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId }) 
                 const data = response.data;
                 setHasNext(data.hasNext)
                 setReply([...reply, ...data.items]);
+                setLoading(false);
             })
             .catch(error => {
+                setLoading(false);
                 console.log(error);
             });
     }, [page]);
     const handleGetCommentChild = () => {
         setPage(page + 1);
+        setLoading(true);
     }
-    const handleReply = (replyTo: string, content: string, receiverEmail: string) => {
+    const handleReply = (replyTo: string, content: string, receiverEmail: string, idCommentReply: number) => {
         setReplyTo(replyTo);
         setIdParent(comment.id);
         setReceiverEmail(receiverEmail);
@@ -55,10 +62,38 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId }) 
         setContentReply(content)
         setTimeout(() => {
             if (replyBoxRef.current) {
+                const link = document.createElement('a');
+                link.className = 'highlight text-decoration-none';
+                link.href = "#" + idCommentReply.toString();
+                link.style.marginRight = '0.5rem';
+                link.textContent = replyTo;
+
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    replyBoxRef.current?.focus();
+                });
+                link.addEventListener('keydown', (e) => {
+                    console.log(e.key);
+                });
+
+                replyBoxRef.current.innerHTML = ' ';
+                replyBoxRef.current.appendChild(link);
+                // Đặt con trỏ ngay sau thẻ <a>
+                const range = document.createRange();
+                const selection = window.getSelection();
+                range.setStartAfter(link);
+                range.collapse(true);
+                selection?.removeAllRanges();
+                selection?.addRange(range);
+
                 replyBoxRef.current.focus();
-                replyBoxRef.current.setSelectionRange(replyTo.length, replyTo.length);
+                replyBoxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+
             }
         }, 100);
+    }
+    const handleInputChange = (e: React.ChangeEvent<HTMLDivElement>) => {
+        setContent(e.target.innerHTML);
     }
     const showLessComment = () => {
         if (reply.length > 5) {
@@ -69,6 +104,8 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId }) 
             setPage(0);
         }
     }
+
+
     const handleCancelReply = () => {
         setIdParent(0);
         setReplyTo('');
@@ -91,27 +128,51 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId }) 
                 console.log(error);
             });
     }
-
-
+    const handleDeleteComment = (id: number) => {
+        const result = window.confirm("Bạn muốn xóa bình luận này?");
+        if (result) {
+            deleteComment(id)
+                .then(response => {
+                    if (response.status !== 200) {
+                        console.log(response.message)
+                    }
+                    const data = response.data;
+                    setComments(comments.filter(comment => comment.id !== id));
+                })
+        }
+    }
+    const convertHmtlToText = (html: string) => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        return doc.body.textContent?.split(":")[1] || "";
+    }
 
     return (
         <div className="justify-content-between">
             <div>
                 <div className="content-box mt-2">
                     <div>
-                        <div className="d-flex justify-content-between align-items-center">
-                            <p className={authorEmail === comment.createdBy ? "mb-1 text-success highlight" : "mb-1"}>
-                                {comment.authorName}  <span className="small"><i className="fa-regular fa-clock"></i> {convertDateTime(comment.createdDate)}</span>
+                        <div className="d-flex justify-content-between align-items-center mt-2">
+                            <p className={authorEmail === comment.createdBy ? "mb-0 text-success" : "mb-0"}>
+                                {comment.authorName}  <span className="time-created-comment"><i className="fa-regular fa-clock"></i> {convertDateTime(comment.createdDate)}</span>
                             </p>
-                            <button className="btn link-primary" onClick={() => {
-                                handleReply("@" + comment.authorName + ": ", comment.content, comment.receiverEmail);
-                            }}><i className="fas fa-reply fa-xs"></i><span className="small"> reply ({comment.totalReply})</span></button>
+
+                            <div className="d-flex">
+                                <button className="btn link-primary" onClick={() => {
+                                    handleReply("@" + comment.authorName + ": ", comment.content, comment.receiverEmail, comment.id);
+                                }}><i className="fas fa-reply fa-xs"></i><span className="small"> reply ({comment.totalReply})</span></button>
+
+                                {authorEmail === comment.createdBy && <div className="d-flex justify-content-end delete-btn" style={{ padding: '0 1rem 0 0' }}>
+                                    <i onClick={() => handleDeleteComment(comment.id)} title="Xóa bình luận" className="fa-regular fa-trash-can"></i>
+                                </div>}
+                            </div>
                         </div>
                         <div>
                             <p className="small mb-0">
                                 {comment.content}
                             </p>
+
                         </div>
+
                     </div>
 
                     {
@@ -120,26 +181,27 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId }) 
                                 key={index} comment={item}
                                 convertDateTime={convertDateTime}
                                 handleReply={handleReply}
+                                setReply={setReply}
+                                reply={reply}
                             />
                         })
                     }
 
                     <div className="d-flex justify-content-between"> {hastNext && comment.totalReply !== 0 && <button className="pe-auto d-inline-block mt-2 btn link-primary" onClick={handleGetCommentChild}>Xem tất cả </button>}
+                        {loading && <div className="loader"></div>}
                         {page !== 0 && <button onClick={showLessComment} className="pe-auto d-inline-block mt-2 btn link-primary">Hiển thị ít hơn</button>}
                     </div>
+                    {idParent !== 0 && <div className="form-group">
+                        <label htmlFor="exampleFormControlTextarea1">Trả lời <span className="highlight">{replyTo}</span>
+                        </label>
+                        <div spellCheck={false} contentEditable id="editableDiv" className="form-control" ref={replyBoxRef} onInput={handleInputChange} >
+                        </div>
+                        <button onClick={handleAddComment} className="btn btn-success mt-2">gửi</button>
+                        <button className="btn btn-secondary mt-2" onClick={handleCancelReply}>Hủy</button>
+                    </div>}
                 </div>
             </div>
-            {idParent !== 0 && <div className="form-group">
-                <label htmlFor="exampleFormControlTextarea1">Trả lời <span className="highlight">{replyTo}</span>
-                </label>
-                <blockquote className="blockquote-comment"><i className="fa-solid fa-quote-left"></i>{contentReply}<i className="fa-solid fa-quote-right"></i>
-                </blockquote>
-                <textarea className="form-control" value={content} ref={replyBoxRef} onChange={(e) => setContent(e.target.value)} >
-                    {replyTo}
-                </textarea>
-                <button onClick={handleAddComment} className="btn btn-success mt-2">gửi</button>
-                <button className="btn btn-secondary mt-2" onClick={handleCancelReply}>Hủy</button>
-            </div>}
+
         </div>
     )
 }
