@@ -12,8 +12,10 @@ interface UploadDocumentProps {
     label: string;
     documentIds: number[];
     setDocumentIds: (documentIds: number[]) => void;
+    handleSetWaiting: (value: boolean) => void;
+    waiting: boolean;
 }
-export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, setDocumentIds, label }) => {
+export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, waiting, setDocumentIds, label, handleSetWaiting }) => {
     const [files, setFiles] = useState<File[]>([]);
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
@@ -58,6 +60,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, set
     }, [files]);
     const upload = async () => {
         if (files.length === 0) return;
+        handleSetWaiting(true);
         setIsUpload(true);
         setLoading(true);
         const formData = new FormData();
@@ -75,12 +78,14 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, set
             const result = await response.json();
 
             if (response.status !== 200) {
+                handleSetWaiting(false);
                 alert("Upload failed: " + result.message);
                 setLoading(false);
                 setIsUpload(false);
                 setDocumentDTO([]);
                 return;
             }
+            handleSetWaiting(false);
             setDocumentIds([...documentIds, ...extractIds(result.data)]);
             setFiles([]);
             setIsUpload(false);
@@ -89,6 +94,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, set
 
             console.log('File uploaded successfully');
         } catch (error) {
+            handleSetWaiting(false);
             console.error('Error uploading file', error);
             setLoading(false);
         }
@@ -130,7 +136,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, set
             <label className="mb-4 text-center">{label}<i className="mr-2 fa-solid fa-cloud-arrow-up"></i></label>
             <div className="upload-file-area">
                 {!isUpload && <input accept=".pdf,.doc,.docx,.xls,.xlsx" ref={inputRef} type="file" multiple onChange={handleFileChange} />}
-                {!isUpload && !error && <button className="btn btn-secondary btn-upload-video" onClick={upload}>Upload</button>}
+                {!isUpload && !error && !waiting && <button className="btn btn-secondary btn-upload-video" onClick={upload}>Upload</button>}
             </div>
             {error && <div className="alert alert-danger mt-2">{error}</div>}
             {loading && <div className="loader"></div>}

@@ -5,12 +5,17 @@ import '../css/WidgetRight.css'
 import { GroupDTO } from "../../model/GroupDTO";
 import { getGroupByProjectId } from "../../api/groups/GroupAPI";
 import { MemberDTO } from "../../model/MemberDTO";
+import { SectionInfo } from "../user/SectionInfo";
+import { getBaseUrl } from "../../api/CommonApi";
+import { DocumentDTO } from "../../model/DocumentDTO";
+import { getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
 interface WidgetRightProps {
     categories: Category[];
     project: ProjectDTO;
     members: MemberDTO[];
+    documents: DocumentDTO[];
 }
-export const WidgetRight: React.FC<WidgetRightProps> = ({ categories, project, members }) => {
+export const WidgetRight: React.FC<WidgetRightProps> = ({ categories, project, documents, members }) => {
     const chunkArray = (arr: any, chunkSize: any) => {
         const results = [];
         for (let i = 0; i < arr.length; i += chunkSize) {
@@ -18,9 +23,8 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ categories, project, m
         }
         return results;
     };
-
+    console.log("project", project)
     const chunks = chunkArray(categories, 4);
-    console.log("project", project);
     return (
         <div className="col-lg-4">
             {/* <!-- Search widget--> */}
@@ -28,9 +32,9 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ categories, project, m
                 <div className="card-header">Search</div>
                 <div className="card-body">
                     <div className="input-group">
-                        <input className="form-control" type="text" placeholder="Enter search term..."
-                            aria-label="Enter search term..." aria-describedby="button-search" />
-                        <button className="btn btn-primary" id="button-search" type="button">Go!</button>
+                        <input className="form-control" type="text" placeholder="Nhập tìm kiếm..."
+                            aria-label="Nhập tìm kiếm..." aria-describedby="button-search" />
+                        <button className="btn btn-primary" id="button-search" type="button"><i className="fa-solid fa-magnifying-glass"></i></button>
                     </div>
                 </div>
             </div>
@@ -53,20 +57,39 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ categories, project, m
             </div>
             {/* <!-- Side widget--> */}
             <div className="card mb-4">
+                <div className="card-header">Tài liệu</div>
+                <div className="card-body">
+                    <ol id="document-project-detail">
+                        {documents.filter(document => document.type !== 'IMAGE' && document.type !== 'VIDEO').map((document, index) => (
+                            document.type === 'PDF' ? <li key={index}><a target="_blank" rel="noopener noreferrer" href={`${getBaseUrl()}/documents/view/${document.id}`}>{document.name}</a></li> :
+                                <li key={index}><a rel="noopener noreferrer" href={`${document.url}`}>{document.name}</a></li>
+                        ))}
+                    </ol>
+                </div>
+            </div>
+            <div className="card mb-4">
                 <div className="card-header">Thông tin đồ án</div>
                 <div className="card-body">
-                    <label htmlFor="">Giáo viên hướng dẫn</label>
+                    <label htmlFor="">Giáo viên hướng dẫn:</label>
                     <ul id="mentors">
                         {project.mentorNames?.map((mentor, index) => (
                             <li key={index}><a href="">{mentor}</a></li>
                         ))}
                     </ul>
-                    <label htmlFor="">Thành viên</label>
-                    <ul id="members">
-                        {members?.map((member, index) => (
-                            <li key={index}><a href="">{member.memberName}</a> ({member.role.split("_")[1].toLowerCase()})</li>
-                        ))}
-                    </ul>
+                    <label htmlFor="">Thành viên:</label>
+
+                    {members?.map((member, index) => (
+                        <ul key={index} className="members">
+                            <li title={`${member.memberName}`} id={`${member.id}`}><a href="">{member.memberName}</a> ({member.role.split("_")[1].toLowerCase()})
+                            </li>
+                            <li>Email: {member.email}</li>
+                            <li>Khoá: {member.academicYear}</li>
+                            <li>Lớp: {member.className}</li>
+                            <li>Khoa: {member.major}</li>
+                            <li>Chuyên ngành: {member.department}</li>
+                        </ul>
+
+                    ))}
                     <label htmlFor="">Ngày bắt đầu:</label>
                     <p>{project.startDate}</p>
                     <label htmlFor="">Ngày kết thúc:</label>
@@ -81,6 +104,7 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ categories, project, m
                     <p>{project.lastModifiedDate}</p>
                 </div>
             </div>
+
         </div>
     )
 }

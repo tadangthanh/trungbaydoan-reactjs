@@ -17,7 +17,6 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
         getAllCommentByProjectId(projectId, page, 5)
             .then(response => {
                 const data = response.data;
-                console.log(data.items)
                 setComments(data.items);
             })
             .catch(error => {
@@ -85,7 +84,7 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
             <label htmlFor="yourComment"> Bình luận của bạn: </label>
             <textarea placeholder="Nhập bình luận..." id="yourComment" className="form-control" value={content} onChange={(e) => setContent(e.target.value)} >
             </textarea>
-            <button onClick={handleAddComment} className="btn btn-success mt-2">gửi</button>
+            <button onClick={handleAddComment} disabled={content.trim() == ''} className="btn btn-success mt-2">gửi</button>
         </div>
     )
 }

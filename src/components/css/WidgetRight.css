@@ -1,4 +1,23 @@
-#mentors,
-#members li {
+#mentors li,
+.members li {
     list-style-type: none;
+}
+
+#mentors li a,
+.members li a {
+    text-decoration: none;
+}
+
+.members li:not(:first-child) {
+    margin-left: 1rem;
+    font-size: .8rem;
+}
+
+.carousel-item {
+    background-size: contain;
+    background-image: url("http://localhost:8080/api/v1/documents/view/483");
+}
+
+#document-project-detail a {
+    text-decoration: none;
 }

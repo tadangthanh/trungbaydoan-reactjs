@@ -1,5 +1,7 @@
 import { getRefreshToken, getToken, setRefreshToken, setToken } from "./AuthenticationApi";
-
+export const getBaseUrl = () => {
+    return 'http://localhost:8080/api/v1';
+}
 export async function request(url: string, retryCount = 0, method = 'GET'): Promise<any> {
     try {
         let response = await fetchWithAuthorization(url, method);
@@ -27,7 +29,33 @@ export async function requestWithPost(url: string, body: any, retryCount = 0): P
     }
 
 }
+export async function requestWithPostFile(url: string, body: FormData, retryCount = 0): Promise<any> {
+    try {
+        let response = await fetchWithPostFileAuthorization(url, body);
+        if (response.status === 403 && retryCount < 1) {
+            await refreshTokens();
+            return requestWithPostFile(url, body, retryCount + 1);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Failed to make request post:', error);
+        throw error;
+    }
+
+}
+async function fetchWithPostFileAuthorization(url: string, body: any) {
+    console.log("body:" + body);
+    const token = getToken();
+    return await fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: body,
+        method: 'POST'
+    });
+}
 async function fetchWithPostAuthorization(url: string, body: any) {
+    console.log("body:" + JSON.stringify(body));
     const token = getToken();
     return await fetch(url, {
         headers: {

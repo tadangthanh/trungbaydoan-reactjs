@@ -10,6 +10,7 @@ import DateInput from '../date/DateInput';
 import InputSuggestion from '../input/InputSuggestion';
 import { UploadVideo } from './UploadVideo';
 import { UploadDocument } from './UploadDocument';
+import { upload } from '@testing-library/user-event/dist/upload';
 
 export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => void, stopLoading: (success?: boolean, message?: string) => void }) => {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -24,6 +25,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     const [submissionDate, setSubmissionDate] = useState('');
     const [categoryId, setCategoryId] = useState(0);
     const [mentorIds, setMentorIds] = useState<number[]>([]);
+    const [waiting, setWaiting] = useState<boolean>(false);
     const [projectCreate, setProjectCreate] = useState<ProjectCreate>({
         name: '',
         startDate: new Date(),
@@ -37,11 +39,11 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
         description: ''
     });
     useEffect(() => {
-        document.title = "Thêm đồ án";
         getAllCategory()
             .then(response => {
                 const data = response.data;
                 setCategories(data);
+                document.title = "Thêm đồ án";
             })
             .catch(error => {
                 console.log(error);
@@ -50,21 +52,27 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     const handleEditorChangeProjectSummary = (newContent: string) => {
         setProjectSummary(newContent);
     };
+    const handleSetWaiting = (value: boolean) => {
+        setWaiting(value);
+    }
     const handleEditorChangeDescription = (newContent: string) => {
         setDescription(newContent);
     }
     const handleEditorChangeProjectName = (newContent: string) => {
         setProjectName(newContent);
     };
+    const handleSetDocumentIds = (id: number) => {
+        setDocumentIds(pre => [...pre, id]);
+    }
     const handleAddProject = (e: any) => {
         e.preventDefault();
         const project = {
             name: projectName,
             summary: projectSummary,
             description: description,
-            startDate: new Date(startDate),
-            endDate: new Date(endDate),
-            submissionDate: new Date(submissionDate),
+            startDate: new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 1)),
+            endDate: new Date(new Date(endDate).setDate(new Date(endDate).getDate() + 1)),
+            submissionDate: new Date(new Date(submissionDate).setDate(new Date(submissionDate).getDate() + 1)),
             categoryId: categoryId,
             mentorIds: mentorIds,
             memberIds: memberIds,
@@ -116,8 +124,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                     </label>
                     <div id='editor'></div>
                     <MyEditor
-                        documentIds={documentIds}
-                        setDocumentIds={setDocumentIds}
+                        handleSetDocumentIds={handleSetDocumentIds}
                         data={projectName}
                         onChange={handleEditorChangeProjectName}
                         uploadImage={false}
@@ -128,8 +135,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                         Bản tóm tắt <span style={{ color: 'red' }}>*</span>
                     </label>
                     <MyEditor
-                        documentIds={documentIds}
-                        setDocumentIds={setDocumentIds}
+                        handleSetDocumentIds={handleSetDocumentIds}
                         data={projectSummary}
                         onChange={handleEditorChangeProjectSummary}
                         uploadImage={false}
@@ -140,8 +146,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                         Nội dung (mô tả) <span style={{ color: 'red' }}>*</span>
                     </label>
                     <MyEditor
-                        documentIds={documentIds}
-                        setDocumentIds={setDocumentIds}
+                        handleSetDocumentIds={handleSetDocumentIds}
                         data={description}
                         onChange={handleEditorChangeDescription}
                         uploadImage={true}
@@ -210,13 +215,17 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                 <div className='row'>
                     <div className='form-group col-md-6 col-12'>
                         <UploadVideo
+                            handleSetWaiting={handleSetWaiting}
                             label='Upload video'
+                            waiting={waiting}
                             documentIds={documentIds}
                             setDocumentIds={setDocumentIds}
                         />
                     </div>
                     <div className='form-group col-md-6 col-12'>
                         <UploadDocument
+                            handleSetWaiting={handleSetWaiting}
+                            waiting={waiting}
                             label='Upload tài liệu'
                             documentIds={documentIds}
                             setDocumentIds={setDocumentIds}

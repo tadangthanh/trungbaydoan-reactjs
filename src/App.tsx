@@ -8,6 +8,7 @@ import { ForgotPassword } from './components/login/ForgotPassword';
 import { AddProject } from './components/project/AddProject';
 import { Comment } from './components/comment/Comment';
 import { ProjectDetail } from './components/project/ProjectDetail';
+import { Page404 } from './components/common/Page404';
 function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -31,6 +32,7 @@ function App() {
         {isLoading && <LoadingSpinner isSuccess={isSuccess} successMessage={successMessage} />}
         <Routes>
           <Route path="/project/:id" element={<ProjectDetail />} />
+          <Route path="/error-not-found" element={<Page404 />} />
           <Route path="/login" element={<Login startLoading={startLoading} stopLoading={stopLoading} />} />
           <Route path="/register" element={<Register startLoading={startLoading} stopLoading={stopLoading} />} />
           <Route path="/forgot-password" element={<ForgotPassword startLoading={startLoading} stopLoading={stopLoading} />} />

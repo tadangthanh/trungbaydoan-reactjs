@@ -20,7 +20,7 @@ export default function InputSuggestion({ placeholder, label, required, data, se
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedEmail(emailInput);
-        }, 500); // Adjust the delay as needed
+        }, 150); // Adjust the delay as needed
 
         return () => {
             clearTimeout(handler);

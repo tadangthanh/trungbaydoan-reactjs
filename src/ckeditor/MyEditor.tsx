@@ -1,17 +1,18 @@
 import Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { getToken } from '../api/AuthenticationApi';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { requestWithPostFile } from '../api/CommonApi';
 const baseViewUrl = 'http://localhost:8080/api/v1/documents/view/';
 interface MyEditorProps {
     data: string;
     onChange: (event: any) => void;
     uploadImage: boolean;
-    documentIds: number[];
-    setDocumentIds: (documentIds: number[]) => void;
-
+    handleSetDocumentIds(id: number): void;
 }
-const MyEditor: React.FC<MyEditorProps> = ({ data, onChange, uploadImage, documentIds, setDocumentIds }) => {
+const MyEditor: React.FC<MyEditorProps> = ({ data, onChange, uploadImage, handleSetDocumentIds }) => {
+    ;
+
     class MyUploadAdapter {
         loader: any;
         controller: AbortController;
@@ -31,24 +32,13 @@ const MyEditor: React.FC<MyEditorProps> = ({ data, onChange, uploadImage, docume
             formData.append('file', file);
 
             try {
-                const response = await fetch('http://localhost:8080/api/v1/documents/upload', {
-                    method: 'POST',
-                    body: formData,
-                    signal: this.controller.signal,
-                    headers: {
-                        Authorization: `Bearer ${getToken()}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                const response = await requestWithPostFile('http://localhost:8080/api/v1/documents/upload', formData);
+                if (response.status !== 201) {
+                    alert("Upload failed");
                 }
-
-                const result = await response.json();
-                console.log("id", result.data.id)
-                setDocumentIds([...documentIds, result.data.id]);
+                handleSetDocumentIds(response.data.id);
                 return {
-                    default: baseViewUrl + result.data.id,
+                    default: baseViewUrl + response.data.id,
                     width: '500',
                     height: '500px'
                 };

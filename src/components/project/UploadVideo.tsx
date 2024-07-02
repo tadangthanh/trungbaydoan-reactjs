@@ -10,8 +10,10 @@ interface UploadVideoProps {
     label: string;
     documentIds: number[];
     setDocumentIds: (documentIds: number[]) => void;
+    handleSetWaiting: (value: boolean) => void;
+    waiting: boolean;
 }
-export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocumentIds, label }) => {
+export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocumentIds, waiting, label, handleSetWaiting }) => {
     const [file, setFile] = useState<File | null>(null);
     const [error, setError] = useState<string>('');
     const [progress, setProgress] = useState<number>(0);
@@ -75,6 +77,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocume
     }, [stompClient, isConnected]);
     const upload = async () => {
         if (!file) return;
+        handleSetWaiting(true);
         setIsUpload(true);
         setLoading(true);
         const formData = new FormData();
@@ -90,12 +93,14 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocume
             const result = await response.json();
 
             if (response.status !== 200) {
+                handleSetWaiting(false);
                 alert("Upload failed: " + result.message);
                 setLoading(false);
                 setIsUpload(false);
                 setDocumentResponse({ id: 0, url: '' });
                 return;
             }
+            handleSetWaiting(false);
             setDocumentIds([...documentIds, result.data.id]);
             setFile(null);
             setIsUpload(false);
@@ -104,6 +109,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocume
 
             console.log('File uploaded successfully');
         } catch (error) {
+            handleSetWaiting(false);
             console.error('Error uploading file', error);
             setLoading(false);
         }
@@ -140,7 +146,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocume
             <label className="mb-4 text-center">{label}<i className="mr-2 fa-solid fa-cloud-arrow-up"></i></label>
             <div className="upload-file-area">
                 {!documentResponse.url && !isUpload && <input accept="video/*" ref={inputRef} type="file" onChange={handleFileChange} />}
-                {file && !isUpload && !error && <button className="btn btn-secondary btn-upload-video" onClick={upload}>Upload</button>}
+                {file && !isUpload && !error && !waiting && <button className="btn btn-secondary btn-upload-video" onClick={upload}>Upload</button>}
                 {!file && documentResponse.url && <button className="btn btn-danger btn-delete-video" onClick={deleteVideo}>Xóa video</button>}
             </div>
             {error && <div className="alert alert-danger mt-2">{error}</div>}
