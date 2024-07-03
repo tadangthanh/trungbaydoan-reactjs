@@ -1,0 +1,159 @@
+.form-control:focus {
+    box-shadow: none;
+    border-color: #BA68C8
+}
+
+.profile-button {
+    background: rgb(99, 39, 120);
+    box-shadow: none;
+    border: none
+}
+
+.profile-button:hover {
+    background: #682773
+}
+
+.profile-button:focus {
+    background: #682773;
+    box-shadow: none
+}
+
+.profile-button:active {
+    background: #682773;
+    box-shadow: none
+}
+
+.back:hover {
+    color: #682773;
+    cursor: pointer
+}
+
+.labels {
+    font-size: 11px
+}
+
+.add-experience:hover {
+    background: #BA68C8;
+    color: #fff;
+    cursor: pointer;
+    border: solid 1px #BA68C8
+}
+
+.input-container {
+    position: relative;
+    /* display: inline-block; */
+}
+
+.input-container input {
+    padding-right: 50px;
+    /* Để để chỗ cho button */
+    /* Thêm các CSS khác tùy vào thiết kế của bạn */
+}
+
+.input-container button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    padding: 0 15px;
+    /* Thêm các CSS khác tùy vào thiết kế của bạn */
+}
+
+
+.avatar-xxl {
+    height: 7rem;
+    width: 7rem;
+}
+
+.card {
+    margin-bottom: 20px;
+    -webkit-box-shadow: 0 2px 3px #eaedf2;
+    box-shadow: 0 2px 3px #eaedf2;
+}
+
+.pb-0 {
+    padding-bottom: 0 !important;
+}
+
+.font-size-16 {
+    font-size: 16px !important;
+}
+
+.avatar-title {
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    background-color: #038edc;
+    color: #fff;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-weight: 500;
+    height: 100%;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.bg-soft-primary {
+    background-color: rgba(3, 142, 220, .15) !important;
+}
+
+.rounded-circle {
+    border-radius: 50% !important;
+}
+
+.nav-tabs-custom .nav-item .nav-link.active {
+    color: #038edc;
+}
+
+.nav-tabs-custom .nav-item .nav-link {
+    border: none;
+}
+
+.nav-tabs-custom .nav-item .nav-link.active {
+    color: #038edc;
+}
+
+.avatar-group {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    padding-left: 12px;
+}
+
+
+.d-inline-block {
+    display: inline-block !important;
+}
+
+.badge-soft-danger {
+    color: #f34e4e;
+    background-color: rgba(243, 78, 78, .1);
+}
+
+.badge-soft-warning {
+    color: #f7cc53;
+    background-color: rgba(247, 204, 83, .1);
+}
+
+.badge-soft-success {
+    color: #51d28c;
+    background-color: rgba(81, 210, 140, .1);
+}
+
+.avatar-group .avatar-group-item {
+    margin-left: -14px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    -webkit-transition: all .2s;
+    transition: all .2s;
+}
+
+.avatar-sm {
+    height: 2rem;
+    width: 2rem;
+}

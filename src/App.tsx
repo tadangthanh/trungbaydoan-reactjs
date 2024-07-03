@@ -9,6 +9,7 @@ import { AddProject } from './components/project/AddProject';
 import { Comment } from './components/comment/Comment';
 import { ProjectDetail } from './components/project/ProjectDetail';
 import { Page404 } from './components/common/Page404';
+import { Profile } from './components/profile/Profile';
 function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -31,6 +32,7 @@ function App() {
       <div className="App">
         {isLoading && <LoadingSpinner isSuccess={isSuccess} successMessage={successMessage} />}
         <Routes>
+          <Route path="/profile/:email" element={<Profile />} />
           <Route path="/project/:id" element={<ProjectDetail />} />
           <Route path="/error-not-found" element={<Page404 />} />
           <Route path="/login" element={<Login startLoading={startLoading} stopLoading={stopLoading} />} />

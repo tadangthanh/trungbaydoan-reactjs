@@ -5,21 +5,22 @@ export class User extends BaseDTO {
     fullName: string;
     role: string;
     totalsProject: number;
-    avatar: string;
+    avatarId: number;
     department: string;
     academicYear: number;
     major: string;
+    className: string;
 
-    constructor(id: number, createdDate: Date, lastModifiedDate: Date, createdBy: string, lastModifiedBy: string, email: string, fullName: string, role: string, totalsProject: number, avatar: string, department: string, academicYear: number, major: string) {
+    constructor(id: number, createdDate: Date, lastModifiedDate: Date, createdBy: string, lastModifiedBy: string, email: string, fullName: string, role: string, totalsProject: number, avatarId: number, department: string, academicYear: number, major: string, className: string) {
         super(id, createdDate, lastModifiedDate, createdBy, lastModifiedBy);
         this.email = email;
         this.fullName = fullName;
         this.role = role;
         this.totalsProject = totalsProject;
-        this.avatar = avatar;
+        this.avatarId = avatarId;
         this.department = department;
         this.academicYear = academicYear;
         this.major = major;
-
+        this.className = className;
     }
 }

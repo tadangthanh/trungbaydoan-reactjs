@@ -11,8 +11,6 @@ import { Comment } from "../comment/Comment";
 import { WidgetRight } from "./WidgetRight";
 import { Category } from "../../model/Category";
 import { getAllCategory } from "../../api/categoryAPI/GetAllCategoryAPI";
-import { getGroupByProjectId } from "../../api/groups/GroupAPI";
-import { GroupDTO } from "../../model/GroupDTO";
 import { MemberDTO } from "../../model/MemberDTO";
 import { getMemberByProjectId } from "../../api/members/MemberAPI";
 import '../css/ProjectDetail.css'
@@ -21,8 +19,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import { SectionInfo } from "../user/SectionInfo";
-import { Nav } from "react-bootstrap";
+import { FaArrowUp } from 'react-icons/fa';
 import { getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
 export const ProjectDetail = () => {
     const { id } = useParams();
@@ -56,6 +53,7 @@ export const ProjectDetail = () => {
     const [documents, setDocuments] = useState<DocumentDTO[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [members, setMembers] = useState<MemberDTO[]>([]);
+
     useEffect(() => {
         getAllDocumentByProjectId(projectId).then(res => {
             setDocuments(res.data);
@@ -144,7 +142,12 @@ export const ProjectDetail = () => {
     const handleDoubleClick = () => {
         setIsZoomed(!isZoomed);
     };
-
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
     return (
         <div id="content" ref={contentRef}>
             <Header />
@@ -180,7 +183,7 @@ export const ProjectDetail = () => {
                     />
                 </div>
             </div>
-            <Dialog open={isOpen} onClose={handleClose} maxWidth="lg" fullWidth>
+            <Dialog style={{ zIndex: '4000' }} open={isOpen} onClose={handleClose} maxWidth="lg" fullWidth>
                 <DialogTitle>Media Preview</DialogTitle>
                 <DialogContent>
                     {selectedMedia.type === 'IMAGE' ? (
@@ -213,7 +216,27 @@ export const ProjectDetail = () => {
                     <Button onClick={handleClose} color="primary">Close</Button>
                 </DialogActions>
             </Dialog>
+            {/* Scroll to top button */}
+            <div
+                className="scroll-to-top"
+                onClick={scrollToTop}
+                style={{
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    backgroundColor: '#007bff',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    zIndex: 1000
+                }}
+            >
 
+                <FaArrowUp style={{ marginTop: '8px' }} />
+            </div>
         </div>
     )
 }

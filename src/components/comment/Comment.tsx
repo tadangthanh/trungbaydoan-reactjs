@@ -3,6 +3,7 @@ import { CommentDTO } from "../../model/CommentDTO";
 import { createComment, getAllCommentByProjectId } from "../../api/commentAPI/Comment";
 import { CommentRoot } from "./CommentRoot";
 import { useParams } from "react-router-dom";
+import { verifyToken } from "../../api/CommonApi";
 interface CommentProps {
     projectId: number;
 }
@@ -42,7 +43,7 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
     }
     const handleAddComment = () => {
         setLoading(true);
-        const comment = new CommentDTO(0, content, projectId, '', parentCommentId, '', '', 0, '', '', '');
+        const comment = new CommentDTO(0, content, projectId, '', parentCommentId, 0, '', 0, '', '', '');
         createComment(comment)
             .then(response => {
                 if (response.status !== 200) {
@@ -59,7 +60,14 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
                 console.log(error);
             });
     }
-
+    const [isLogin, setIsLogin] = useState(false);
+    useEffect(() => {
+        verifyToken().then(res => {
+            if (res.status === 200) {
+                setIsLogin(true);
+            }
+        });
+    }, []);
     return (
         <div>
             <div className="card">
@@ -67,6 +75,7 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
                     <h4 className="text-center mb-4 pb-2">Bình luận</h4>
                     {comments.map((comment, index) => (
                         <CommentRoot
+                            isLogin={isLogin}
                             key={index}
                             projectId={projectId}
                             comment={comment}
@@ -82,9 +91,11 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
                 {loading && <div className="loader"></div>}
             </div>
             <label htmlFor="yourComment"> Bình luận của bạn: </label>
-            <textarea placeholder="Nhập bình luận..." id="yourComment" className="form-control" value={content} onChange={(e) => setContent(e.target.value)} >
+            {!isLogin && <textarea placeholder="Vui lòng đăng nhập để bình luận" id="yourComment" className="form-control" disabled />}
+            {isLogin && <textarea placeholder="Nhập bình luận..." id="yourComment" className="form-control" value={content} onChange={(e) => setContent(e.target.value)} >
             </textarea>
-            <button onClick={handleAddComment} disabled={content.trim() == ''} className="btn btn-success mt-2">gửi</button>
+            }
+            {isLogin && <button onClick={handleAddComment} disabled={content.trim() == ''} className="btn btn-success mt-2">gửi</button>}
         </div>
     )
 }

@@ -4,20 +4,20 @@ export class CommentDTO {
     projectId: number;
     authorName: string;
     parentCommentId: number;
-    authorAvatar: string;
+    authorAvatarId: number;
     createdDate: string;
     totalReply: number;
     createdBy: string;
     authorEmail: string;
     receiverEmail: string;
 
-    constructor(id: number, content: string, projectId: number, authorName: string, parentCommentId: number, authorAvatar: string, createdDate: string, totalReply: number, createdBy: string, authorEmail: string, receiverEmail: string) {
+    constructor(id: number, content: string, projectId: number, authorName: string, parentCommentId: number, authorAvatarId: number, createdDate: string, totalReply: number, createdBy: string, authorEmail: string, receiverEmail: string) {
         this.id = id;
         this.content = content;
         this.projectId = projectId;
         this.authorName = authorName;
         this.parentCommentId = parentCommentId;
-        this.authorAvatar = authorAvatar;
+        this.authorAvatarId = authorAvatarId;
         this.createdDate = createdDate;
         this.totalReply = totalReply;
         this.createdBy = createdBy;

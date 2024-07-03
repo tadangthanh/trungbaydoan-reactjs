@@ -3,16 +3,17 @@ import { CommentDTO } from "../../model/CommentDTO"
 import { CommentElement } from "./CommentElement";
 import { createComment, deleteComment, getAllCommentChildByParentId } from "../../api/commentAPI/Comment";
 import '../css/comment.css';
-import { getEmailFromToken } from "../../api/CommonApi";
+import { getEmailFromToken, verifyToken } from "../../api/CommonApi";
 
 interface CommentRootProps {
     comment: CommentDTO,
     projectId: number,
     setComments: (comments: CommentDTO[]) => void
     comments: CommentDTO[]
+    isLogin: boolean
 
 }
-export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId, setComments, comments }) => {
+export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, projectId, setComments, comments }) => {
     function convertDateTime(inputDateTime: string) {
         const date = new Date(inputDateTime);
 
@@ -113,7 +114,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId, se
         setContentReply('');
     }
     const handleAddComment = () => {
-        const comment = new CommentDTO(0, content, projectId, '', idParent, '', '', 0, '', '', receiverEmail);
+        const comment = new CommentDTO(0, content, projectId, '', idParent, 0, '', 0, '', '', receiverEmail);
         createComment(comment)
             .then(response => {
                 if (response.status !== 200) {
@@ -156,7 +157,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId, se
                                 {comment.authorName}  <span className="time-created-comment"><i className="fa-regular fa-clock"></i> {convertDateTime(comment.createdDate)}</span>
                             </p>
 
-                            <div className="d-flex">
+                            {isLogin && <div className="d-flex">
                                 <button className="btn link-primary" onClick={() => {
                                     handleReply("@" + comment.authorName + ": ", comment.content, comment.receiverEmail, comment.id);
                                 }}><i className="fas fa-reply fa-xs"></i><span className="small"> reply ({comment.totalReply})</span></button>
@@ -164,7 +165,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId, se
                                 {authorEmail === comment.createdBy && <div className="d-flex justify-content-end delete-btn" style={{ padding: '0 1rem 0 0' }}>
                                     <i onClick={() => handleDeleteComment(comment.id)} title="Xóa bình luận" className="fa-regular fa-trash-can"></i>
                                 </div>}
-                            </div>
+                            </div>}
                         </div>
                         <div>
                             <p className="small mb-0">
@@ -178,6 +179,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ comment, projectId, se
                     {
                         reply.map((item, index) => {
                             return <CommentElement
+                                isLogin={isLogin}
                                 key={index} comment={item}
                                 convertDateTime={convertDateTime}
                                 handleReply={handleReply}

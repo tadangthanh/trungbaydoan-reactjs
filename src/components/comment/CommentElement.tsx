@@ -8,11 +8,12 @@ interface CommentElementProps {
     convertDateTime: (inputDateTime: string) => string,
     handleReply: (replyTo: string, content: string, receiverEmail: string, idCommentReply: number) => void,
     setReply: (reply: CommentDTO[]) => void,
-    reply: CommentDTO[],
+    reply: CommentDTO[]
+    isLogin: boolean
 
 }
 
-export const CommentElement: React.FC<CommentElementProps> = ({ comment, setReply, reply, convertDateTime, handleReply }) => {
+export const CommentElement: React.FC<CommentElementProps> = ({ isLogin, comment, setReply, reply, convertDateTime, handleReply }) => {
     const [authorEmail, setAuthorEmail] = useState(getEmailFromToken());
     const handleDeleteComment = (id: number) => {
         const result = window.confirm("Bạn muốn xóa bình luận này?");
@@ -41,7 +42,7 @@ export const CommentElement: React.FC<CommentElementProps> = ({ comment, setRepl
                             {comment.authorName} <span className="small time-created-comment"><i className="fa-regular fa-clock"></i> {convertDateTime(comment.createdDate)}</span>
                         </p>
 
-                        <div className="d-flex">
+                        {isLogin && <div className="d-flex">
                             <button className="btn link-primary btn-reply" onClick={() => {
                                 handleReply("@" + comment.authorName + ": ", comment.content, comment.receiverEmail, comment.id);
                             }}><i className="fas fa-reply fa-xs"></i><span className="small"> reply</span></button>
@@ -49,7 +50,7 @@ export const CommentElement: React.FC<CommentElementProps> = ({ comment, setRepl
                             {authorEmail === comment.createdBy && <div className="d-flex justify-content-end delete-btn" style={{ padding: '0 1rem 0 0' }}>
                                 <i onClick={() => handleDeleteComment(comment.id)} title="Xóa bình luận" className="fa-regular fa-trash-can"></i>
                             </div>}
-                        </div>
+                        </div>}
                     </div>
                     <div className="small mb-0">
                         <div dangerouslySetInnerHTML={covertToHtml(comment.content)}></div>

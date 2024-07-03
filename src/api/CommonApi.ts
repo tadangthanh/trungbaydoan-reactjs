@@ -29,6 +29,7 @@ export async function requestWithPost(url: string, body: any, retryCount = 0): P
     }
 
 }
+
 export async function requestWithPostFile(url: string, body: FormData, retryCount = 0): Promise<any> {
     try {
         let response = await fetchWithPostFileAuthorization(url, body);
@@ -67,7 +68,7 @@ async function fetchWithPostAuthorization(url: string, body: any) {
     });
 }
 async function fetchWithAuthorization(url: string, method = 'GET') {
-    const token = getToken();
+    const token = getToken() || '';
     return await fetch(url, {
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -107,8 +108,8 @@ export async function refreshTokens() {
 }
 export const getEmailFromToken = (): string => {
     const token = getToken() as string;
-    if (!token) window.location.href = '/login';
-    const payload = token.split('.')[1];
+    if (!token) return '';
+    const payload = token?.split('.')[1];
     try {
         return JSON.parse(atob(payload)).sub;
     } catch (error) {
@@ -116,3 +117,17 @@ export const getEmailFromToken = (): string => {
         return '';
     }
 };
+
+export const baseAvatarUrl = 'http://localhost:8080/api/v1/users/avatar/view/';
+export const verifyToken = async (): Promise<any> => {
+    try {
+        const url = getBaseUrl() + "/auth/verify-token";
+        const response = await fetch(url, {
+            headers: { 'Access-Token': getToken() as string },
+            method: 'POST',
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Failed to verify token:', error);
+    }
+}

@@ -9,6 +9,7 @@ import { SectionInfo } from "../user/SectionInfo";
 import { getBaseUrl } from "../../api/CommonApi";
 import { DocumentDTO } from "../../model/DocumentDTO";
 import { getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
+import { Link } from "react-router-dom";
 interface WidgetRightProps {
     categories: Category[];
     project: ProjectDTO;
@@ -80,7 +81,7 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ categories, project, d
 
                     {members?.map((member, index) => (
                         <ul key={index} className="members">
-                            <li title={`${member.memberName}`} id={`${member.id}`}><a href="">{member.memberName}</a> ({member.role.split("_")[1].toLowerCase()})
+                            <li title="Ấn vào để xem thông tin" id={`${member.id}`}><Link to={`/profile/${member.email}`}>{member.memberName}</Link>({member.role.split("_")[1].toLowerCase()})
                             </li>
                             <li>Email: {member.email}</li>
                             <li>Khoá: {member.academicYear}</li>
