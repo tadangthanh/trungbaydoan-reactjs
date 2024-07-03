@@ -2,7 +2,7 @@ import Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { getToken } from '../api/AuthenticationApi';
 import React, { useEffect, useState } from 'react';
-import { requestWithPostFile } from '../api/CommonApi';
+import { getBaseUrl, requestWithPostFile } from '../api/CommonApi';
 const baseViewUrl = 'http://localhost:8080/api/v1/documents/view/';
 interface MyEditorProps {
     data: string;
@@ -38,7 +38,7 @@ const MyEditor: React.FC<MyEditorProps> = ({ data, onChange, uploadImage, handle
                 }
                 handleSetDocumentIds(response.data.id);
                 return {
-                    default: baseViewUrl + response.data.id,
+                    default: getBaseUrl() + "/documents/view/" + response.data.id,
                     width: '500',
                     height: '500px'
                 };

@@ -99,6 +99,7 @@ export const ProjectDetail = () => {
 
     const handleClose = () => {
         setIsOpen(false);
+        setIsZoomed(false);
         if (videoRef.current) {
             videoRef.current.pause();
         }
@@ -106,21 +107,51 @@ export const ProjectDetail = () => {
     useEffect(() => {
         // Lấy ra tất cả các thẻ img
         const images = document.querySelectorAll('img');
-        // Thêm sự kiện cho từng thẻ img
         images.forEach(img => {
-            img.addEventListener('click', () => handleMediaClick("IMAGE", img.src)); // Thêm sự kiện click với hàm callback
+            img.style.cursor = 'pointer';
+            img.title = 'Click để xem ảnh';
         });
-
-        // Xóa sự kiện khi component bị hủy
+        images.forEach(img => {
+            img.addEventListener('click', () => handleMediaClick("IMAGE", img.src));
+        });
         return () => {
             images.forEach(img => {
-                img.removeEventListener('click', () => handleMediaClick("IMAGE", img.src)); // Xóa sự kiện click
+                img.removeEventListener('click', () => handleMediaClick("IMAGE", img.src));
             });
         };
     }, [project]); // useEffect chạy chỉ một lần sau khi component được render
+    const contentRef = useRef<HTMLDivElement | null>(null);
+    const progressBar = useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollValue = window.scrollY;
+            const contentHeight = contentRef.current?.clientHeight || 0;
+            const windowHeight = window.innerHeight;
+            const scrollPercent = (scrollValue / (contentHeight - windowHeight)) * 100;
+            if (progressBar.current) {
+                progressBar.current.style.width = `${scrollPercent}%`;
+            }
+        };
+
+        document.addEventListener('scroll', handleScroll);
+
+        // Cleanup event listener on component unmount
+        return () => {
+            document.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+    const [isZoomed, setIsZoomed] = useState(false);
+    const handleDoubleClick = () => {
+        setIsZoomed(!isZoomed);
+    };
+
     return (
-        <div>
+        <div id="content" ref={contentRef}>
             <Header />
+            <div id="progress-container">
+                <div id="progress-bar" ref={progressBar}></div>
+
+            </div>
             <div className="container mt-5">
                 <div className="row">
                     <div className="col-lg-8">
@@ -153,14 +184,28 @@ export const ProjectDetail = () => {
                 <DialogTitle>Media Preview</DialogTitle>
                 <DialogContent>
                     {selectedMedia.type === 'IMAGE' ? (
-                        <img src={selectedMedia.url} alt="Preview" style={{ width: '100%', height: '100%' }} />
+                        <img
+                            src={selectedMedia.url}
+                            alt="Preview"
+                            style={{
+                                width: isZoomed ? '200%' : '100%',
+                                height: isZoomed ? '200%' : '100%',
+                                cursor: 'zoom-in',
+                            }}
+                            onDoubleClick={handleDoubleClick}
+                        />
                     ) : (
                         <video
                             ref={videoRef}
                             src={selectedMedia.url}
-                            style={{ width: '100%' }}
+                            style={{
+                                width: isZoomed ? '200%' : '100%',
+                                height: isZoomed ? '200%' : '100%',
+                                cursor: 'zoom-in',
+                            }}
                             controls
                             autoPlay
+                            onDoubleClick={handleDoubleClick}
                         ></video>
                     )}
                 </DialogContent>
@@ -168,6 +213,7 @@ export const ProjectDetail = () => {
                     <Button onClick={handleClose} color="primary">Close</Button>
                 </DialogActions>
             </Dialog>
+
         </div>
     )
 }
