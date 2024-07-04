@@ -1,14 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '../css/Profile.css'
 import { Header } from '../common/Header';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { getUserByEmail, uploadAvatar } from '../../api/user/UserAPI';
+import { useParams } from 'react-router-dom';
+import { changePassword, getCodeVerify, getUserByEmail, uploadAvatar } from '../../api/user/UserAPI';
 import { User } from '../../model/User';
 import logo from '../../assets/img/vnua.png';
-import { baseAvatarUrl, getEmailFromToken, verifyToken } from '../../api/CommonApi';
+import { deleteToken, getEmailFromToken, verifyToken } from '../../api/CommonApi';
 import { ProjectElement } from './ProjectElement';
 import { ProjectDTO } from '../../model/ProjectDTO';
-import { getAllProjectByUserEmail } from '../../api/projectAPI/ProjectAPI';
+import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import { getAllProjectByUserEmail, getProjectsByMentorEmail } from '../../api/projectAPI/ProjectAPI';
+import { FaArrowUp } from 'react-icons/fa';
 export const Profile: React.FC = () => {
     const { email } = useParams() as any;
     const [error, setError] = useState<string>('');
@@ -16,18 +22,43 @@ export const Profile: React.FC = () => {
     const [user, setUser] = useState<User>({} as User);
     const [editAvatar, setEditAvatar] = useState(false);
     const [projects, setProjects] = useState<ProjectDTO[]>([] as ProjectDTO[]);
-    const emailFromToken = getEmailFromToken();
     const [isLogin, setIsLogin] = useState(false);
+    const [hasNext, setHasNext] = useState(false);
+    const [page, setPage] = useState(1);
+    const [role, setRole] = useState('');
     useEffect(() => {
         getUserByEmail(email).then(res => {
-            console.log("res", res)
             if (res.status !== 200) {
                 window.location.href = "/error-not-found";
             }
-            setUser(res.data)
-            console.log("User: ", res.data)
+            setUser(res.data);
+            setRole(res.data.role);
+            document.title = res.data.fullName;
         });
     }, [email]);
+    useEffect(() => {
+        if (role === 'ROLE_TEACHER') {
+            getProjectsByMentorEmail(email, page, 6).then(res => {
+                if (res.status !== 200) {
+                    alert("Lỗi tải dữ liệu");
+                    return;
+                }
+                console.log("page", page)
+                setHasNext(res.data.hasNext);
+                setProjects([...projects, ...res.data.items]);
+            });
+        } else {
+            getAllProjectByUserEmail(email, page, 6).then(res => {
+                if (res.status !== 200) {
+                    alert("Lỗi tải dữ liệu");
+                    return;
+                }
+                console.log([...projects, ...res.data.items])
+                setHasNext(res.data.hasNext);
+                setProjects([...projects, ...res.data.items]);
+            });
+        }
+    }, [role, page, email]);
     useEffect(() => {
         verifyToken().then(res => {
             if (res.status === 200) {
@@ -35,16 +66,6 @@ export const Profile: React.FC = () => {
             }
         })
     }, [])
-    useEffect(() => {
-        getAllProjectByUserEmail(email).then(res => {
-            if (res.status !== 200) {
-                alert("Lỗi tải dữ liệu");
-                return;
-            }
-            setProjects(res.data.items);
-            console.log("Projects: ", res.data);
-        });
-    }, [email]);
     const handleEditAvatar = () => {
         setEditAvatar(!editAvatar);
     }
@@ -73,27 +94,139 @@ export const Profile: React.FC = () => {
         setEditAvatar(false);
     }
     const handleUpload = () => {
-        console.log("file", file)
         uploadAvatar(file as File).then(res => {
             if (res.status !== 200) {
                 alert("Upload ảnh đại diện thất bại");
                 handleCancelUpload();
                 return;
             }
-            setUser({ ...user, avatarId: res.data.avatarId });
-            console.log("Upload ảnh đại diện thành công", res.data);
+            setUser({ ...user, avatarUrl: res.data.avatarUrl });
             handleCancelUpload();
         });
     }
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedMedia, setSelectedMedia] = useState({ url: '' });
+    const handleMediaClick = (url: string) => {
+        setSelectedMedia({ url });
+        setIsOpen(true);
+    };
+
+    const handleClose = () => {
+        setIsOpen(false);
+    };
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
+    const imgRef = useRef<HTMLImageElement>(null);
+    useEffect(() => {
+        imgRef.current?.addEventListener('click', () => handleMediaClick(imgRef.current?.src as string));
+        return () => {
+            imgRef.current?.removeEventListener('click', () => handleMediaClick(imgRef.current?.src as string));
+        };
+    }, []);
+    const refTop = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        refTop.current?.scrollIntoView({ behavior: 'smooth' });
+    }, []);
+    const [currentPasswordHidden, setCurrentPasswordHidden] = useState(false);
+    const [newPasswordHidden, setNewPasswordHidden] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const handleCurrentPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPasswordError('');
+        setCode('');
+        setIsCode(false);
+        setCurrentPassword(e.target.value);
+    };
+
+    const handleNewPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setIsCode(false);
+        setPasswordError('');
+        setCode('');
+        setNewPassword(e.target.value);
+    };
+
+    const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setIsCode(false);
+        setPasswordError('');
+        setCode('');
+        setConfirmPassword(e.target.value);
+    };
+    const [isCode, setIsCode] = useState(false);
+    const [labelCode, setLabelCode] = useState('Code ?');
+    const [code, setCode] = useState('');
+    const handleSendCode = () => {
+        getCodeVerify(getEmailFromToken()).then(res => {
+            if (res.status === 200) {
+                setTimeLeft(60);
+                setIsCode(true);
+                setLabelCode("nhập mã của bạn");
+            } else {
+                setPasswordError(res.message);
+                setIsCode(false);
+                setConfirmPassword('');
+                setNewPassword('');
+                setCurrentPassword('');
+                setLabelCode('Code ?');
+            }
+        })
+    }
+    const handleChangePassword = () => {
+        const updateNewPassword = {
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+            confirmPassword: confirmPassword,
+            code: code
+        }
+        changePassword(user.id, updateNewPassword).then(res => {
+            if (res.status === 204) {
+                deleteToken();
+                alert("Đổi mật khẩu thành công");
+                window.location.href = '/login';
+            } else {
+                setCode('');
+                setIsCode(false);
+                setConfirmPassword('');
+                setNewPassword('');
+                setCurrentPassword('');
+                setPasswordError(res.message);
+            }
+        })
+    }
+    const handleShowMore = () => {
+        setPage(page + 1);
+    }
+    const [timeLeft, setTimeLeft] = useState(10);
+
+    useEffect(() => {
+        // exit early when we reach 0
+        if (!timeLeft) return;
+
+        if (timeLeft === 0) {
+            setIsCode(true);
+            setTimeLeft(0);
+        }
+        const intervalId = setInterval(() => {
+
+            setTimeLeft(timeLeft - 1);
+        }, 1000);
+        return () => clearInterval(intervalId);
+    }, [timeLeft]);
 
     return (
         <div>
+            <div ref={refTop}></div>
             <Header />
             <div className="container rounded bg-white mt-5 mb-5">
                 <div className="row">
                     <div className="col-md-3 border-right">
                         <div className="d-flex flex-column align-items-center text-center p-3 py-5">
-                            <img className="rounded-circle mt-5" width="150px" src={imageUrl ? imageUrl : user.avatarId === 0 || user.avatarId === undefined ? logo : baseAvatarUrl + user.avatarId} alt="Profile" />
+                            <img ref={imgRef} style={{ cursor: 'pointer' }} className="rounded-circle mt-5" width="150px" src={imageUrl ? imageUrl : user.avatarUrl === "" || user.avatarId === undefined ? logo : user.avatarUrl} alt="Profile" />
                             <span className="font-weight-bold">{user.fullName}</span>
                             <span className="text-black-50">{user.email?.split("@")[0]}</span>
                             {editAvatar && <input onChange={handleFileChange} type="file" className="form-control" />}
@@ -136,10 +269,6 @@ export const Profile: React.FC = () => {
                                         <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.academicYear} />
                                     </div>
                                 </div>
-
-                                <div className="mt-5 text-center">
-                                    <button className="btn btn-primary profile-button" type="button">Save Profile</button>
-                                </div>
                             </form>
                         </div>
                     </div>
@@ -149,23 +278,31 @@ export const Profile: React.FC = () => {
                                 <span>Thay đổi mật khẩu</span>
                             </div>
                             <div className="mt-3">
-                                <label className="label">Mật khẩu cũ</label>
-                                <input type="text" className="form-control" placeholder="Experience" value="" />
+                                <label className="label">Mật khẩu hiện tại</label>
+                                <input value={currentPassword} onChange={handleCurrentPasswordChange} type={currentPasswordHidden ? "text" : "password"} className="form-control" placeholder="Nhập mật khẩu hiện tại" />
+                                <input style={{ cursor: 'pointer' }} onChange={(e) => { setCurrentPasswordHidden(e.target.checked) }} id='showPasswordCurrent' type="checkbox" /><label style={{ cursor: 'pointer' }} htmlFor='showPasswordCurrent'>Hiển thị mật khẩu</label>
                             </div>
                             <div className="mt-3">
                                 <label className="label">Mật khẩu mới</label>
-                                <input type="text" className="form-control" placeholder="Additional details" value="" />
+                                <input value={newPassword} onChange={handleNewPasswordChange} type={newPasswordHidden ? "text" : "password"} className="form-control" placeholder="Nhập mật khẩu mới" />
                             </div>
                             <div className="mt-3">
                                 <label className="label">Nhập lại mật khẩu mới</label>
-                                <input type="text" className="form-control" placeholder="Additional details" value="" />
+                                <input value={confirmPassword} onChange={handleConfirmPasswordChange} type={newPasswordHidden ? "text" : "password"} className="form-control" placeholder="Nhập lại mật khẩu mới" />
+                                <input style={{ cursor: 'pointer' }} onChange={(e) => { setNewPasswordHidden(e.target.checked) }} id='showNewPassword' type="checkbox" /><label style={{ cursor: 'pointer' }} htmlFor='showNewPassword'>Hiển thị mật khẩu</label>
                             </div>
+                            <span className='text-danger'>{passwordError}</span>
                             <div className="mt-3">
                                 <label className="label">Mã xác nhận</label>
                                 <div className="input-container">
-                                    <input type="text" className="form-control" placeholder="Nhập mã được gửi về email" />
-                                    <button className="inline-button">Lấy mã</button>
+                                    <input onChange={(e) => setCode(e.target.value)} value={code} type="text" disabled={isCode === false} className="form-control" placeholder={labelCode} />
+                                    {!isCode && <button disabled={passwordError === "" && currentPassword.length > 0 && newPassword.length > 0 && confirmPassword.length > 0 ? false : true} onClick={handleSendCode} className="inline-button">Lấy mã</button>}
+                                    {isCode && <button onClick={handleChangePassword}>Đổi mật khẩu</button>}
                                 </div>
+                                {isCode && <div className="input-container">
+                                    <span>Vui lòng đợi để gửi lại mã ? </span>
+                                    <span hidden={timeLeft === 0 ? false : true} onClick={handleSendCode} style={{ cursor: 'pointer' }} className="link-primary">Gửi lại</span> {timeLeft !== 0 && <span className='text-danger'>{timeLeft} giây</span>}
+                                </div>}
                             </div>
                         </div>
                     </div>}
@@ -174,7 +311,7 @@ export const Profile: React.FC = () => {
                             <div className="tab-pane active show" id="projects-tab" role="tabpanel">
                                 <div className="d-flex align-items-center">
                                     <div className="flex-1">
-                                        <h4 className="card-title mb-4">Projects</h4>
+                                        <h4 className="card-title mb-4">{user.role === "ROLE_TEACHER" ? "Projects mentor" : "Projects"}</h4>
                                     </div>
                                 </div>
                                 <div className="row" id="all-projects">
@@ -185,8 +322,44 @@ export const Profile: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                        {
+                            hasNext && <button onClick={handleShowMore}>Hiển thị thêm</button>
+                        }
                     </div>
                 </div>
+            </div>
+            <Dialog style={{ zIndex: '4000' }} open={isOpen} onClose={handleClose} maxWidth="lg" fullWidth>
+                <DialogTitle>Media Preview</DialogTitle>
+                <DialogContent>
+                    <img
+                        src={selectedMedia.url}
+                        style={{ width: '100%', height: '100%' }}
+                        alt="Preview"
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">Close</Button>
+                </DialogActions>
+            </Dialog>
+            <div
+                className="scroll-to-top"
+                onClick={scrollToTop}
+                style={{
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    backgroundColor: '#007bff',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    zIndex: 1000
+                }}
+            >
+
+                <FaArrowUp style={{ marginTop: '8px' }} />
             </div>
         </div>
     );

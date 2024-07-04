@@ -25,29 +25,29 @@ export const ProjectDetail = () => {
     const { id } = useParams();
     const projectId = Number(id);
     const [project, setProject] = useState({
-        id: 0,
-        approverName: "",
-        name: "",
-        description: "",
-        createdDate: "",
-        categoryName: "",
-        mentorNames: [],
-        documentIds: [],
-        groupId: 0,
-        academicYear: 0,
-        memberNames: [],
-        startDate: "",
-        endDate: "",
-        projectStatus: "",
-        submissionDate: "",
-        summary: "",
-        categoryId: 0,
-        approverId: 0,
-        mentorIds: [],
-        createdBy: "",
-        lastModifiedDate: "",
-        lastModifiedBy: ""
-    }
+        // id: 0,
+        // approverName: "",
+        // name: "",
+        // description: "",
+        // createdDate: "",
+        // categoryName: "",
+        // mentorNames: [],
+        // documentIds: [],
+        // groupId: 0,
+        // academicYear: 0,
+        // memberNames: [],
+        // startDate: "",
+        // endDate: "",
+        // projectStatus: "",
+        // submissionDate: "",
+        // summary: "",
+        // categoryId: 0,
+        // approverId: 0,
+        // mentorIds: [],
+        // createdBy: "",
+        // lastModifiedDate: "",
+        // lastModifiedBy: ""
+    } as ProjectDTO
     );
 
     const [documents, setDocuments] = useState<DocumentDTO[]>([]);
@@ -107,6 +107,7 @@ export const ProjectDetail = () => {
         const images = document.querySelectorAll('img');
         images.forEach(img => {
             img.style.cursor = 'pointer';
+            img.loading = 'lazy';
             img.title = 'Click để xem ảnh';
         });
         images.forEach(img => {
@@ -148,6 +149,9 @@ export const ProjectDetail = () => {
             behavior: 'smooth'
         });
     };
+    useEffect(() => {
+        contentRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, []);
     return (
         <div id="content" ref={contentRef}>
             <Header />

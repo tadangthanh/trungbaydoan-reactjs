@@ -52,9 +52,9 @@
 }
 
 .content-box {
-    /* border: 1px solid #ccc; */
+    border: 1px dotted #cccc;
     padding: 10px;
-    /* border-radius: 10px */
+    border-radius: 10px
 }
 
 .me-fullname {

@@ -157,3 +157,16 @@
     height: 2rem;
     width: 2rem;
 }
+
+.projects-container {
+    border: 1px solid #e9ecef;
+}
+
+.team-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    /* Số lượng dòng hiển thị */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

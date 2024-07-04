@@ -13,21 +13,31 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
     const [parentCommentId, setParentCommentId] = useState(0);
     const [page, setPage] = useState(1);
     const [hastNext, setHasNext] = useState(true);
+    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    // useEffect(() => {
+    //     getAllCommentByProjectId(projectId, page, 5)
+    //         .then(response => {
+    //             if (response.status !== 200) {
+    //                 setError('Không thể lấy dữ liệu');
+    //             }
+    //             const data = response.data;
+    //             setComments(data.items);
+    //         })
+    //         .catch(error => {
+    //             setError('Không thể lấy dữ liệu');
+    //             console.log(error);
+    //         });
+    // }, []);
     useEffect(() => {
         getAllCommentByProjectId(projectId, page, 5)
             .then(response => {
                 const data = response.data;
-                setComments(data.items);
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }, []);
-    useEffect(() => {
-        getAllCommentByProjectId(projectId, page, 5)
-            .then(response => {
-                const data = response.data;
+                if (response.status !== 200) {
+                    setHasNext(false)
+                    setLoading(false);
+                    return;
+                }
                 setHasNext(data.hasNext)
                 setComments([...comments, ...data.items]);
                 setLoading(false);
@@ -48,8 +58,10 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
             .then(response => {
                 if (response.status !== 200) {
                     console.log(response.message)
+                    setError('Không thể thêm bình luận');
                     setLoading(false);
                 }
+                setError('');
                 const data = response.data;
                 setComments([...comments, data]);
                 setContent('');
@@ -57,6 +69,7 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
             })
             .catch(error => {
                 setLoading(false);
+                setError('Không thể thêm bình luận');
                 console.log(error);
             });
     }
@@ -87,12 +100,13 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
 
             </div>
             <div className="d-flex justify-content-between">
-                {hastNext && <button className="pe-auto d-inline-block mt-2 btn link-primary" onClick={getAllComment}>Xem thêm bình luận</button>}
+                {hastNext && comments.length > 0 && <button className="pe-auto d-inline-block mt-2 btn link-primary" onClick={getAllComment}>Xem thêm bình luận</button>}
                 {loading && <div className="loader"></div>}
+                <span className="text-danger">{error}</span>
             </div>
             <label htmlFor="yourComment"> Bình luận của bạn: </label>
             {!isLogin && <textarea placeholder="Vui lòng đăng nhập để bình luận" id="yourComment" className="form-control" disabled />}
-            {isLogin && <textarea placeholder="Nhập bình luận..." id="yourComment" className="form-control" value={content} onChange={(e) => setContent(e.target.value)} >
+            {isLogin && <textarea placeholder="Nhập bình luận..." id="yourComment" className="form-control" value={content} onChange={(e) => { setContent(e.target.value); setError('') }} >
             </textarea>
             }
             {isLogin && <button onClick={handleAddComment} disabled={content.trim() == ''} className="btn btn-success mt-2">gửi</button>}

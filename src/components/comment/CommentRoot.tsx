@@ -4,6 +4,7 @@ import { CommentElement } from "./CommentElement";
 import { createComment, deleteComment, getAllCommentChildByParentId } from "../../api/commentAPI/Comment";
 import '../css/comment.css';
 import { getEmailFromToken, verifyToken } from "../../api/CommonApi";
+import { error } from "jquery";
 
 interface CommentRootProps {
     comment: CommentDTO,
@@ -53,9 +54,11 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
     }, [page]);
     const handleGetCommentChild = () => {
         setPage(page + 1);
+        setError('');
         setLoading(true);
     }
     const handleReply = (replyTo: string, content: string, receiverEmail: string, idCommentReply: number) => {
+        setError('');
         setReplyTo(replyTo);
         setIdParent(comment.id);
         setReceiverEmail(receiverEmail);
@@ -97,6 +100,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
         setContent(e.target.innerHTML);
     }
     const showLessComment = () => {
+        setError('');
         if (reply.length > 5) {
             setReply(prevReply => prevReply.slice(0, prevReply.length - 5));
         } else {
@@ -113,6 +117,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
         setContent('');
         setContentReply('');
     }
+    const [error, setError] = useState('');
     const handleAddComment = () => {
         const comment = new CommentDTO(0, content, projectId, '', idParent, 0, '', 0, '', '', receiverEmail);
         createComment(comment)
@@ -126,6 +131,8 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                 setContent('');
             })
             .catch(error => {
+                setError('Có lỗi xảy ra khi thêm bình luận');
+                setIdParent(0);
                 console.log(error);
             });
     }
@@ -137,6 +144,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                     if (response.status !== 200) {
                         console.log(response.message)
                     }
+                    setIdParent(0);
                     const data = response.data;
                     setComments(comments.filter(comment => comment.id !== id));
                 })
@@ -201,6 +209,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                         <button onClick={handleAddComment} className="btn btn-success mt-2">gửi</button>
                         <button className="btn btn-secondary mt-2" onClick={handleCancelReply}>Hủy</button>
                     </div>}
+                    <span className="text-danger" >{error}</span>
                 </div>
             </div>
 

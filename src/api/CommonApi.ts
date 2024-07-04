@@ -1,3 +1,4 @@
+import Cookies from "js-cookie";
 import { getRefreshToken, getToken, setRefreshToken, setToken } from "./AuthenticationApi";
 export const getBaseUrl = () => {
     return 'http://localhost:8080/api/v1';
@@ -45,7 +46,6 @@ export async function requestWithPostFile(url: string, body: FormData, retryCoun
 
 }
 async function fetchWithPostFileAuthorization(url: string, body: any) {
-    console.log("body:" + body);
     const token = getToken();
     return await fetch(url, {
         headers: {
@@ -56,7 +56,6 @@ async function fetchWithPostFileAuthorization(url: string, body: any) {
     });
 }
 async function fetchWithPostAuthorization(url: string, body: any) {
-    console.log("body:" + JSON.stringify(body));
     const token = getToken();
     return await fetch(url, {
         headers: {
@@ -123,11 +122,15 @@ export const verifyToken = async (): Promise<any> => {
     try {
         const url = getBaseUrl() + "/auth/verify-token";
         const response = await fetch(url, {
-            headers: { 'Access-Token': getToken() as string },
+            headers: { 'Access-Token': getToken() || '' },
             method: 'POST',
         });
         return await response.json();
     } catch (error) {
         console.error('Failed to verify token:', error);
     }
+}
+export const deleteToken = () => {
+    Cookies.remove('token');
+    Cookies.remove('refreshToken');
 }

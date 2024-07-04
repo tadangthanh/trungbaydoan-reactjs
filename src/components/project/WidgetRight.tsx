@@ -2,14 +2,12 @@ import { useEffect, useState } from "react";
 import { Category } from "../../model/Category";
 import { ProjectDTO } from "../../model/ProjectDTO";
 import '../css/WidgetRight.css'
-import { GroupDTO } from "../../model/GroupDTO";
-import { getGroupByProjectId } from "../../api/groups/GroupAPI";
 import { MemberDTO } from "../../model/MemberDTO";
-import { SectionInfo } from "../user/SectionInfo";
 import { getBaseUrl } from "../../api/CommonApi";
 import { DocumentDTO } from "../../model/DocumentDTO";
-import { getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
 import { Link } from "react-router-dom";
+import { User } from "../../model/User";
+import { getMentorsByProjectId } from "../../api/projectAPI/ProjectAPI";
 interface WidgetRightProps {
     categories: Category[];
     project: ProjectDTO;
@@ -24,6 +22,14 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ categories, project, d
         }
         return results;
     };
+    const [mentors, setMentors] = useState<User[]>([]);
+    useEffect(() => {
+        getMentorsByProjectId(project.id).then(res => {
+            setMentors(res.data);
+        }).catch(error => {
+            console.log(error);
+        });
+    }, [project.id])
     console.log("project", project)
     const chunks = chunkArray(categories, 4);
     return (
@@ -73,21 +79,21 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ categories, project, d
                 <div className="card-body">
                     <label htmlFor="">Giáo viên hướng dẫn:</label>
                     <ul id="mentors">
-                        {project.mentorNames?.map((mentor, index) => (
-                            <li key={index}><a href="">{mentor}</a></li>
+                        {mentors?.map((mentor, index) => (
+                            <li key={index}><Link to={`/profile/${mentor.email}`}>{mentor.fullName}</Link></li>
                         ))}
                     </ul>
                     <label htmlFor="">Thành viên:</label>
 
                     {members?.map((member, index) => (
-                        <ul key={index} className="members">
+                        <ul key={index} className="members m-0">
                             <li title="Ấn vào để xem thông tin" id={`${member.id}`}><Link to={`/profile/${member.email}`}>{member.memberName}</Link>({member.role.split("_")[1].toLowerCase()})
                             </li>
-                            <li>Email: {member.email}</li>
+                            {/* <li>Email: {member.email}</li>
                             <li>Khoá: {member.academicYear}</li>
                             <li>Lớp: {member.className}</li>
                             <li>Khoa: {member.major}</li>
-                            <li>Chuyên ngành: {member.department}</li>
+                            <li>Chuyên ngành: {member.department}</li> */}
                         </ul>
 
                     ))}

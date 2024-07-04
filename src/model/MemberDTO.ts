@@ -9,8 +9,9 @@ export class MemberDTO {
     department: string;
     className: string;
     email: string;
+    avatarUrl: string;
 
-    constructor(id: number, role: string, userId: number, memberName: string, groupId: number, academicYear: number, major: string, department: string, className: string, email: string) {
+    constructor(id: number, role: string, userId: number, memberName: string, groupId: number, academicYear: number, major: string, department: string, className: string, email: string, avatarUrl: string) {
         this.id = id;
         this.role = role;
         this.userId = userId;
@@ -21,5 +22,6 @@ export class MemberDTO {
         this.department = department;
         this.className = className;
         this.email = email;
+        this.avatarUrl = avatarUrl;
     }
 }
