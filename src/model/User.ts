@@ -11,8 +11,9 @@ export class User extends BaseDTO {
     major: string;
     avatarUrl: string;
     className: string;
-
-    constructor(id: number, createdDate: Date, lastModifiedDate: Date, createdBy: string, lastModifiedBy: string, email: string, fullName: string, role: string, totalsProject: number, avatarId: number, department: string, academicYear: number, major: string, className: string, avatarUrl: string) {
+    facebookUrl: string;
+    githubUrl: string
+    constructor(id: number, createdDate: Date, lastModifiedDate: Date, createdBy: string, lastModifiedBy: string, email: string, fullName: string, role: string, totalsProject: number, avatarId: number, department: string, academicYear: number, major: string, className: string, avatarUrl: string, facebookUrl: string, githubUrl: string) {
         super(id, createdDate, lastModifiedDate, createdBy, lastModifiedBy);
         this.email = email;
         this.fullName = fullName;
@@ -24,5 +25,7 @@ export class User extends BaseDTO {
         this.major = major;
         this.className = className;
         this.avatarUrl = avatarUrl;
+        this.facebookUrl = facebookUrl;
+        this.githubUrl = githubUrl;
     }
 }

@@ -170,3 +170,25 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+#social-network {
+    display: flex;
+    flex-direction: column;
+}
+
+#social-network a {
+    display: inline-block;
+    text-decoration: none;
+    color: #636c76;
+    font-size: 1rem;
+}
+
+#social-network a:hover {
+    color: #682773;
+    text-decoration: underline;
+}
+
+#social-network a i {
+    display: inline-block;
+    margin-right: 0.3rem;
+}

@@ -16,6 +16,19 @@ export async function request(url: string, retryCount = 0, method = 'GET'): Prom
         throw error;
     }
 }
+export async function requestWithMethod(url: string, retryCount = 0, body: any, method = 'GET'): Promise<any> {
+    try {
+        let response = await fetchWithMethodAuthorization(url, body, method);
+        if (response.status === 403 && retryCount < 1) {
+            await refreshTokens();
+            return request(url, retryCount + 1);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('url request:', url, 'Failed to make request:', error);
+        throw error;
+    }
+}
 export async function requestWithPost(url: string, body: any, retryCount = 0): Promise<any> {
     try {
         let response = await fetchWithPostAuthorization(url, body);
@@ -73,6 +86,16 @@ async function fetchWithAuthorization(url: string, method = 'GET') {
             'Authorization': `Bearer ${token}`,
         },
         method: method
+    });
+}
+async function fetchWithMethodAuthorization(url: string, body: any, method = 'GET') {
+    const token = getToken() || '';
+    return await fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+        method: method,
+        body: JSON.stringify(body)
     });
 }
 

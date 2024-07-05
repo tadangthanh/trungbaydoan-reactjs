@@ -29,3 +29,7 @@ export const getCodeVerify = async (email: string) => {
     const url = baseUrl + `/auth/send-code-change-password?email=${email}`;
     return await requestWithPost(url, {});
 }
+export const updateProfile = async (userId: number, userUpdateDTO: any): Promise<any> => {
+    const url = baseUrl + `/users/${userId}`;
+    return await requestWithPost(url, userUpdateDTO);
+}

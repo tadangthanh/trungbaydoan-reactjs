@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import '../css/Profile.css'
 import { Header } from '../common/Header';
 import { useParams } from 'react-router-dom';
-import { changePassword, getCodeVerify, getUserByEmail, uploadAvatar } from '../../api/user/UserAPI';
+import { changePassword, getCodeVerify, getUserByEmail, updateProfile, uploadAvatar } from '../../api/user/UserAPI';
 import { User } from '../../model/User';
 import logo from '../../assets/img/vnua.png';
 import { deleteToken, getEmailFromToken, verifyToken } from '../../api/CommonApi';
@@ -15,6 +15,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import { getAllProjectByUserEmail, getProjectsByMentorEmail } from '../../api/projectAPI/ProjectAPI';
 import { FaArrowUp } from 'react-icons/fa';
+import { UserUpdateDTO } from '../../model/UserUpdateDTO';
 export const Profile: React.FC = () => {
     const { email } = useParams() as any;
     const [error, setError] = useState<string>('');
@@ -43,7 +44,6 @@ export const Profile: React.FC = () => {
                     alert("Lỗi tải dữ liệu");
                     return;
                 }
-                console.log("page", page)
                 setHasNext(res.data.hasNext);
                 setProjects([...projects, ...res.data.items]);
             });
@@ -53,12 +53,32 @@ export const Profile: React.FC = () => {
                     alert("Lỗi tải dữ liệu");
                     return;
                 }
-                console.log([...projects, ...res.data.items])
                 setHasNext(res.data.hasNext);
                 setProjects([...projects, ...res.data.items]);
             });
         }
-    }, [role, page, email]);
+    }, [role, page]);
+    useEffect(() => {
+        if (role === 'ROLE_TEACHER') {
+            getProjectsByMentorEmail(email, page, 6).then(res => {
+                if (res.status !== 200) {
+                    alert("Lỗi tải dữ liệu");
+                    return;
+                }
+                setHasNext(res.data.hasNext);
+                setProjects(res.data.items);
+            });
+        } else {
+            getAllProjectByUserEmail(email, page, 6).then(res => {
+                if (res.status !== 200) {
+                    alert("Lỗi tải dữ liệu");
+                    return;
+                }
+                setHasNext(res.data.hasNext);
+                setProjects(res.data.items);
+            });
+        }
+    }, [role, email]);
     useEffect(() => {
         verifyToken().then(res => {
             if (res.status === 200) {
@@ -204,7 +224,6 @@ export const Profile: React.FC = () => {
     const [timeLeft, setTimeLeft] = useState(10);
 
     useEffect(() => {
-        // exit early when we reach 0
         if (!timeLeft) return;
 
         if (timeLeft === 0) {
@@ -217,11 +236,53 @@ export const Profile: React.FC = () => {
         }, 1000);
         return () => clearInterval(intervalId);
     }, [timeLeft]);
-
+    const [isEditSocialNetwork, setIsEditSocialNetwork] = useState(false);
+    const handleFacebookChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setUser({ ...user, facebookUrl: e.target.value });
+        setIsEditSocialNetwork(true)
+    }
+    const handleGithubChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setUser({ ...user, githubUrl: e.target.value });
+        setIsEditSocialNetwork(true)
+    }
+    const [socialNetWorkError, setSocialNetWorkError] = useState('');
+    const handleUpdateProfile = () => {
+        const userUpdate = {
+            githubUrl: user.githubUrl,
+            facebookUrl: user.facebookUrl
+        }
+        if (!checkExistFacebookUrl(userUpdate.facebookUrl)) {
+            setSocialNetWorkError("Link facebook không hợp lệ");
+            return;
+        }
+        if (!checkExistGithubUrl(userUpdate.githubUrl)) {
+            setSocialNetWorkError("Link github không hợp lệ");
+            return;
+        }
+        updateProfile(user.id, userUpdate).then(res => {
+            console.log("res", res)
+            if (res.status === 200) {
+                setUser(res.data);
+                setSocialNetWorkError('');
+                setIsEditSocialNetwork(false);
+                alert("Cập nhật thông tin thành công");
+            } else {
+                setSocialNetWorkError(res.message);
+            }
+        })
+    }
+    const checkExistFacebookUrl = (url: string) => {
+        if (url.trim() === "") return true;
+        return url.trim() !== "" && url.toLowerCase().includes("facebook.com");
+    }
+    const checkExistGithubUrl = (url: string) => {
+        if (url.trim() === "") return true;
+        return url.toLowerCase().includes("github.com");
+    }
     return (
         <div>
             <div ref={refTop}></div>
-            <Header />
+            {/* <Header /> */}
             <div className="container rounded bg-white mt-5 mb-5">
                 <div className="row">
                     <div className="col-md-3 border-right">
@@ -233,6 +294,10 @@ export const Profile: React.FC = () => {
                             {!editAvatar && isLogin && getEmailFromToken() === email && <span className="btn" onClick={handleEditAvatar} title='thay đổi ảnh đại diện'><i className="fa-regular fa-pen-to-square"></i></span>}
                             <span className='mt-2'>{file && !error && <button onClick={handleUpload} className='btn btn-secondary'>upload</button>}{editAvatar && <button onClick={handleCancelUpload} className='btn btn-danger'>cancel</button>}</span>
                             <span className='text-danger'>{error}</span>
+                            <div id='social-network'>
+                                {user.facebookUrl && <a target='_blank' href={user.facebookUrl}> <i className="fa-brands fa-facebook"></i>Facebook</a>}
+                                {user.githubUrl && <a target='_blank' href={user.githubUrl}><i className="fa-brands fa-github"></i>Github</a>}
+                            </div>
                         </div>
                     </div>
                     <div className="col-md-5 border-right">
@@ -240,36 +305,51 @@ export const Profile: React.FC = () => {
                             <div className="d-flex justify-content-between align-items-center mb-3">
                                 <h4 className="text-right">Profile</h4>
                             </div>
-                            <form>
-                                <div className="row mt-2">
-                                    <div className="col-md-12">
-                                        <label className="label">Name</label>
-                                        <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.fullName} />
-                                    </div>
+                            <div className="row mt-2">
+                                <div className="col-md-12">
+                                    <label className="label">Name</label>
+                                    <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.fullName} />
                                 </div>
-                                <div className="row mt-2">
-                                    <div className="col-md-12">
-                                        <label className="label">Email</label>
-                                        <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.email} />
-                                    </div>
-                                    <div className="col-md-12">
-                                        <label className="label">Lớp</label>
-                                        <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.className} />
-                                    </div>
-                                    <div className="col-md-12">
-                                        <label className="label">Chuyên ngành</label>
-                                        <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.department} />
-                                    </div>
-                                    <div className="col-md-12">
-                                        <label className="label">Khoa</label>
-                                        <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.major} />
-                                    </div>
-                                    <div className="col-md-12">
-                                        <label className="label">Khóa</label>
-                                        <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.academicYear} />
-                                    </div>
+                            </div>
+                            <div className="row mt-2">
+                                <div className="col-md-12">
+                                    <label className="label">Email</label>
+                                    <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.email} />
                                 </div>
-                            </form>
+                                <div className="col-md-12">
+                                    <label className="label">Lớp</label>
+                                    <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.className} />
+                                </div>
+                                <div className="col-md-12">
+                                    <label className="label">Chuyên ngành</label>
+                                    <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.department} />
+                                </div>
+                                <div className="col-md-12">
+                                    <label className="label">Khoa</label>
+                                    <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.major} />
+                                </div>
+                                <div className="col-md-12 ">
+                                    <label className="label">Khóa</label>
+                                    <input title='Không được chỉnh sửa' type="text" readOnly className="form-control" value={user.academicYear} />
+                                </div>
+                                {isLogin && getEmailFromToken() === email &&
+                                    <div>
+                                        <div className="col-md-12 ">
+                                            <label className="label"><i className="fab fa-fw fa-facebook me-2 text-facebook"></i>Facebook</label>
+                                            <input onChange={handleFacebookChange} type="text" className="form-control" placeholder="" aria-label="Facebook" value={user.facebookUrl} />
+                                        </div>
+                                        <div className="col-md-12 ">
+                                            <label className="label"><i className="fab fa-fw fa-github me-2 text-github"></i>Github</label>
+                                            <input onChange={handleGithubChange} type="text" className="form-control" placeholder="" aria-label="Github" value={user.githubUrl} />
+                                        </div>
+                                    </div>
+                                }
+                                <span className='text-danger mt-2'>{socialNetWorkError}</span>
+                            </div>
+
+                            {
+                                isLogin && getEmailFromToken() === email && isEditSocialNetwork && <div className="mt-5 text-center"><button className="btn btn-primary profile-button" onClick={handleUpdateProfile} type="button">Save Profile</button></div>
+                            }
                         </div>
                     </div>
                     {isLogin && getEmailFromToken() === email && <div className="col-md-4">
@@ -323,7 +403,7 @@ export const Profile: React.FC = () => {
                             </div>
                         </div>
                         {
-                            hasNext && <button onClick={handleShowMore}>Hiển thị thêm</button>
+                            hasNext && <div className='d-flex align-items-center flex-column'><a style={{ cursor: 'pointer', color: 'blue' }} onClick={handleShowMore}>Hiển thị thêm <i className="fa-solid fa-caret-down"></i></a></div>
                         }
                     </div>
                 </div>
