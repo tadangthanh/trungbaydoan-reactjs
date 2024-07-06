@@ -1,13 +1,40 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { CommentDTO } from "../../model/CommentDTO";
-import { createComment, getAllCommentByProjectId } from "../../api/commentAPI/Comment";
+import { createComment, getAllCommentByProjectId, getCommentById } from "../../api/commentAPI/Comment";
 import { CommentRoot } from "./CommentRoot";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { verifyToken } from "../../api/CommonApi";
 interface CommentProps {
     projectId: number;
 }
 export const Comment: React.FC<CommentProps> = ({ projectId }) => {
+    const location = useLocation();
+    const [idSelected, setIdSelected] = useState('');
+    let idComment = 0;
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const commentId = searchParams.get('comment');
+        setIdSelected(commentId || '');
+        if (Number(commentId) > 0) {
+            const myElement = document.getElementById(commentId || '');
+            myElement?.setAttribute('style', '');
+            getCommentById(Number(commentId)).then(response => {
+                if (response.status !== 200) {
+                    return;
+                }
+                setComments([...comments, response.data]);
+            });
+            setTimeout(() => {
+                const myElement = document.getElementById(commentId || '');
+                myElement?.setAttribute('style', 'background-color:#fdeded');
+                if (myElement) {
+                    myElement.scrollIntoView();
+                }
+            }, 1000);
+        }
+    }, [location]);
+
+
     const [comments, setComments] = useState<CommentDTO[]>([]);
     const [content, setContent] = useState('');
     const [parentCommentId, setParentCommentId] = useState(0);
@@ -15,20 +42,6 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
     const [hastNext, setHasNext] = useState(true);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    // useEffect(() => {
-    //     getAllCommentByProjectId(projectId, page, 5)
-    //         .then(response => {
-    //             if (response.status !== 200) {
-    //                 setError('Không thể lấy dữ liệu');
-    //             }
-    //             const data = response.data;
-    //             setComments(data.items);
-    //         })
-    //         .catch(error => {
-    //             setError('Không thể lấy dữ liệu');
-    //             console.log(error);
-    //         });
-    // }, []);
     useEffect(() => {
         getAllCommentByProjectId(projectId, page, 5)
             .then(response => {
@@ -93,6 +106,7 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
                             projectId={projectId}
                             comment={comment}
                             comments={comments}
+                            idSelected={idSelected}
                             setComments={setComments}
                         />
                     ))}

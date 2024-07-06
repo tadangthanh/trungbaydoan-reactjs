@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { useLocation, useParams } from "react-router-dom"
 import { Header } from "../common/Header";
 import { PreviewCarousel } from "./PreviewCarousel";
 import { useEffect, useRef, useState } from "react";
@@ -23,37 +23,14 @@ import { FaArrowUp } from 'react-icons/fa';
 import { getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
 export const ProjectDetail = () => {
     const { id } = useParams();
+
     const projectId = Number(id);
-    const [project, setProject] = useState({
-        // id: 0,
-        // approverName: "",
-        // name: "",
-        // description: "",
-        // createdDate: "",
-        // categoryName: "",
-        // mentorNames: [],
-        // documentIds: [],
-        // groupId: 0,
-        // academicYear: 0,
-        // memberNames: [],
-        // startDate: "",
-        // endDate: "",
-        // projectStatus: "",
-        // submissionDate: "",
-        // summary: "",
-        // categoryId: 0,
-        // approverId: 0,
-        // mentorIds: [],
-        // createdBy: "",
-        // lastModifiedDate: "",
-        // lastModifiedBy: ""
-    } as ProjectDTO
-    );
+    const [project, setProject] = useState({} as ProjectDTO);
 
     const [documents, setDocuments] = useState<DocumentDTO[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [members, setMembers] = useState<MemberDTO[]>([]);
-
+    const [status, setStatus] = useState(false);
     useEffect(() => {
         getAllDocumentByProjectId(projectId).then(res => {
             setDocuments(res.data);
@@ -61,12 +38,12 @@ export const ProjectDetail = () => {
     }, [projectId]);
     useEffect(() => {
         getProjectById(projectId).then(res => {
-            if (res.status === 404) {
+            if (res.status !== 200) {
                 window.location.href = "/error-not-found";
             }
             setProject({ ...project, ...res.data });
+            setStatus(true);
             document.title = convertHtmlToText(res.data.name);
-
         });
     }, [projectId]);
     useEffect(() => {
@@ -104,18 +81,23 @@ export const ProjectDetail = () => {
     };
     useEffect(() => {
         // Lấy ra tất cả các thẻ img
-        const images = document.querySelectorAll('img');
+        const images = document.querySelectorAll('img:not(.img-profile)');
         images.forEach(img => {
-            img.style.cursor = 'pointer';
-            img.loading = 'lazy';
-            img.title = 'Click để xem ảnh';
+            if (!img.classList.contains('abc')) {
+                const imageElement = img as HTMLImageElement;
+                imageElement.style.cursor = 'pointer';
+                imageElement.loading = 'lazy';
+                imageElement.title = 'Click để xem ảnh';
+            }
         });
         images.forEach(img => {
-            img.addEventListener('click', () => handleMediaClick("IMAGE", img.src));
+            const imageElement = img as HTMLImageElement;
+            imageElement.addEventListener('click', () => handleMediaClick("IMAGE", imageElement.src));
         });
         return () => {
             images.forEach(img => {
-                img.removeEventListener('click', () => handleMediaClick("IMAGE", img.src));
+                const imageElement = img as HTMLImageElement;
+                imageElement.removeEventListener('click', () => handleMediaClick("IMAGE", imageElement.src));
             });
         };
     }, [project]); // useEffect chạy chỉ một lần sau khi component được render
@@ -153,94 +135,94 @@ export const ProjectDetail = () => {
         contentRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, []);
     return (
-        <div id="content" ref={contentRef}>
-            <Header />
-            <div id="progress-container">
-                <div id="progress-bar" ref={progressBar}></div>
-
-            </div>
-            <div className="container mt-5">
-                <div className="row">
-                    <div className="col-lg-8">
-                        {/* header */}
-                        <header className="mb-4">
-                            <h1 className="fw-bolder mb-1">{convertHtmlToText(project.name)}</h1>
-                            <div className="text-muted fst-italic mb-2">Posted on {project.createdDate}</div>
-                            <a className="badge bg-secondary text-decoration-none link-light" href="#!">{project.categoryName}</a>
-                        </header>
-                        {/* preview */}
-                        <PreviewCarousel
-                            handleMediaClick={handleMediaClick}
-                            handleClose={handleClose}
-                            documents={documents}
-                            videoRef={videoRef}
-                        />
-                        <div id="project-content" className="mb-5" dangerouslySetInnerHTML={covertToHtml(project.description)}>
-                        </div>
-                        <Comment projectId={projectId} />
-                    </div>
-                    <WidgetRight
-                        documents={documents}
-                        categories={categories}
-                        project={project}
-                        members={members}
-                    />
+        <div>
+            {status && <div id="content" ref={contentRef}>
+                <div id="progress-container" style={{ zIndex: "10000" }}>
+                    <div id="progress-bar" ref={progressBar}></div>
                 </div>
-            </div>
-            <Dialog style={{ zIndex: '4000' }} open={isOpen} onClose={handleClose} maxWidth="lg" fullWidth>
-                <DialogTitle>Media Preview</DialogTitle>
-                <DialogContent>
-                    {selectedMedia.type === 'IMAGE' ? (
-                        <img
-                            src={selectedMedia.url}
-                            alt="Preview"
-                            style={{
-                                width: isZoomed ? '200%' : '100%',
-                                height: isZoomed ? '200%' : '100%',
-                                cursor: 'zoom-in',
-                            }}
-                            onDoubleClick={handleDoubleClick}
+                <div className="container mt-5">
+                    <div className="row">
+                        <div className="col-lg-8">
+                            {/* header */}
+                            <header className="mb-4">
+                                <h1 className="fw-bolder mb-1">{convertHtmlToText(project?.name)}</h1>
+                                <div className="text-muted fst-italic mb-2">Posted on {project?.createdDate}</div>
+                                <a className="badge bg-secondary text-decoration-none link-light" href="#!">{project?.categoryName}</a>
+                            </header>
+                            {/* preview */}
+                            <PreviewCarousel
+                                handleMediaClick={handleMediaClick}
+                                handleClose={handleClose}
+                                documents={documents}
+                                videoRef={videoRef}
+                            />
+                            <div id="project-content" className="mb-5" dangerouslySetInnerHTML={covertToHtml(project?.description)}>
+                            </div>
+                            <Comment projectId={projectId} />
+                        </div>
+                        <WidgetRight
+                            documents={documents}
+                            categories={categories}
+                            project={project}
+                            members={members}
                         />
-                    ) : (
-                        <video
-                            ref={videoRef}
-                            src={selectedMedia.url}
-                            style={{
-                                width: isZoomed ? '200%' : '100%',
-                                height: isZoomed ? '200%' : '100%',
-                                cursor: 'zoom-in',
-                            }}
-                            controls
-                            autoPlay
-                            onDoubleClick={handleDoubleClick}
-                        ></video>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="primary">Close</Button>
-                </DialogActions>
-            </Dialog>
-            {/* Scroll to top button */}
-            <div
-                className="scroll-to-top"
-                onClick={scrollToTop}
-                style={{
-                    position: 'fixed',
-                    bottom: '20px',
-                    right: '20px',
-                    backgroundColor: '#007bff',
-                    color: '#fff',
-                    borderRadius: '50%',
-                    width: '40px',
-                    height: '40px',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    zIndex: 1000
-                }}
-            >
+                    </div>
+                </div>
+                <Dialog style={{ zIndex: '4000' }} open={isOpen} onClose={handleClose} maxWidth="lg" fullWidth>
+                    <DialogTitle>Media Preview</DialogTitle>
+                    <DialogContent>
+                        {selectedMedia.type === 'IMAGE' ? (
+                            <img
+                                src={selectedMedia.url}
+                                alt="Preview"
+                                style={{
+                                    width: isZoomed ? '200%' : '100%',
+                                    height: isZoomed ? '200%' : '100%',
+                                    cursor: 'zoom-in',
+                                }}
+                                onDoubleClick={handleDoubleClick}
+                            />
+                        ) : (
+                            <video
+                                ref={videoRef}
+                                src={selectedMedia.url}
+                                style={{
+                                    width: isZoomed ? '200%' : '100%',
+                                    height: isZoomed ? '200%' : '100%',
+                                    cursor: 'zoom-in',
+                                }}
+                                controls
+                                autoPlay
+                                onDoubleClick={handleDoubleClick}
+                            ></video>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleClose} color="primary">Close</Button>
+                    </DialogActions>
+                </Dialog>
+                {/* Scroll to top button */}
+                <div
+                    className="scroll-to-top"
+                    onClick={scrollToTop}
+                    style={{
+                        position: 'fixed',
+                        bottom: '20px',
+                        right: '20px',
+                        backgroundColor: '#007bff',
+                        color: '#fff',
+                        borderRadius: '50%',
+                        width: '40px',
+                        height: '40px',
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        zIndex: 1000
+                    }}
+                >
 
-                <FaArrowUp style={{ marginTop: '8px' }} />
-            </div>
+                    <FaArrowUp style={{ marginTop: '8px' }} />
+                </div>
+            </div>}
         </div>
     )
 }

@@ -12,9 +12,9 @@ interface CommentRootProps {
     setComments: (comments: CommentDTO[]) => void
     comments: CommentDTO[]
     isLogin: boolean
-
+    idSelected: string
 }
-export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, projectId, setComments, comments }) => {
+export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, projectId, setComments, comments, idSelected }) => {
     function convertDateTime(inputDateTime: string) {
         const date = new Date(inputDateTime);
 
@@ -57,11 +57,11 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
         setError('');
         setLoading(true);
     }
-    const handleReply = (replyTo: string, content: string, receiverEmail: string, idCommentReply: number) => {
+    const handleReply = (replyTo: string, content: string, authorEmail: string, idCommentReply: number) => {
         setError('');
         setReplyTo(replyTo);
         setIdParent(comment.id);
-        setReceiverEmail(receiverEmail);
+        setReceiverEmail(authorEmail);
         setContent(replyTo);
         setContentReply(content)
         setTimeout(() => {
@@ -145,7 +145,6 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                         console.log(response.message)
                     }
                     setIdParent(0);
-                    const data = response.data;
                     setComments(comments.filter(comment => comment.id !== id));
                 })
         }
@@ -156,18 +155,18 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
     }
 
     return (
-        <div className="justify-content-between">
+        <div id={`${comment.id}`} className={`justify-content-between ${idSelected === `${comment.id}` ? 'selected-comment' : ''}`}>
             <div>
                 <div className="content-box mt-2">
                     <div>
                         <div className="d-flex justify-content-between align-items-center mt-2">
-                            <p className={authorEmail === comment.createdBy ? "mb-0 text-success" : "mb-0"}>
+                            <p className={authorEmail === comment.createdBy && isLogin ? "mb-0 text-success" : "mb-0"}>
                                 {comment.authorName}  <span className="time-created-comment"><i className="fa-regular fa-clock"></i> {convertDateTime(comment.createdDate)}</span>
                             </p>
 
                             {isLogin && <div className="d-flex">
                                 <button className="btn link-primary" onClick={() => {
-                                    handleReply("@" + comment.authorName + ": ", comment.content, comment.receiverEmail, comment.id);
+                                    handleReply("@" + comment.authorName + ": ", comment.content, comment.authorEmail, comment.id);
                                 }}><i className="fas fa-reply fa-xs"></i><span className="small"> reply ({comment.totalReply})</span></button>
 
                                 {authorEmail === comment.createdBy && <div className="d-flex justify-content-end delete-btn" style={{ padding: '0 1rem 0 0' }}>
@@ -187,6 +186,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                     {
                         reply.map((item, index) => {
                             return <CommentElement
+                                idSelected={idSelected}
                                 isLogin={isLogin}
                                 key={index} comment={item}
                                 convertDateTime={convertDateTime}

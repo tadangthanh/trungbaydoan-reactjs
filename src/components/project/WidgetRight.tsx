@@ -24,7 +24,7 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ categories, project, d
     };
     const [mentors, setMentors] = useState<User[]>([]);
     useEffect(() => {
-        getMentorsByProjectId(project.id).then(res => {
+        getMentorsByProjectId(project.id || 0).then(res => {
             setMentors(res.data);
         }).catch(error => {
             console.log(error);

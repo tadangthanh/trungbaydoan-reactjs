@@ -1,11 +1,7 @@
-import { useRef, useState } from "react";
+
 import { DocumentDTO } from "../../model/DocumentDTO";
 import '../css/PreviewCarousel.css'
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
+
 interface PreviewCarouselProps {
     documents: DocumentDTO[];
     videoRef: any;
@@ -17,7 +13,7 @@ export const PreviewCarousel: React.FC<PreviewCarouselProps> = ({ documents, vid
 
     return (
         <div>
-            <div id="carouselExampleControls" className="carousel slide" data-bs-ride="carousel"
+            <div id="carouselExampleControls" className="carousel"
                 style={{ width: '100%', overflow: 'hidden' }}>
                 <div className="carousel-inner" style={{ height: '100%', }}>
                     {
@@ -34,7 +30,7 @@ export const PreviewCarousel: React.FC<PreviewCarouselProps> = ({ documents, vid
                             if (document.type === 'VIDEO') {
                                 return (
                                     <div className={`video-container carousel-item ${index === 0 ? 'active' : ''}`} key={document.id}>
-                                        <video title="click vào để xem" onClick={() => handleMediaClick('VIDEO', document.url)} ref={videoRef} autoPlay={true} id="video-preview-upload" className="mt-2 col-12 col-md-12"
+                                        <video title="click vào để xem" onClick={() => handleMediaClick('VIDEO', document.url)} ref={videoRef} autoPlay={true} muted id="video-preview-upload" className="mt-2 col-12 col-md-12"
                                             style={{ objectFit: 'cover', cursor: 'pointer', height: '100%' }}
                                             src={`${document.url}`} controls></video>
                                     </div>

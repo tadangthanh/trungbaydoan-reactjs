@@ -1,0 +1,97 @@
+/* Các định dạng cơ bản */
+.user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.user-menu .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    max-height: 300px;
+    /* Chiều cao tối đa của menu */
+    overflow-y: auto;
+    /* Hiển thị thanh cuộn khi nội dung vượt quá chiều cao tối đa */
+}
+
+.item-menu-user:hover .dropdown-menu,
+.notification-menu:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu .dropdown-item {
+    text-decoration: none;
+    color: black;
+    padding: 10px 15px;
+    display: block;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+    /* Không cho xuống dòng */
+    overflow: hidden;
+    /* Ẩn phần bị tràn */
+    text-overflow: ellipsis;
+    /* Hiển thị dấu ba chấm khi tràn */
+}
+
+.dropdown-menu .dropdown-item:active,
+.dropdown-menu .dropdown-item:hover {
+    background-color: #f0f0f0;
+}
+
+.user-icon {
+    cursor: pointer;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.item-menu-user {
+    padding: 0 2rem 0 0rem;
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    flex-direction: row;
+}
+
+/* Định dạng menu thông báo */
+.notification-menu {
+    position: relative;
+}
+
+.notification-menu .dropdown-menu {
+    max-height: 300px;
+    /* Chiều cao tối đa của menu */
+    overflow-y: auto;
+    /* Hiển thị thanh cuộn khi nội dung vượt quá chiều cao tối đa */
+}
+
+.dropdown-header {
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ccc;
+    font-weight: bold;
+}
+
+/* Bổ sung để xóa thanh cuộn ngang */
+.dropdown-menu {
+    overflow-x: hidden;
+    /* Xóa thanh cuộn ngang */
+}
+
+.notification-menu .dropdown-item {
+    max-width: 200px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* .dropdown-footer span {
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: none;
+} */

@@ -15,7 +15,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import { getAllProjectByUserEmail, getProjectsByMentorEmail } from '../../api/projectAPI/ProjectAPI';
 import { FaArrowUp } from 'react-icons/fa';
-import { UserUpdateDTO } from '../../model/UserUpdateDTO';
+import { TopNavBar } from '../common/TopNavBar';
 export const Profile: React.FC = () => {
     const { email } = useParams() as any;
     const [error, setError] = useState<string>('');
@@ -282,7 +282,6 @@ export const Profile: React.FC = () => {
     return (
         <div>
             <div ref={refTop}></div>
-            {/* <Header /> */}
             <div className="container rounded bg-white mt-5 mb-5">
                 <div className="row">
                     <div className="col-md-3 border-right">
@@ -396,7 +395,7 @@ export const Profile: React.FC = () => {
                                 </div>
                                 <div className="row" id="all-projects">
                                     {projects.map((project, index) => {
-                                        return <ProjectElement key={index} project={project} />
+                                        return <ProjectElement key={project.id} project={project} />
                                     })
                                     }
                                 </div>

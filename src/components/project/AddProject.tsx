@@ -13,6 +13,7 @@ import { UploadDocument } from './UploadDocument';
 import { upload } from '@testing-library/user-event/dist/upload';
 import { verifyToken } from '../../api/CommonApi';
 import { useNavigate } from 'react-router-dom';
+import { Header } from '../common/Header';
 
 export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => void, stopLoading: (success?: boolean, message?: string) => void }) => {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -123,6 +124,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
 
     return (
         <div>
+            <Header />
             {!isLoading && <div className="container mt-5 box-add-project">
                 <a className="back-button">
                     <i className="fas fa-arrow-left"></i>

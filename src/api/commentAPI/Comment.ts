@@ -1,15 +1,18 @@
 import { CommentDTO } from "../../model/CommentDTO";
-import { request, requestWithPost } from "../CommonApi";
-
+import { getBaseUrl, request, requestWithPost } from "../CommonApi";
+const baseUrl = getBaseUrl();
 export async function getAllCommentByProjectId(projectId: number, page = 1, pageSize = 5) {
-    return await request(`http://localhost:8080/api/v1/comments/project/${projectId}?page=${page}&size=${pageSize}`);
+    return await request(baseUrl + `/comments/project/${projectId}?page=${page}&size=${pageSize}`);
 }
 export async function getAllCommentChildByParentId(parentId: number, page: number, pageSize: number) {
-    return await request(`http://localhost:8080/api/v1/comments/parent-comment/${parentId}?page=${page}&size=${pageSize}`);
+    return await request(baseUrl + `/comments/parent-comment/${parentId}?page=${page}&size=${pageSize}`);
 }
 export async function createComment(commentDTO: CommentDTO) {
-    return await requestWithPost(`http://localhost:8080/api/v1/comments`, commentDTO);
+    return await requestWithPost(baseUrl + `/comments`, commentDTO);
 }
 export async function deleteComment(commentId: number) {
-    return await request(`http://localhost:8080/api/v1/comments/${commentId}`, 0, 'DELETE');
+    return await request(baseUrl + `/comments/${commentId}`, 0, 'DELETE');
+}
+export async function getCommentById(commentId: number) {
+    return await request(baseUrl + `/comments/${commentId}`);
 }

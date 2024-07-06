@@ -10,10 +10,11 @@ interface CommentElementProps {
     setReply: (reply: CommentDTO[]) => void,
     reply: CommentDTO[]
     isLogin: boolean
+    idSelected: string
 
 }
 
-export const CommentElement: React.FC<CommentElementProps> = ({ isLogin, comment, setReply, reply, convertDateTime, handleReply }) => {
+export const CommentElement: React.FC<CommentElementProps> = ({ idSelected, isLogin, comment, setReply, reply, convertDateTime, handleReply }) => {
     const [authorEmail, setAuthorEmail] = useState(getEmailFromToken());
     const handleDeleteComment = (id: number) => {
         const result = window.confirm("Bạn muốn xóa bình luận này?");
@@ -34,7 +35,7 @@ export const CommentElement: React.FC<CommentElementProps> = ({ isLogin, comment
     }
 
     return (
-        <div className="comment-child" id={`${comment.id}`}>
+        <div className={`comment-child ${idSelected === `${comment.id}` ? 'selected-comment' : ''}`} id={`${comment.id}`}>
             <div className="flex-grow-1 flex-shrink-1">
                 <div>
                     <div className="d-flex justify-content-between align-items-center" style={{ padding: '1rem 0 0 0' }}>
@@ -44,7 +45,7 @@ export const CommentElement: React.FC<CommentElementProps> = ({ isLogin, comment
 
                         {isLogin && <div className="d-flex">
                             <button className="btn link-primary btn-reply" onClick={() => {
-                                handleReply("@" + comment.authorName + ": ", comment.content, comment.receiverEmail, comment.id);
+                                handleReply("@" + comment.authorName + ": ", comment.content, comment.authorEmail, comment.id);
                             }}><i className="fas fa-reply fa-xs"></i><span className="small"> reply</span></button>
 
                             {authorEmail === comment.createdBy && <div className="d-flex justify-content-end delete-btn" style={{ padding: '0 1rem 0 0' }}>

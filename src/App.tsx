@@ -10,7 +10,9 @@ import { Comment } from './components/comment/Comment';
 import { ProjectDetail } from './components/project/ProjectDetail';
 import { Page404 } from './components/common/Page404';
 import { Profile } from './components/profile/Profile';
-import { Header } from './components/common/Header';
+
+import { TopNavBar } from './components/common/TopNavBar';
+
 function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -31,7 +33,7 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Header />
+        <TopNavBar />
         {isLoading && <LoadingSpinner isSuccess={isSuccess} successMessage={successMessage} />}
         <Routes>
           <Route path="/profile/:email" element={<Profile />} />

@@ -80,3 +80,8 @@
 .time-created-comment {
     font-size: .7rem;
 }
+
+.selected-comment {
+    background-color: #fdeded;
+    /* Thay đổi màu nền theo ý muốn */
+}

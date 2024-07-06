@@ -12,7 +12,7 @@
 .login-container {
     text-align: center;
     display: flex;
-    background: linear-gradient(90deg, #d4f4c5, #6bcc83);
+    /* background: linear-gradient(90deg, #d4f4c5, #ffff); */
     align-items: center;
     justify-content: center;
     min-height: 100vh;

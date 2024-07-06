@@ -32,6 +32,7 @@ export async function requestWithMethod(url: string, retryCount = 0, body: any, 
 export async function requestWithPost(url: string, body: any, retryCount = 0): Promise<any> {
     try {
         let response = await fetchWithPostAuthorization(url, body);
+        console.log("-----------------code", response.status)
         if (response.status === 403 && retryCount < 1) {
             await refreshTokens();
             return requestWithPost(url, body, retryCount + 1);
@@ -130,7 +131,7 @@ export async function refreshTokens() {
 }
 export const getEmailFromToken = (): string => {
     const token = getToken() as string;
-    if (!token) return '';
+    if (!token || token === 'undefined') return '';
     const payload = token?.split('.')[1];
     try {
         return JSON.parse(atob(payload)).sub;
@@ -139,13 +140,25 @@ export const getEmailFromToken = (): string => {
         return '';
     }
 };
+export const getIdFromToken = (): number => {
+    const token = getToken() as string;
+    if (!token) return 0;
+    const payload = token?.split('.')[1];
+    try {
+        return JSON.parse(atob(payload)).id;
+    } catch (error) {
+        console.error('Invalid base64 string', error);
+        return 0;
+    }
+}
 
 export const baseAvatarUrl = 'http://localhost:8080/api/v1/users/avatar/view/';
 export const verifyToken = async (): Promise<any> => {
+    const token = getToken();
     try {
         const url = getBaseUrl() + "/auth/verify-token";
         const response = await fetch(url, {
-            headers: { 'Access-Token': getToken() || '' },
+            headers: { 'Access-Token': token || '' },
             method: 'POST',
         });
         return await response.json();
