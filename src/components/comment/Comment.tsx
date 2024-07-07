@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { CommentDTO } from "../../model/CommentDTO";
-import { createComment, getAllCommentByProjectId, getCommentById } from "../../api/commentAPI/Comment";
+import { createComment, getAllCommentByProjectId, getCommentByCommentIdAndProjectId } from "../../api/commentAPI/Comment";
 import { CommentRoot } from "./CommentRoot";
 import { useLocation, useParams } from "react-router-dom";
 import { verifyToken } from "../../api/CommonApi";
@@ -10,15 +10,14 @@ interface CommentProps {
 export const Comment: React.FC<CommentProps> = ({ projectId }) => {
     const location = useLocation();
     const [idSelected, setIdSelected] = useState('');
-    let idComment = 0;
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
         const commentId = searchParams.get('comment');
         setIdSelected(commentId || '');
-        if (Number(commentId) > 0) {
+        if (Number(commentId) > 0 && comments.filter(comment => comment.id !== Number(commentId)).length === comments.length) {
             const myElement = document.getElementById(commentId || '');
             myElement?.setAttribute('style', '');
-            getCommentById(Number(commentId)).then(response => {
+            getCommentByCommentIdAndProjectId(Number(commentId), projectId).then(response => {
                 if (response.status !== 200) {
                     return;
                 }

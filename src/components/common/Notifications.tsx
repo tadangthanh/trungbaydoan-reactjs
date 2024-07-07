@@ -120,7 +120,6 @@ export const Notifications: React.FC<NotificationsProps> = ({ userId }) => {
             }
         });
     };
-    console.log("notifications", notifications)
     return (
         <div>
             <ToastContainer />

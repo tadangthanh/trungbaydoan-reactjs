@@ -12,6 +12,7 @@ export const TopNavBar: React.FC = () => {
     const [isLogin, setIsLogin] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [user, setUser] = useState<User>({} as User);
+
     useEffect(() => {
         verifyToken().then(res => {
             if (res.status === 200) {

@@ -13,6 +13,6 @@ export async function createComment(commentDTO: CommentDTO) {
 export async function deleteComment(commentId: number) {
     return await request(baseUrl + `/comments/${commentId}`, 0, 'DELETE');
 }
-export async function getCommentById(commentId: number) {
-    return await request(baseUrl + `/comments/${commentId}`);
+export async function getCommentByCommentIdAndProjectId(commentId: number, projectId: number) {
+    return await request(baseUrl + `/comments/${commentId}/project/${projectId}`);
 }

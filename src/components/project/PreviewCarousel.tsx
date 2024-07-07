@@ -13,7 +13,7 @@ export const PreviewCarousel: React.FC<PreviewCarouselProps> = ({ documents, vid
 
     return (
         <div>
-            <div id="carouselExampleControls" className="carousel"
+            <div id="carouselExampleControls" className="carousel slide"
                 style={{ width: '100%', overflow: 'hidden' }}>
                 <div className="carousel-inner" style={{ height: '100%', }}>
                     {

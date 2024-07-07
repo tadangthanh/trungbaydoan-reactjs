@@ -32,7 +32,6 @@ export async function requestWithMethod(url: string, retryCount = 0, body: any, 
 export async function requestWithPost(url: string, body: any, retryCount = 0): Promise<any> {
     try {
         let response = await fetchWithPostAuthorization(url, body);
-        console.log("-----------------code", response.status)
         if (response.status === 403 && retryCount < 1) {
             await refreshTokens();
             return requestWithPost(url, body, retryCount + 1);

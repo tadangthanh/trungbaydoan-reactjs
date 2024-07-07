@@ -153,7 +153,9 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
         const doc = new DOMParser().parseFromString(html, 'text/html');
         return doc.body.textContent?.split(":")[1] || "";
     }
-
+    const isHtml = (str: string) => {
+        return /<[a-z][\s\S]*>/i.test(str);
+    }
     return (
         <div id={`${comment.id}`} className={`justify-content-between ${idSelected === `${comment.id}` ? 'selected-comment' : ''}`}>
             <div>
@@ -166,7 +168,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
 
                             {isLogin && <div className="d-flex">
                                 <button className="btn link-primary" onClick={() => {
-                                    handleReply("@" + comment.authorName + ": ", comment.content, comment.authorEmail, comment.id);
+                                    handleReply("@" + comment?.authorName + ": ", comment?.content, comment?.authorEmail, comment?.id);
                                 }}><i className="fas fa-reply fa-xs"></i><span className="small"> reply ({comment.totalReply})</span></button>
 
                                 {authorEmail === comment.createdBy && <div className="d-flex justify-content-end delete-btn" style={{ padding: '0 1rem 0 0' }}>
@@ -176,7 +178,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                         </div>
                         <div>
                             <p className="small mb-0">
-                                {comment.content}
+                                {isHtml(comment.content) ? convertHmtlToText(comment.content) : comment.content}
                             </p>
 
                         </div>
@@ -185,7 +187,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
 
                     {
                         reply.map((item, index) => {
-                            return <CommentElement
+                            return (item && <CommentElement
                                 idSelected={idSelected}
                                 isLogin={isLogin}
                                 key={index} comment={item}
@@ -193,7 +195,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                                 handleReply={handleReply}
                                 setReply={setReply}
                                 reply={reply}
-                            />
+                            />)
                         })
                     }
 

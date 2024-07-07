@@ -16,7 +16,7 @@ interface NotificationProps {
 
 export const Notification: React.FC<NotificationProps> = ({ userId }) => {
     const [showNotificationMenu, setShowNotificationMenu] = useState(false);
-    const [notifications, setNotifications] = useState<NotificationDTO[]>([{} as NotificationDTO]);
+    const [notifications, setNotifications] = useState<NotificationDTO[]>([]);
     const [hasNext, setHasNext] = useState<boolean>(true);
     const [stompClient, setStompClient] = useState<any>(null);
     const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -40,10 +40,12 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
             client.subscribe('/topic/notification/' + getEmailFromToken(), (data) => {
                 const notification = JSON.parse(data.body);
                 notify(notification.projectId, notification.commentId, notification.message, notification.id);
-                setNotifications([...notifications, notification]);
-                setUnreadCount(unreadCount + 1);
+                setNotifications(prevNotifications => {
+                    const updatedNotifications = [...prevNotifications, notification];
+                    return updatedNotifications.sort((a, b) => b.id - a.id);
+                });
+                setUnreadCount(prevUnreadCount => prevUnreadCount + 1);
                 setIsNewNotification(true);
-                // setTimeout(() => setIsNewNotification(false), 5000); // Nhấp nháy trong 5 giây
             });
         }, (error) => {
             console.error('không thể kết nối tới websocket:', error);
@@ -68,7 +70,7 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
     const [page, setPage] = useState(1);
     useEffect(() => {
         getNotificationByUserId(getIdFromToken(), page, 5).then(res => {
-            setNotifications([...notifications, ...res.data.items]);
+            setNotifications(prevNotifications => [...prevNotifications, ...res.data.items]);
             setHasNext(res.data.hasNext);
         });
     }, [page]);
@@ -94,7 +96,9 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
         }
     );
 
-    const showMoreNotification = () => {
+    const showMoreNotification = (e: any) => {
+        e.preventDefault();
+        e.stopPropagation();
         setPage(page + 1);
     };
 
@@ -110,14 +114,13 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
     };
 
     const handleSeenNotification = (id: number) => {
-        setUnreadCount(unreadCount - 1);
+        setUnreadCount(prevUnreadCount => prevUnreadCount - 1);
         seenNotification(id).then(res => {
-            if (res.status === 200) {
-                setNotifications(notifications.map(notification => notification.id === id ? { ...notification, seen: true } : notification));
+            if (res.status === 204) {
+                setNotifications(prevNotifications => prevNotifications.map(notification => notification.id === id ? { ...notification, seen: true } : notification));
             }
         });
     };
-
     return (
         <div>
             <ToastContainer />
@@ -128,18 +131,19 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
                 </a>
                 <div className={`dropdown-menu ${showNotificationMenu ? 'show' : ''}`} aria-labelledby="notificationToggle">
                     <div className="dropdown-header">Thông báo</div>
-                    {notifications.map((notification) => (
-                        notification.projectId && (
-                            <div key={notification.id}>
-                                <Link
-                                    onClick={notification.seen ? () => { } : () => handleSeenNotification(notification.id)}
-                                    className={notification.seen ? "notification-item " : "notification-item notification-not-seen"}
-                                    to={!notification.commentId ? `/project/${notification.projectId}` : `/project/${notification.projectId}?comment=${notification.commentId}`}
-                                >
-                                    {notification.message}
-                                    <span className="created-date-notification">{convertDateTime(notification.createdDate)}</span>
-                                </Link>
-                            </div>
+                    {notifications.map((notification, index) => (
+                        (
+                            <Link
+                                key={index}
+                                className={notification.seen ? "notification-item " : "notification-item notification-not-seen"}
+                                onClick={notification.seen ? () => { } : () => handleSeenNotification(notification.id)}
+                                to={!notification.commentId ? `/project/${notification.projectId}` : `/project/${notification.projectId}?comment=${notification.commentId}`}
+                            >
+
+                                <i className="fa-solid fa-book"></i>
+                                {notification.message}
+                                <span className="created-date-notification">{convertDateTime(notification.createdDate)}</span>
+                            </Link>
                         )
                     ))}
                     {hasNext && (
@@ -147,6 +151,13 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
                             <span>Hiển thị thêm</span>
                         </div>
                     )}
+                    {
+                        !hasNext && (
+                            <div className="dropdown-footer text-center">
+                                <span>Không còn thông báo nào</span>
+                            </div>
+                        )
+                    }
                 </div>
             </div>
         </div>

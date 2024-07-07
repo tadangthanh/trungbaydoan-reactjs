@@ -1,4 +1,4 @@
-/* .notification-menu {
+.notification-menu {
     position: relative;
     display: inline-block;
 }
@@ -138,7 +138,7 @@
 
 .notification-menu .dropdown-item:hover {
     background-color: #e9ecef;
-} */
+}
 
 /* Thêm hiệu ứng nhấp nháy */
 .blink {

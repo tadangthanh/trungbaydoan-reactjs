@@ -12,6 +12,11 @@ import { Page404 } from './components/common/Page404';
 import { Profile } from './components/profile/Profile';
 
 import { TopNavBar } from './components/common/TopNavBar';
+import { PageLogin } from './components/login/PageLogin';
+import { PageRegister } from './components/login/PageRegister';
+import { PageForgotPassword } from './components/login/PageForgotPassword';
+import { Admin } from './components/admin/Admin';
+import { Header } from './components/common/Header';
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -33,18 +38,18 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <TopNavBar />
+        <Header />
         {isLoading && <LoadingSpinner isSuccess={isSuccess} successMessage={successMessage} />}
         <Routes>
+          <Route path="/admin" element={<Admin startLoading={startLoading} stopLoading={stopLoading} />} />
+          <Route path="/forgot-password" element={<PageForgotPassword startLoading={startLoading} stopLoading={stopLoading} />} />
+          <Route path="/login" element={<PageLogin startLoading={startLoading} stopLoading={stopLoading} />} />
+          <Route path="/register" element={<PageRegister startLoading={startLoading} stopLoading={stopLoading} />} />
           <Route path="/profile/:email" element={<Profile />} />
           <Route path="/project/:id" element={<ProjectDetail />} />
           <Route path="/error-not-found" element={<Page404 />} />
-          <Route path="/login" element={<Login startLoading={startLoading} stopLoading={stopLoading} />} />
-          <Route path="/register" element={<Register startLoading={startLoading} stopLoading={stopLoading} />} />
-          <Route path="/forgot-password" element={<ForgotPassword startLoading={startLoading} stopLoading={stopLoading} />} />
+          <Route path="/forgot-password2" element={<ForgotPassword startLoading={startLoading} stopLoading={stopLoading} />} />
           <Route path="/add-project" element={<AddProject startLoading={startLoading} stopLoading={stopLoading} />} />
-          {/* <Route path="/register" element={<Register />} /> 
-          <Route path="/login" element={<Login />} /> */}
         </Routes>
       </div>
     </Router>

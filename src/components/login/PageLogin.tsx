@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/img/vnua.png';
 import { login } from '../../api/AuthenticationApi';
-export const PageLogin: React.FC = () => {
+interface Props {
+    startLoading: () => void;
+    stopLoading: (success?: boolean, message?: string) => void;
+}
+export const PageLogin: React.FC<Props> = ({ startLoading, stopLoading }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -28,20 +32,8 @@ export const PageLogin: React.FC = () => {
             input.focus();
         }
     }
-    useEffect(() => {
-        const handleKeyPress = (event: any) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                const button = document.querySelector('.login__submit') as HTMLButtonElement;
-                button.click();
-            }
-        };
-        document.addEventListener('keydown', handleKeyPress);
 
-        return () => {
-            document.removeEventListener('keydown', handleKeyPress);
-        };
-    }, []);
+
     return (
         <div className="container">
             <div className="row justify-content-center">
@@ -49,7 +41,6 @@ export const PageLogin: React.FC = () => {
                     <div className="card o-hidden border-0 shadow-lg my-5">
                         <div className="card-body p-0">
                             <div className="row">
-                                <div className="col-lg-6 d-none d-lg-block bg-login-image"></div>
                                 <div className="col-lg-6">
                                     <div className="p-5">
                                         <div className="text-center">
@@ -86,10 +77,10 @@ export const PageLogin: React.FC = () => {
                                         </form>
 
                                         <div className="text-center">
-                                            <a className="small" href="forgot-password.html">Forgot Password?</a>
+                                            <Link className='small' to="/forgot-password">Quên mật khẩu?</Link>
                                         </div>
                                         <div className="text-center">
-                                            <Link className='small' to="/register2">Tạo tài khoản mới</Link>
+                                            <Link className='small' to="/register">Tạo tài khoản mới</Link>
                                         </div>
                                     </div>
                                 </div>

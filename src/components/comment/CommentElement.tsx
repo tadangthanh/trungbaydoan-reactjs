@@ -35,6 +35,7 @@ export const CommentElement: React.FC<CommentElementProps> = ({ idSelected, isLo
     }
 
     return (
+
         <div className={`comment-child ${idSelected === `${comment.id}` ? 'selected-comment' : ''}`} id={`${comment.id}`}>
             <div className="flex-grow-1 flex-shrink-1">
                 <div>
@@ -45,7 +46,7 @@ export const CommentElement: React.FC<CommentElementProps> = ({ idSelected, isLo
 
                         {isLogin && <div className="d-flex">
                             <button className="btn link-primary btn-reply" onClick={() => {
-                                handleReply("@" + comment.authorName + ": ", comment.content, comment.authorEmail, comment.id);
+                                handleReply("@" + comment?.authorName + ": ", comment.content, comment.authorEmail, comment.id);
                             }}><i className="fas fa-reply fa-xs"></i><span className="small"> reply</span></button>
 
                             {authorEmail === comment.createdBy && <div className="d-flex justify-content-end delete-btn" style={{ padding: '0 1rem 0 0' }}>
