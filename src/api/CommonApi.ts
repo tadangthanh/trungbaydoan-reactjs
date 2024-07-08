@@ -16,12 +16,13 @@ export async function request(url: string, retryCount = 0, method = 'GET'): Prom
         throw error;
     }
 }
-export async function requestWithMethod(url: string, retryCount = 0, body: any, method = 'GET'): Promise<any> {
+export async function requestWithMethod(url: string, method = 'GET', body: any, retryCount = 0): Promise<any> {
+
     try {
         let response = await fetchWithMethodAuthorization(url, body, method);
         if (response.status === 403 && retryCount < 1) {
             await refreshTokens();
-            return request(url, retryCount + 1);
+            return requestWithMethod(url, method, body, retryCount + 1);
         }
         return await response.json();
     } catch (error) {
@@ -89,10 +90,12 @@ async function fetchWithAuthorization(url: string, method = 'GET') {
     });
 }
 async function fetchWithMethodAuthorization(url: string, body: any, method = 'GET') {
+    console.log("json", JSON.stringify(body));
     const token = getToken() || '';
     return await fetch(url, {
         headers: {
             'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
         },
         method: method,
         body: JSON.stringify(body)

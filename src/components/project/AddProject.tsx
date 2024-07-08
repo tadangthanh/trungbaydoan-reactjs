@@ -124,7 +124,6 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
 
     return (
         <div>
-            <Header />
             {!isLoading && <div className="container mt-5 box-add-project">
                 <a className="back-button">
                     <i className="fas fa-arrow-left"></i>

@@ -1,4 +1,5 @@
-import { request, requestWithPost } from "../CommonApi";
+import { ProjectDeleteRequest } from "../../model/ProjectDeleteRequest";
+import { request, requestWithMethod, requestWithPost } from "../CommonApi";
 
 export const getProjectById = async (projectId: number) => {
     return await request(`http://localhost:8080/api/v1/projects/${projectId}`);
@@ -23,4 +24,7 @@ export const getMembersByProjectIds = async (projectIds: number[]) => {
 }
 export const getDocumentsByProjectIds = async (projectIds: number[]) => {
     return await requestWithPost(`http://localhost:8080/api/v1/documents/projects`, projectIds);
+}
+export const deleteProjectByIds = async (projectDeleteRequest: ProjectDeleteRequest) => {
+    return await requestWithMethod(`http://localhost:8080/api/v1/projects`, 'DELETE', projectDeleteRequest);
 }

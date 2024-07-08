@@ -21,7 +21,6 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, wai
     const [loading, setLoading] = useState<boolean>(false);
     const [isUpload, setIsUpload] = useState<boolean>(false);
     const [documentDTO, setDocumentDTO] = useState<DocumentDTO[]>([]);
-    const [documentRemoveId, setDocumentRemoveId] = useState<number>(0);
     const inputRef = useRef<HTMLInputElement>(null);
 
 
@@ -100,18 +99,16 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, wai
         }
     };
 
-
-
-    useEffect(() => {
+    const handleRemoveDocument = (idRemove: number) => {
         setLoading(true);
-        deleteDocument(documentRemoveId)
+        deleteDocument(idRemove)
             .then(response => {
                 if (response.status !== 200) {
                     alert(response.message);
                     setLoading(false);
                     return;
                 }
-                setDocumentIds(documentIds.filter(id => id !== documentRemoveId));
+                setDocumentIds(documentIds.filter(id => id !== idRemove));
                 clearFile();
                 setLoading(false);
             })
@@ -119,7 +116,8 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, wai
                 setLoading(false);
                 console.log(error);
             });
-    }, [documentRemoveId]);
+
+    }
     const extractIds = (documentDTO: DocumentDTO[]) => {
         const ids = documentDTO.map(document => document.id);
         return ids;
@@ -144,7 +142,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, wai
                 <DocumentComponent
                     key={document.id}
                     id={document.id}
-                    setDocumentRemoveId={setDocumentRemoveId}
+                    handleRemoveDocument={handleRemoveDocument}
                     documentDTO={documentDTO}
                     setDocumentDTO={setDocumentDTO}
                     name={document.name}

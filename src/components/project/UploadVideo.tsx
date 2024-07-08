@@ -4,7 +4,7 @@ import { over } from 'stompjs';
 import { getToken } from "../../api/AuthenticationApi";
 import '../css/uploadfile.css';
 import { DocumentResponse } from "../../model/DocumentResponse";
-import { deleteDocument } from "../../api/documentAPI/DocumentAPI";
+import { deleteDocument, uploadFile } from "../../api/documentAPI/DocumentAPI";
 import { getEmailFromToken } from "../../api/CommonApi";
 interface UploadVideoProps {
     label: string;
@@ -46,7 +46,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocume
             // alert("Đã kết nối với server");
             return;
         };
-        const socket = new SockJS('http://localhost:8080/ws');
+        const socket = new SockJS('http://localhost:8080/ws?token=' + getToken());
         const client = over(socket);
         const headers = {
             Authorization: `Bearer ${getToken()}`
@@ -56,7 +56,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocume
             setIsConnected(true);
             setStompClient(client);
             console.log("Đã kết nối với server!!!!!!!!!!!");
-            client.subscribe('/topic/upload-progress/' + getEmailFromToken(), (message) => {
+            client.subscribe('/user/topic/upload-progress', (message) => {
                 const receivedProgress = parseInt(message.body);
                 setProgress(receivedProgress);
             });
@@ -82,40 +82,31 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocume
         setLoading(true);
         const formData = new FormData();
         formData.append('file', file);
-        try {
-            const response = await fetch('http://localhost:8080/api/v1/documents/upload-progress', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    Authorization: `Bearer ${getToken()}`
-                }
-            });
-            const result = await response.json();
-
-            if (response.status !== 200) {
+        uploadFile(formData).then(response => {
+            if (response.status !== 201) {
                 handleSetWaiting(false);
-                alert("Upload failed: " + result.message);
+                alert("Upload failed: " + response.message);
                 setLoading(false);
                 setIsUpload(false);
                 setDocumentResponse({ id: 0, url: '' });
                 return;
             }
             handleSetWaiting(false);
-            setDocumentIds([...documentIds, result.data.id]);
+            setDocumentIds([...documentIds, response.data.id]);
             setFile(null);
             setIsUpload(false);
-            setDocumentResponse(result.data);
+            setDocumentResponse(response.data);
             setLoading(false);
-
-            console.log('File uploaded successfully');
-        } catch (error) {
+        }).catch(error => {
+            setLoading(false);
             handleSetWaiting(false);
-            console.error('Error uploading file', error);
-            setLoading(false);
-        }
+            setIsUpload(false);
+        });
     };
 
-    const deleteVideo = () => {
+
+    const deleteVideo = (e: any) => {
+        e.preventDefault();
         setLoading(true);
         deleteDocument(documentResponse.id)
             .then(response => {
@@ -129,10 +120,6 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocume
                 clearFile();
                 setLoading(false);
             })
-            .catch(error => {
-                setLoading(false);
-                console.log(error);
-            });
     }
 
     const clearFile = () => {

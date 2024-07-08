@@ -27,7 +27,7 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
         if (isConnected || stompClient) {
             return;
         };
-        const socket = new SockJS('http://localhost:8080/ws');
+        const socket = new SockJS('http://localhost:8080/ws?token=' + getToken());
         const client = over(socket);
         const headers = {
             Authorization: `Bearer ${getToken()}`
@@ -37,7 +37,7 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
             setIsConnected(true);
             setStompClient(client);
             console.log("Đã kết nối với server!!!!!!!!!!!");
-            client.subscribe('/topic/notification/' + getEmailFromToken(), (data) => {
+            client.subscribe('/user/topic/notification', (data) => {
                 const notification = JSON.parse(data.body);
                 notify(notification.projectId, notification.commentId, notification.message, notification.id);
                 setNotifications(prevNotifications => {
@@ -133,17 +133,22 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
                     <div className="dropdown-header">Thông báo</div>
                     {notifications.map((notification, index) => (
                         (
-                            <Link
-                                key={index}
-                                className={notification.seen ? "notification-item " : "notification-item notification-not-seen"}
-                                onClick={notification.seen ? () => { } : () => handleSeenNotification(notification.id)}
-                                to={!notification.commentId ? `/project/${notification.projectId}` : `/project/${notification.projectId}?comment=${notification.commentId}`}
-                            >
+                            notification.projectId ?
+                                <Link
+                                    key={index}
+                                    className={notification.seen ? "notification-item " : "notification-item notification-not-seen"}
+                                    onClick={notification.seen ? () => { } : () => handleSeenNotification(notification.id)}
+                                    to={!notification.commentId ? `/project/${notification.projectId}` : `/project/${notification.projectId}?comment=${notification.commentId}`}
+                                >
 
-                                <i className="fa-solid fa-book"></i>
-                                {notification.message}
-                                <span className="created-date-notification">{convertDateTime(notification.createdDate)}</span>
-                            </Link>
+                                    <i className="fa-solid fa-book"></i>
+                                    {notification.message}
+                                    <span className="created-date-notification">{convertDateTime(notification.createdDate)}</span>
+                                </Link> : <span className="notification-item ">
+                                    <i className="fa-solid fa-book"></i>
+                                    {notification.message}
+                                    <span className="created-date-notification">{convertDateTime(notification.createdDate)}</span>
+                                </span>
                         )
                     ))}
                     {hasNext && (
