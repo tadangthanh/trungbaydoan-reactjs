@@ -9,8 +9,6 @@ interface PreviewCarouselProps {
     handleClose: () => void;
 }
 export const PreviewCarousel: React.FC<PreviewCarouselProps> = ({ documents, videoRef, handleMediaClick, handleClose }) => {
-
-
     return (
         <div>
             <div id="carouselExampleControls" className="carousel slide"

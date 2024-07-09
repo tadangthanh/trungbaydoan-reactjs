@@ -6,8 +6,9 @@ import { MemberDTO } from "../../model/MemberDTO";
 import { Link } from "react-router-dom";
 import { DocumentDTO } from '../../model/DocumentDTO';
 import { PageResponse } from '../../model/PageResponse';
-import { deleteProjectByIds, getAllProjectByAdmin, getDocumentsByProjectIds, getMembersByProjectIds } from '../../api/projectAPI/ProjectAPI';
-
+import { activeProjectByIds, approveProjectByIds, deleteProjectByIds, getAllProjectByAdmin, getDocumentsByProjectIds, getMembersByProjectIds, inactiveProjectByIds, rejectPRojectByIds } from '../../api/projectAPI/ProjectAPI';
+import { Bounce, ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 interface TableProjectProps {
     projects: ProjectDTO[];
     members: MemberDTO[];
@@ -36,7 +37,24 @@ export const TableProject: React.FC = () => {
     const [isSelect, setIsSelect] = useState(false);
     const [isDelete, setIsDelete] = useState(false);
     const [isReject, setIsReject] = useState(false);
+    const checkboxRefs = useRef<HTMLInputElement[]>([]);
+    const selectAllInput = useRef<HTMLInputElement>(null);
+    const notify = (message: string) => toast(
+        message,
+        {
+            position: 'top-center',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: 'light',
+            transition: Bounce,
+        }
+    );
     useEffect(() => {
+        handleUnSelectAll();
         getAllData();
     }, [page, search, direction, size]);
     const getAllData = () => {
@@ -58,6 +76,41 @@ export const TableProject: React.FC = () => {
             }
         })
     }
+    const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const isChecked = e.target.checked;
+        setIsSelect(isChecked);
+        setIdsSelected(isChecked ? projects.map(project => project.id) : []);
+        checkboxRefs.current.forEach(checkbox => {
+            if (checkbox) checkbox.checked = isChecked;
+        });
+    };
+    useEffect(() => {
+        checkboxRefs.current.forEach(checkbox => {
+            checkbox?.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    if (idsSelected.filter(id => id !== +checkbox.value).length === 0) {
+                        setIdsSelected(pre => [...pre.filter(id => id !== +checkbox.value), +checkbox.value])
+                        setIsSelect(true)
+                    }
+                } else {
+                    setIdsSelected(pre => pre.filter(id => id !== +checkbox.value))
+                    if (idsSelected.filter(id => id !== +checkbox.value).length === 1) {
+                        setIsSelect(false)
+                    }
+                }
+            });
+        });
+    }, [projects]);
+
+    const handleUnSelectAll = () => {
+        setIsSelect(false);
+        selectAllInput.current && (selectAllInput.current.checked = false);
+        setIdsSelected([]);
+        checkboxRefs.current.forEach(checkbox => {
+            if (checkbox) checkbox.checked = false;
+        });
+    };
+
     const searchRef = React.createRef<HTMLInputElement>();
     const handleSearch = (e: any) => {
         e.preventDefault();
@@ -74,42 +127,57 @@ export const TableProject: React.FC = () => {
     const handleSetSize = (e: any) => {
         setSize(e.target.value);
     }
+    const handleShow = (e: any) => {
+        setSearch(e.target.value)
+        setSearchField("active")
+    }
 
     const handleCloseModal = () => {
         setShowModal(false);
         setDeleteReason("");
-        setIdsSelected([]);
-        setIsDelete(false);
-        setIsReject(false);
         setActionResult("Modal Closed");
     };
+
 
     const handleSubmit = () => {
         if (idsSelected.length > 0) {
             if (isDelete) {
+                deleteProjectByIds({ projectIds: idsSelected, reason: deleteReason }).then(res => {
+                    if (res.status === 200) {
+                        notify("Xóa thành công")
+                        setProjects(projects.filter(project => !idsSelected.includes(project.id)));
+                        setMembers(members.filter(member => !idsSelected.includes(member.projectId)));
+                        setDocuments(documents.filter(document => !idsSelected.includes(document.projectId)));
+                        setIsSelect(false);
+                        handleUnSelectAll();
+                    } else {
+                        notify("Xóa không thành công");
+                    }
+                });
                 setIsDelete(false);
                 setShowModal(false);
                 setDeleteReason("");
                 setIdsSelected([]);
-                deleteProjectByIds({ projectIds: idsSelected, reason: deleteReason }).then(res => {
-                    if (res.status === 200) {
-                        setActionResult("Delete Submitted");
-                    }
-                });
-                setActionResult("Delete Submitted");
-
+                return;
             }
             if (isReject) {
+                rejectPRojectByIds({ projectIds: idsSelected, reason: deleteReason }).then(res => {
+                    if (res.status === 200) {
+                        setProjects(pre => pre.map(project => idsSelected.includes(project.id) ? { ...project, projectStatus: "REJECTED" } : project))
+                        setIsSelect(false);
+                        handleUnSelectAll()
+                        notify("Từ chối thành công")
+                    } else {
+                        toast("Từ chối không thành công")
+                    }
+                });
                 setIsReject(false);
-
-                console.log("Reject projects with ID:", idsSelected, "Reason:", deleteReason);
-                // Add your delete API call here
                 setShowModal(false);
                 setDeleteReason("");
-                // setSelectedProjectIdDelete(null);
                 setIdsSelected([]);
-                setActionResult("Reject Submitted");
+                return;
             }
+
         }
         setIsDelete(false);
         setIsReject(false);
@@ -150,17 +218,39 @@ export const TableProject: React.FC = () => {
         setSelectedProjectIdReject(projectId);
         setShowModal(true);
     }
+    const handleApproveProject = (projectId: number) => {
+        handleApprove([projectId], "");
+        setIsReject(false);
+    }
+    const handleApprove = (projectIds: number[], reason: string) => {
+        approveProjectByIds({ projectIds: projectIds, reason: reason }).then(res => {
+            if (res.status === 200) {
+                setProjects(pre => pre.map(project => projectIds.includes(project.id) ? { ...project, projectStatus: "APPROVED" } : project))
+                setIsSelect(false);
+                handleUnSelectAll()
+                notify("Phê duyệt thành công")
+            } else {
+                toast("Phê duyệt không thành công")
+            }
+        });
+    }
     const handleDeleteSelected = () => {
         if (idsSelected.length === 0) return;
+        setIsDelete(true);
+        setIsReject(false);
         setShowModal(true);
     }
 
     const handleRejectSelected = () => {
         if (idsSelected.length === 0) return;
+        setIsReject(true);
+        setIsDelete(false);
         setShowModal(true);
     }
     const handleApproveSelected = () => {
-        if (idsSelected.length === 0) return;
+        handleApprove(idsSelected, "");
+        setIsReject(false);
+        setIsDelete(false);
     }
     const getDocumentType = (mimeType: string): string => {
         const mimeTypesMap: { [key: string]: string } = {
@@ -173,42 +263,31 @@ export const TableProject: React.FC = () => {
 
         return mimeTypesMap[mimeType] || 'file';
     };
-    const inputsRef = useRef<HTMLInputElement[]>([]);
-    const addToRefs = (el: HTMLInputElement) => {
-        if (el && !inputsRef.current.includes(el)) {
-            inputsRef.current.push(el);
-            el.addEventListener('change', (e: any) => {
-                if (e.target.checked) {
-                    setIsSelect(true);
-                    if (idsSelected.filter(id => id === +el.value).length === 0) {
-                        setIdsSelected(pre => [...pre, +el.value])
-                    }
-                } else {
-                    setIdsSelected(pre => pre.filter(id => id !== +el.value))
-                }
-            })
-        }
-    };
-    const handleSelectAll = (e: any) => {
-        if (e.target.checked === false && idsSelected.length !== projects.length) return;
-        if (idsSelected.length === projects.length) {
-            setIdsSelected([]);
-            inputsRef.current.forEach(input => {
-                input.checked = false;
-            });
-            return
-        }
-        inputsRef.current.forEach(input => {
-            if (idsSelected.filter(id => id === +input.value).length === 0) {
-                setIdsSelected(pre => [...pre, +input.value])
-                input.checked = true;
+
+    const handleActive = (projectId: number) => {
+        activeProjectByIds({ projectIds: [projectId], reason: "" }).then(res => {
+            if (res.status === 200) {
+                setProjects(pre => pre.map(project => project.id === projectId ? { ...project, active: true } : project))
+                notify("thành công")
+            } else {
+                notify("không thành công")
             }
         });
-        setIsSelect(true);
     }
+    const handleInactive = (projectId: number) => {
+        inactiveProjectByIds({ projectIds: [projectId], reason: "" }).then(res => {
+            if (res.status === 200) {
+                setProjects(pre => pre.map(project => project.id === projectId ? { ...project, active: false } : project))
+                notify("thành công")
+            } else {
+                notify("không thành công")
+            }
+        });
+    }
+
     return (
         <div className="content container">
-            <button onClick={() => console.log(idsSelected)}>asd</button>
+            <ToastContainer />
             <nav className="navbar navbar-expand-lg navbar-light ">
                 <div className="container-fluid">
                     <span className="navbar-brand">Danh sách đồ án</span>
@@ -247,6 +326,15 @@ export const TableProject: React.FC = () => {
                                     }
                                 </select>
                             </li>
+                            <li className="nav-item">
+                                <label htmlFor='admin-sort' className="nav-link">
+                                    <i className="ms-2 me-1 fa-solid fa-sort"></i>Hiển thị
+                                </label>
+                                <select name="" onChange={handleShow}>
+                                    <option value="1">Hiện</option>
+                                    <option value="0">Ẩn</option>
+                                </select>
+                            </li>
                         </ul>
                         <form className="d-flex">
                             <input ref={searchRef} className="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
@@ -259,7 +347,7 @@ export const TableProject: React.FC = () => {
                 <div style={{ paddingLeft: '0.75rem' }}>
                     <button onClick={handleDeleteSelected} style={{ fontSize: '0.8rem' }} className='btn btn-danger'><i className="me-1 fa-regular fa-trash-can"></i>Xoá</button>
                     <button onClick={handleApproveSelected} style={{ fontSize: '0.8rem' }} className='btn btn-success'><i className="me-1 fa-solid fa-check"></i>Phê duyệt</button>
-                    <button onClick={handleRejectSelected} style={{ fontSize: '0.8rem' }} className='btn btn-warning'><i className="me-1 fa-regular fa-circle-xmark"></i>Từ chối</button>
+                    <button onClick={handleRejectSelected} style={{ fontSize: '0.8rem' }} className='btn btn-warning'><i className="me-1 fa-regular fa-face-sad-tear"></i>Từ chối</button>
                 </div>
             }
             <>
@@ -273,7 +361,7 @@ export const TableProject: React.FC = () => {
                                             <table className="table mb-0">
                                                 <thead>
                                                     <tr>
-                                                        <th scope="col"><input onClick={handleSelectAll} type="checkbox" /><i className="ms-1 fa-solid fa-list-check"></i></th>
+                                                        <th scope="col"><input ref={selectAllInput} onChange={handleSelectAll} type="checkbox" /></th>
                                                         <th scope="col">ID</th>
                                                         <th scope="col">TÊN ĐỒ ÁN</th>
                                                         <th scope="col">TÓM TẮT</th>
@@ -282,21 +370,22 @@ export const TableProject: React.FC = () => {
                                                         <th scope="col"><i className="m-1 fa-solid fa-file"> </i>TÀI LIỆU</th>
                                                         <th scope="col"><i className="me-1 fa-regular fa-user"></i>THÀNH VIÊN</th>
                                                         <th scope="col">TRẠNG THÁI</th>
+                                                        <th scope="col">HIỂN THỊ</th>
                                                         <th scope="col"><i className="me-1 fa-solid fa-gear"></i>CHỨC NĂNG</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {projects.map((project, index) => (
                                                         <tr key={index}>
-                                                            <td><input ref={addToRefs} value={project.id} onChange={
+                                                            <td><input ref={el => (checkboxRefs.current[index] = el!)} value={project.id} onChange={
                                                                 (e) => {
                                                                     idsSelected.length === projects.length && setIsSelect(true)
 
                                                                 }
                                                             } type="checkbox" /></td>
                                                             <td scope="row">{project.id}</td>
-                                                            <td>{convertHtmlToText(project.name)}</td>
-                                                            <td>{convertHtmlToText(project.summary)}</td>
+                                                            <td><p className='text-clamp'>{convertHtmlToText(project.name)}</p></td>
+                                                            <td><p className='text-clamp'>{convertHtmlToText(project.summary)}</p></td>
                                                             <td>{convertDateTime(project.submissionDate)}</td>
                                                             <td>{project.categoryName}</td>
                                                             <td>
@@ -341,16 +430,28 @@ export const TableProject: React.FC = () => {
                                                                     <i className="me-2  fa-solid fa-circle"></i>{project.projectStatus}
                                                                 </div>
                                                             </td>
+                                                            <td>
+                                                                <div className="dropdown">
+                                                                    <span role='button' className="no-select item-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                        {project.active ? "Hiện" : "Ẩn"}
+                                                                    </span>
+                                                                    <ul className="dropdown-menu">
+                                                                        <li><a href="#" onClick={() => handleInactive(project.id)} className="nav-link"><i className="me-1 fa-regular fa-eye-slash"></i>Ẩn</a></li>
+                                                                        <li><a href="#" onClick={() => handleActive(project.id)} className="nav-link"><i className="me-1 fa-regular fa-eye"></i>Hiện</a></li>
+                                                                    </ul>
+                                                                </div>
+
+                                                            </td>
                                                             <td id="function-admin">
                                                                 <div className="dropdown">
                                                                     <span role='button' className="no-select item-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                                                         Chức năng
                                                                     </span>
                                                                     <ul className="dropdown-menu">
-                                                                        <li><Link to={`/project/${project.id}`} className="nav-link">Xem</Link></li>
-                                                                        <li><a href="#" className="nav-link text-danger" onClick={() => handleDeleteProject(project.id)}>Xóa</a></li>
-                                                                        <li><a href="#" className="nav-link text-warning" onClick={() => handleRejectProject(project.id)}>Từ chối</a></li>
-                                                                        <li><a href="#" className="nav-link">Phê duyệt</a></li>
+                                                                        <li><Link to={`/project/${project.id}`} className="nav-link"><i className="me-1 fa-regular fa-eye"></i>Xem</Link></li>
+                                                                        <li><a href="#" className="nav-link text-danger" onClick={() => handleDeleteProject(project.id)}><i className="me-1 fa-solid fa-trash"></i>Xóa</a></li>
+                                                                        <li><a href="#" className="nav-link text-warning" onClick={() => handleRejectProject(project.id)}><i className="me-1 fa-regular fa-face-sad-tear"></i>Từ chối</a></li>
+                                                                        <li><a href="#" onClick={() => handleApproveProject(project.id)} className="nav-link"><i className="me-1 fa-solid fa-check"></i>Phê duyệt</a></li>
                                                                     </ul>
                                                                 </div>
                                                             </td>
@@ -366,7 +467,7 @@ export const TableProject: React.FC = () => {
                     </div>
                     <nav aria-label="Page navigation example d-flex flex-column align-items-center" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                         <ul className="pagination">
-                            <li className="page-item"><a className="page-link" href="#" onClick={() => setPage(1)}>First</a></li>
+                            {pageResponse?.data?.currentPage - 1 > 0 && <li className="page-item"><a className="page-link" href="#" onClick={() => setPage(1)}>First</a></li>}
                             {pageResponse?.data?.currentPage - 1 > 0 && <li className="page-item"><a className="page-link" href="#" onClick={() => setPage(page - 1)}>Previous</a></li>}
                             {pageResponse?.data?.currentPage - 3 > 0 && <li className="page-item"><a className="page-link" href="#" onClick={() => setPage(page - 3)}>{pageResponse?.data?.currentPage - 3}</a></li>}
                             {pageResponse?.data?.currentPage - 2 > 0 && <li className="page-item"><a className="page-link" href="#" onClick={() => setPage(page - 2)}>{pageResponse?.data?.currentPage - 2}</a></li>}

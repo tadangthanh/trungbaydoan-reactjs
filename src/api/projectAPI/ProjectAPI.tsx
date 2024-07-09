@@ -1,4 +1,5 @@
 import { ProjectDeleteRequest } from "../../model/ProjectDeleteRequest";
+import { ProjectDTO } from "../../model/ProjectDTO";
 import { request, requestWithMethod, requestWithPost } from "../CommonApi";
 
 export const getProjectById = async (projectId: number) => {
@@ -27,4 +28,19 @@ export const getDocumentsByProjectIds = async (projectIds: number[]) => {
 }
 export const deleteProjectByIds = async (projectDeleteRequest: ProjectDeleteRequest) => {
     return await requestWithMethod(`http://localhost:8080/api/v1/projects`, 'DELETE', projectDeleteRequest);
+}
+export const rejectPRojectByIds = async (projectDeleteRequest: ProjectDeleteRequest) => {
+    return await requestWithMethod(`http://localhost:8080/api/v1/projects/reject`, 'POST', projectDeleteRequest);
+}
+export const approveProjectByIds = async (projectDeleteRequest: ProjectDeleteRequest) => {
+    return await requestWithMethod(`http://localhost:8080/api/v1/projects/approve`, 'POST', projectDeleteRequest);
+}
+export const activeProjectByIds = async (projectDeleteRequest: ProjectDeleteRequest) => {
+    return await requestWithMethod(`http://localhost:8080/api/v1/projects/activate`, 'POST', projectDeleteRequest);
+}
+export const inactiveProjectByIds = async (projectDeleteRequest: ProjectDeleteRequest) => {
+    return await requestWithMethod(`http://localhost:8080/api/v1/projects/inactivate`, 'POST', projectDeleteRequest);
+}
+export const updateProject = async (project: ProjectDTO) => {
+    return await requestWithMethod(`http://localhost:8080/api/v1/projects`, 'PATCH', project);
 }

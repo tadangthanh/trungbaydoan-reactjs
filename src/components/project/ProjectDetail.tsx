@@ -21,12 +21,12 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import { FaArrowUp } from 'react-icons/fa';
 import { getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
+import MyEditor from "../../ckeditor/MyEditor";
+import { requestWithPostFile } from "../../api/CommonApi";
 export const ProjectDetail = () => {
     const { id } = useParams();
-
     const projectId = Number(id);
     const [project, setProject] = useState({} as ProjectDTO);
-
     const [documents, setDocuments] = useState<DocumentDTO[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [members, setMembers] = useState<MemberDTO[]>([]);
@@ -79,6 +79,25 @@ export const ProjectDetail = () => {
             videoRef.current.pause();
         }
     };
+    const observer = new MutationObserver((mutationsList) => {
+        for (let mutation of mutationsList) {
+            if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
+                mutation.removedNodes.forEach((node) => {
+                    if (node.nodeName === 'FIGURE') {
+                        handleImageDeletion(node);
+                    }
+                });
+            }
+        }
+    });
+    function handleImageDeletion(node: any) {
+        console.log('Image deleted:', node.getElementsByTagName('img')[0].src);
+    }
+    const contentEdit = document.getElementById('content-edit');
+    if (contentEdit) {
+        observer.observe(contentEdit, { childList: true, subtree: true });
+
+    }
     useEffect(() => {
         // Lấy ra tất cả các thẻ img
         const images = document.querySelectorAll('img:not(.img-profile)');
@@ -89,6 +108,7 @@ export const ProjectDetail = () => {
                 imageElement.loading = 'lazy';
                 imageElement.title = 'Click để xem ảnh';
             }
+
         });
         images.forEach(img => {
             const imageElement = img as HTMLImageElement;
@@ -134,6 +154,25 @@ export const ProjectDetail = () => {
     useEffect(() => {
         contentRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, []);
+
+    const handleChangeName = (newName: string) => {
+        setProject({ ...project, name: newName });
+    }
+    const handleChangeContent = (newContent: string) => {
+        setProject({ ...project, description: newContent });
+    }
+    const handleSetDocumentIds = (id: number) => {
+
+    }
+    const [documentIds, setDocumentIds] = useState<number[]>([]);
+    const handleUpdateProject = (id: number) => {
+        console.log(project);
+    }
+    const [waiting, setWaiting] = useState(false);
+    const [isEditContent, setIsEditContent] = useState(false);
+    const handleSetWaiting = (value: boolean) => {
+        setWaiting(value);
+    }
     return (
         <div>
             {status && <div id="content" ref={contentRef}>
@@ -143,32 +182,79 @@ export const ProjectDetail = () => {
                 <div className="container mt-5">
                     <div className="row">
                         <div className="col-lg-8">
-                            {/* header */}
-                            <header className="mb-4">
-                                <h1 className="fw-bolder mb-1">{convertHtmlToText(project?.name)}</h1>
-                                <div className="text-muted fst-italic mb-2">Posted on {project?.createdDate}</div>
-                                <a className="badge bg-secondary text-decoration-none link-light" href="#!">{project?.categoryName}</a>
-                            </header>
-                            {/* preview */}
-                            <PreviewCarousel
-                                handleMediaClick={handleMediaClick}
-                                handleClose={handleClose}
-                                documents={documents}
-                                videoRef={videoRef}
-                            />
-                            <div id="project-content" className="mb-5" dangerouslySetInnerHTML={covertToHtml(project?.description)}>
+                            <div>
+                                {isEditContent && (
+                                    <div style={{ width: '100%', zIndex: '5000', top: '0', position: 'relative' }}>
+                                        <MyEditor
+                                            data={project.name}
+                                            onChange={handleChangeName}
+                                            uploadImage={false}
+                                            handleSetDocumentIds={handleSetDocumentIds}
+                                        />
+                                    </div>
+                                )}
                             </div>
-                            <Comment projectId={projectId} />
+                            {!isEditContent && (
+                                <div>
+                                    <header className="mb-4">
+                                        <h1 className="fw-bolder mb-1">{convertHtmlToText(project?.name)}</h1>
+                                        <div className="text-muted fst-italic mb-2">Posted on {project?.createdDate}</div>
+                                        <a className="badge bg-secondary text-decoration-none link-light" href="#!">
+                                            {project?.categoryName}
+                                        </a>
+                                    </header>
+                                    <PreviewCarousel
+                                        handleMediaClick={handleMediaClick}
+                                        handleClose={handleClose}
+                                        documents={documents}
+                                        videoRef={videoRef}
+                                    />
+                                </div>
+                            )}
+                            {!isEditContent && (
+                                <div id="project-content" className="mb-5" dangerouslySetInnerHTML={covertToHtml(project?.description)}></div>
+                            )}
+                            <div id="content-edit">
+                                {isEditContent && (
+                                    <div style={{ width: '100%', zIndex: '5000', top: '0', position: 'relative' }}>
+                                        <MyEditor
+                                            data={project.description}
+                                            onChange={handleChangeContent}
+                                            uploadImage={true}
+                                            handleSetDocumentIds={handleSetDocumentIds}
+                                        />
+                                        <button
+                                            onClick={() => handleUpdateProject(project.id)}
+                                            className="d-flex m-auto mt-2 btn btn-outline-info"
+                                        >
+                                            Cập nhật
+                                        </button>
+                                        <button
+                                            onClick={() => setIsEditContent(false)}
+                                            className="d-flex m-auto mt-2 btn btn-outline-danger"
+                                        >
+                                            Huỷ cập nhật
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                            {!isEditContent && <Comment projectId={projectId} />}
                         </div>
+
                         <WidgetRight
+                            waiting={waiting}
+                            handleSetWaiting={handleSetWaiting}
+                            isEditContent={isEditContent}
+                            setIsEditContent={setIsEditContent}
                             documents={documents}
                             categories={categories}
                             project={project}
                             members={members}
+                            setDocumentIds={setDocumentIds}
                         />
                     </div>
                 </div>
-                <Dialog style={{ zIndex: '4000' }} open={isOpen} onClose={handleClose} maxWidth="lg" fullWidth>
+                <Dialog style={{ zIndex: '8000' }} open={isOpen} onClose={handleClose} maxWidth="lg" fullWidth>
                     <DialogTitle>Media Preview</DialogTitle>
                     <DialogContent>
                         {selectedMedia.type === 'IMAGE' ? (

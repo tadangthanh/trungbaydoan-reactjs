@@ -97,7 +97,7 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
         <div>
             <div className="card">
                 <div className="card-body p-4">
-                    <h4 className="text-center mb-4 pb-2">Bình luận</h4>
+                    <h4 className="text-center mb-4 pb-2">Bình luận<i className="ms-2 fa-solid fa-comment"></i></h4>
                     {comments.map((comment, index) => (
                         <CommentRoot
                             isLogin={isLogin}

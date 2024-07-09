@@ -11,7 +11,7 @@ interface MyEditorProps {
     handleSetDocumentIds(id: number): void;
 }
 const MyEditor: React.FC<MyEditorProps> = ({ data, onChange, uploadImage, handleSetDocumentIds }) => {
-    ;
+
 
     class MyUploadAdapter {
         loader: any;
@@ -73,7 +73,7 @@ const MyEditor: React.FC<MyEditorProps> = ({ data, onChange, uploadImage, handle
                 data={data}
                 config={{
                     extraPlugins: [MyCustomUploadAdapterPlugin],
-                    placeholder: 'Nhập nội dung',
+                    placeholder: 'Nhập nội dung ở đây...',
                     toolbar: {
                         items: [
                             'heading',

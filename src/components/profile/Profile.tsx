@@ -34,6 +34,7 @@ export const Profile: React.FC = () => {
             }
             setUser(res.data);
             setRole(res.data.role);
+            console.log("res", res.data);
             document.title = res.data.fullName;
         });
     }, [email]);
@@ -272,11 +273,11 @@ export const Profile: React.FC = () => {
         })
     }
     const checkExistFacebookUrl = (url: string) => {
-        if (url.trim() === "") return true;
+        if (url?.trim() === "") return true;
         return url.trim() !== "" && url.toLowerCase().includes("facebook.com");
     }
     const checkExistGithubUrl = (url: string) => {
-        if (url.trim() === "") return true;
+        if (url?.trim() === "") return true;
         return url.toLowerCase().includes("github.com");
     }
     return (
@@ -335,11 +336,11 @@ export const Profile: React.FC = () => {
                                     <div>
                                         <div className="col-md-12 ">
                                             <label className="label"><i className="fab fa-fw fa-facebook me-2 text-facebook"></i>Facebook</label>
-                                            <input onChange={handleFacebookChange} type="text" className="form-control" placeholder="" aria-label="Facebook" value={user.facebookUrl} />
+                                            <input onChange={handleFacebookChange} type="text" className="form-control" placeholder="" aria-label="Facebook" value={user.facebookUrl ? user.facebookUrl : ""} />
                                         </div>
                                         <div className="col-md-12 ">
                                             <label className="label"><i className="fab fa-fw fa-github me-2 text-github"></i>Github</label>
-                                            <input onChange={handleGithubChange} type="text" className="form-control" placeholder="" aria-label="Github" value={user.githubUrl} />
+                                            <input onChange={handleGithubChange} type="text" className="form-control" placeholder="" aria-label="Github" value={user.githubUrl ? user.githubUrl : ""} />
                                         </div>
                                     </div>
                                 }
@@ -395,7 +396,7 @@ export const Profile: React.FC = () => {
                                 </div>
                                 <div className="row" id="all-projects">
                                     {projects.map((project, index) => {
-                                        return <ProjectElement key={project.id} project={project} />
+                                        return <ProjectElement key={index} project={project} />
                                     })
                                     }
                                 </div>
