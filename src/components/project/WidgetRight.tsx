@@ -18,11 +18,13 @@ interface WidgetRightProps {
     setIsEditContent: (isEditContent: boolean) => void;
     documents: DocumentDTO[];
     isEditContent: boolean;
+    handleSetDocumentIds: (id: number) => void;
+    handleDeleteDocumentIds: (id: number) => void;
     waiting: boolean;
     handleSetWaiting: (value: boolean) => void;
     setDocumentIds: (documentIds: number[]) => void;
 }
-export const WidgetRight: React.FC<WidgetRightProps> = ({ handleSetWaiting, waiting, setIsEditContent, setDocumentIds, isEditContent, categories, project, documents, members }) => {
+export const WidgetRight: React.FC<WidgetRightProps> = ({ handleDeleteDocumentIds, handleSetDocumentIds, handleSetWaiting, waiting, setIsEditContent, setDocumentIds, isEditContent, categories, project, documents, members }) => {
     const chunkArray = (arr: any, chunkSize: any) => {
         const results = [];
         for (let i = 0; i < arr.length; i += chunkSize) {
@@ -92,14 +94,14 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleSetWaiting, wait
             </div>
             {isEditContent &&
                 <div className="card mb-4">
-                    <div className="card-header"><i className="me-1 fa-regular fa-file"></i>Update tài liệu</div>
-                    <div className="p-2"> <UploadDocument handleSetWaiting={handleSetWaiting} documentIds={documents.map(dcm => dcm.id)} setDocumentIds={setDocumentIds} waiting={waiting} label="Update tài liệu" /></div>
+                    <div className="card-header"><i className="me-1 fa-regular fa-file"></i>Thêm tài liệu</div>
+                    <div className="p-2"> <UploadDocument handleDeleteDocumentIds={handleDeleteDocumentIds} handleSetDocumentIds={handleSetDocumentIds} handleSetWaiting={handleSetWaiting} documentIds={documents.map(dcm => dcm.id)} setDocumentIds={setDocumentIds} waiting={waiting} label="Thêm tài liệu" /></div>
                 </div>
             }
             {isEditContent &&
                 <div className="card mb-4">
-                    <div className="card-header"><i className="me-1 fa-solid fa-video"></i>Update Video</div>
-                    <div className="p-2"> <UploadVideo handleSetWaiting={handleSetWaiting} documentIds={documents.map(dcm => dcm.id)} setDocumentIds={setDocumentIds} waiting={waiting} label="Update video" /></div>
+                    <div className="card-header"><i className="me-1 fa-solid fa-video"></i>Thay đổi Video</div>
+                    <div className="p-2"> <UploadVideo handleDeleteDocumentIds={handleDeleteDocumentIds} handleSetDocumentIds={handleSetDocumentIds} handleSetWaiting={handleSetWaiting} documentIds={documents.map(dcm => dcm.id)} setDocumentIds={setDocumentIds} waiting={waiting} label="Thay đổi video" /></div>
                 </div>
             }
             {!isEditContent &&

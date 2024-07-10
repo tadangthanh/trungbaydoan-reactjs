@@ -1,0 +1,9 @@
+/* File: custom-ckeditor.css */
+
+/* Đảm bảo thanh công cụ CKEditor luôn ở trên cùng */
+.ck-editor__top {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10000 !important;
+    /* Đặt z-index cao để đảm bảo nó luôn ở trên cùng */
+}

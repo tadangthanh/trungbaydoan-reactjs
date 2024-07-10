@@ -14,6 +14,8 @@ import { upload } from '@testing-library/user-event/dist/upload';
 import { verifyToken } from '../../api/CommonApi';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../common/Header';
+import { data } from 'jquery';
+import { deleteDocument, deleteDocumentAnonymous } from '../../api/documentAPI/DocumentAPI';
 
 export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => void, stopLoading: (success?: boolean, message?: string) => void }) => {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -75,8 +77,11 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
         setProjectName(newContent);
     };
     const handleSetDocumentIds = (id: number) => {
+        console.log(id);
+
         setDocumentIds(pre => [...pre, id]);
     }
+
     const handleAddProject = (e: any) => {
         e.preventDefault();
         const project = {
@@ -91,13 +96,11 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
             memberIds: memberIds,
             documentIds: documentIds
         }
-        console.log("projectCreate", projectCreate);
         createProject(project).then((response: any) => {
             if (response.status !== 201) {
                 alert(response.message);
                 return;
             }
-            console.log(response);
             startLoading();
             stopLoading(true, 'Thêm đồ án thành công');
             alert('Thêm thành công');
@@ -118,10 +121,30 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
             stopLoading(false, 'Thêm đồ án thất bại');
         });
         stopLoading();
+        const idsDelete = getIdsDocumentDeleted();
+        deleteDocumentAnonymous({ ids: idsDelete }).then((response: any) => {
+            if (response.status !== 200) {
+                return;
+            }
+        })
     }
 
-
-
+    const [mapIdUrl, setMapIdUrl] = useState(new Map<string, number>());
+    const getIdsDocumentDeleted = () => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(description, 'text/html');
+        const images = doc.getElementsByTagName('img');
+        Array.from(images).forEach((image: any) => {
+            const src = image?.src;
+            if (mapIdUrl.has(src)) {
+                mapIdUrl.delete(src);
+            }
+        });
+        return Array.from(mapIdUrl.values());
+    }
+    const handleDeleteDocumentIds = (id: number) => {
+        setDocumentIds(documentIds.filter(documentId => documentId !== id));
+    }
     return (
         <div>
             {!isLoading && <div className="container mt-5 box-add-project">
@@ -160,6 +183,8 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                             Nội dung (mô tả) <span style={{ color: 'red' }}>*</span>
                         </label>
                         <MyEditor
+                            mapIdUrl={mapIdUrl}
+                            setMapIdUrl={setMapIdUrl}
                             handleSetDocumentIds={handleSetDocumentIds}
                             data={description}
                             onChange={handleEditorChangeDescription}
@@ -229,8 +254,10 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                     <div className='row'>
                         <div className='form-group col-md-6 col-12'>
                             <UploadVideo
+                                handleDeleteDocumentIds={handleDeleteDocumentIds}
                                 handleSetWaiting={handleSetWaiting}
                                 label='Upload video'
+                                handleSetDocumentIds={handleSetDocumentIds}
                                 waiting={waiting}
                                 documentIds={documentIds}
                                 setDocumentIds={setDocumentIds}
@@ -238,6 +265,8 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                         </div>
                         <div className='form-group col-md-6 col-12'>
                             <UploadDocument
+                                handleDeleteDocumentIds={deleteDocument}
+                                handleSetDocumentIds={handleSetDocumentIds}
                                 handleSetWaiting={handleSetWaiting}
                                 waiting={waiting}
                                 label='Upload tài liệu'

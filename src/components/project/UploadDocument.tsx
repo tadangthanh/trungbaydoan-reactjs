@@ -12,10 +12,12 @@ interface UploadDocumentProps {
     label: string;
     documentIds: number[];
     setDocumentIds: (documentIds: number[]) => void;
+    handleSetDocumentIds: (id: number) => void;
     handleSetWaiting: (value: boolean) => void;
+    handleDeleteDocumentIds: (id: number) => void;
     waiting: boolean;
 }
-export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, waiting, setDocumentIds, label, handleSetWaiting }) => {
+export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocumentIds, handleSetDocumentIds, documentIds, waiting, setDocumentIds, label, handleSetWaiting }) => {
     const [files, setFiles] = useState<File[]>([]);
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
@@ -85,7 +87,8 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, wai
                 return;
             }
             handleSetWaiting(false);
-            setDocumentIds([...documentIds, ...extractIds(result.data)]);
+            extractIds(result.data).forEach(id => handleSetDocumentIds(id));
+            // setDocumentIds([...documentIds, ...extractIds(result.data)]);
             setFiles([]);
             setIsUpload(false);
             setDocumentDTO([...documentDTO, ...result.data]);
@@ -108,7 +111,8 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ documentIds, wai
                     setLoading(false);
                     return;
                 }
-                setDocumentIds(documentIds.filter(id => id !== idRemove));
+                // setDocumentIds(documentIds.filter(id => id !== idRemove));
+                handleDeleteDocumentIds(idRemove);
                 clearFile();
                 setLoading(false);
             })

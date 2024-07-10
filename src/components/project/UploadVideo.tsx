@@ -10,10 +10,12 @@ interface UploadVideoProps {
     label: string;
     documentIds: number[];
     setDocumentIds: (documentIds: number[]) => void;
+    handleSetDocumentIds: (id: number) => void;
     handleSetWaiting: (value: boolean) => void;
     waiting: boolean;
+    handleDeleteDocumentIds: (id: number) => void;
 }
-export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocumentIds, waiting, label, handleSetWaiting }) => {
+export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentIds, handleSetDocumentIds, documentIds, setDocumentIds, waiting, label, handleSetWaiting }) => {
     const [file, setFile] = useState<File | null>(null);
     const [error, setError] = useState<string>('');
     const [progress, setProgress] = useState<number>(0);
@@ -92,7 +94,8 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocume
                 return;
             }
             handleSetWaiting(false);
-            setDocumentIds([...documentIds, response.data.id]);
+            handleSetDocumentIds(response.data.id);
+            // setDocumentIds([...documentIds, response.data.id]);
             setFile(null);
             setIsUpload(false);
             setDocumentResponse(response.data);
@@ -115,7 +118,8 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ documentIds, setDocume
                     setLoading(false);
                     return;
                 }
-                setDocumentIds(documentIds.filter(id => id !== documentResponse.id));
+                // setDocumentIds(documentIds.filter(id => id !== documentResponse.id));
+                handleDeleteDocumentIds(documentResponse.id);
                 setDocumentResponse({ id: 0, url: '' });
                 clearFile();
                 setLoading(false);

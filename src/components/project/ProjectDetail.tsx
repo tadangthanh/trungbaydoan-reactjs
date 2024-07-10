@@ -22,11 +22,11 @@ import Button from '@mui/material/Button';
 import { FaArrowUp } from 'react-icons/fa';
 import { getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
 import MyEditor from "../../ckeditor/MyEditor";
-import { requestWithPostFile } from "../../api/CommonApi";
 export const ProjectDetail = () => {
     const { id } = useParams();
     const projectId = Number(id);
     const [project, setProject] = useState({} as ProjectDTO);
+    const [projectUpdate, setProjectUpdate] = useState({} as ProjectDTO);
     const [documents, setDocuments] = useState<DocumentDTO[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [members, setMembers] = useState<MemberDTO[]>([]);
@@ -42,6 +42,7 @@ export const ProjectDetail = () => {
                 window.location.href = "/error-not-found";
             }
             setProject({ ...project, ...res.data });
+            setProjectUpdate({ ...project, ...res.data });
             setStatus(true);
             document.title = convertHtmlToText(res.data.name);
         });
@@ -79,25 +80,7 @@ export const ProjectDetail = () => {
             videoRef.current.pause();
         }
     };
-    const observer = new MutationObserver((mutationsList) => {
-        for (let mutation of mutationsList) {
-            if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
-                mutation.removedNodes.forEach((node) => {
-                    if (node.nodeName === 'FIGURE') {
-                        handleImageDeletion(node);
-                    }
-                });
-            }
-        }
-    });
-    function handleImageDeletion(node: any) {
-        console.log('Image deleted:', node.getElementsByTagName('img')[0].src);
-    }
-    const contentEdit = document.getElementById('content-edit');
-    if (contentEdit) {
-        observer.observe(contentEdit, { childList: true, subtree: true });
 
-    }
     useEffect(() => {
         // Lấy ra tất cả các thẻ img
         const images = document.querySelectorAll('img:not(.img-profile)');
@@ -156,23 +139,42 @@ export const ProjectDetail = () => {
     }, []);
 
     const handleChangeName = (newName: string) => {
-        setProject({ ...project, name: newName });
+        setProjectUpdate({ ...project, name: newName });
     }
     const handleChangeContent = (newContent: string) => {
-        setProject({ ...project, description: newContent });
+        setProjectUpdate({ ...project, description: newContent });
     }
     const handleSetDocumentIds = (id: number) => {
-
+        setDocumentIds(pre => [...pre, id]);
     }
+    const handleDeleteDocumentIds = (id: number) => {
+        setDocumentIds(pre => pre.filter(dcmId => dcmId !== id));
+    }
+
     const [documentIds, setDocumentIds] = useState<number[]>([]);
+
+    const [ids, setIds] = useState<number[]>([]);
+    useEffect(() => {
+
+
+
+    }, [documentIds]);
     const handleUpdateProject = (id: number) => {
-        console.log(project);
+        const idsDelete: number[] = [];
+
+        Array.from(mapIdUrl.keys()).forEach(key => {
+            if (!projectUpdate.description.includes(key)) {
+                idsDelete.push(mapIdUrl.get(key) as number);
+            }
+        });
+        console.log("idsDelete", idsDelete);
     }
     const [waiting, setWaiting] = useState(false);
     const [isEditContent, setIsEditContent] = useState(false);
     const handleSetWaiting = (value: boolean) => {
         setWaiting(value);
     }
+    const [mapIdUrl, setMapIdUrl] = useState(new Map<string, number>());
     return (
         <div>
             {status && <div id="content" ref={contentRef}>
@@ -184,7 +186,9 @@ export const ProjectDetail = () => {
                         <div className="col-lg-8">
                             <div>
                                 {isEditContent && (
+
                                     <div style={{ width: '100%', zIndex: '5000', top: '0', position: 'relative' }}>
+                                        <h2>Title:</h2>
                                         <MyEditor
                                             data={project.name}
                                             onChange={handleChangeName}
@@ -217,8 +221,11 @@ export const ProjectDetail = () => {
                             <div id="content-edit">
                                 {isEditContent && (
                                     <div style={{ width: '100%', zIndex: '5000', top: '0', position: 'relative' }}>
+                                        <h2 className="mt-5">Content:</h2>
                                         <MyEditor
-                                            data={project.description}
+                                            mapIdUrl={mapIdUrl}
+                                            setMapIdUrl={setMapIdUrl}
+                                            data={projectUpdate.description}
                                             onChange={handleChangeContent}
                                             uploadImage={true}
                                             handleSetDocumentIds={handleSetDocumentIds}
@@ -242,6 +249,8 @@ export const ProjectDetail = () => {
                         </div>
 
                         <WidgetRight
+                            handleDeleteDocumentIds={handleDeleteDocumentIds}
+                            handleSetDocumentIds={handleSetDocumentIds}
                             waiting={waiting}
                             handleSetWaiting={handleSetWaiting}
                             isEditContent={isEditContent}
@@ -286,6 +295,7 @@ export const ProjectDetail = () => {
                     <DialogActions>
                         <Button onClick={handleClose} color="primary">Close</Button>
                     </DialogActions>
+
                 </Dialog>
                 {/* Scroll to top button */}
                 <div

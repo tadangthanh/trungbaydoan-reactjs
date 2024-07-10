@@ -1,6 +1,6 @@
 
-import { getToken } from "../AuthenticationApi";
-import { getBaseUrl, request, requestWithPost, requestWithPostFile } from "../CommonApi";
+import { DocumentRequest } from "../../model/DocumentRequest";
+import { getBaseUrl, request, requestWithMethod, requestWithPostFile } from "../CommonApi";
 
 
 
@@ -15,4 +15,7 @@ export const getUrlByDocumentId = async (documentId: number) => {
 }
 export const uploadFile = async (formData: FormData) => {
     return await requestWithPostFile(getBaseUrl() + `/documents/upload-progress`, formData);
+}
+export const deleteDocumentAnonymous = async (documentRequest: DocumentRequest) => {
+    return await requestWithMethod(getBaseUrl() + `/documents/delete-anonymous`, 'DELETE', documentRequest);
 }
