@@ -9,14 +9,6 @@ import { PageResponse } from '../../model/PageResponse';
 import { activeProjectByIds, approveProjectByIds, deleteProjectByIds, getAllProjectByAdmin, getDocumentsByProjectIds, getMembersByProjectIds, inactiveProjectByIds, rejectPRojectByIds } from '../../api/projectAPI/ProjectAPI';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-interface TableProjectProps {
-    projects: ProjectDTO[];
-    members: MemberDTO[];
-    documents: DocumentDTO[];
-    setPage: any;
-    page: number;
-    pageResponse: PageResponse;
-}
 
 export const TableProject: React.FC = () => {
     const [showModal, setShowModal] = useState(false);

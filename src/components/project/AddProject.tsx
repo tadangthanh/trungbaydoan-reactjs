@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import '../css/addproject.css';
-import { createProject, getAllCategory } from '../../api/projectAPI/addproject';
 import { Category } from '../../model/Category';
 import { findAllStudentByEmail, findAllTeacherByEmail } from '../../api/user/UserAPI';
 import { ProjectCreate } from '../../model/ProjectCreate';
@@ -16,6 +15,8 @@ import { useNavigate } from 'react-router-dom';
 import { Header } from '../common/Header';
 import { data } from 'jquery';
 import { deleteDocument, deleteDocumentAnonymous } from '../../api/documentAPI/DocumentAPI';
+import { getAllCategory } from '../../api/categoryAPI/CategoryAPI';
+import { createProject } from '../../api/projectAPI/ProjectAPI';
 
 export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => void, stopLoading: (success?: boolean, message?: string) => void }) => {
     const [categories, setCategories] = useState<Category[]>([]);

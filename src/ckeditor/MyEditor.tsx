@@ -1,17 +1,18 @@
 import Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import React, { useEffect, useState } from 'react';
-import { getBaseUrl, requestWithPostFile } from '../api/CommonApi';
+import { apiUrl, requestWithPostFile } from '../api/CommonApi';
 import '../../src/components/css/MyEditor.css';
 interface MyEditorProps {
     data: string;
     onChange: (event: any) => void;
     uploadImage: boolean;
     handleSetDocumentIds(id: number): void;
+    handleDeleteDocumentIds?(id: number): void;
     mapIdUrl?: Map<string, number>;
     setMapIdUrl?: React.Dispatch<React.SetStateAction<Map<string, number>>>;
 }
-const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, data, onChange, uploadImage, handleSetDocumentIds }) => {
+const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, handleDeleteDocumentIds, data, onChange, uploadImage, handleSetDocumentIds }) => {
     const replaceIframeWithOembed = (data: string) => {
         const doc = new DOMParser().parseFromString(data, 'text/html');
         const iframes = doc.querySelectorAll('iframe');
@@ -134,7 +135,7 @@ const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, data, onChan
                 }
                 handleSetDocumentIds(response.data.id);
                 return {
-                    default: getBaseUrl() + "/documents/view/" + response.data.id,
+                    default: apiUrl + "/documents/view/" + response.data.id,
                     width: '500',
                     height: '500px'
                 };

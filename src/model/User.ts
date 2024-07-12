@@ -13,7 +13,8 @@ export class User extends BaseDTO {
     className: string;
     facebookUrl: string;
     githubUrl: string
-    constructor(id: number, createdDate: Date, lastModifiedDate: Date, createdBy: string, lastModifiedBy: string, email: string, fullName: string, role: string, totalsProject: number, avatarId: number, department: string, academicYear: number, major: string, className: string, avatarUrl: string, facebookUrl: string, githubUrl: string) {
+    status: boolean;
+    constructor(id: number, createdDate: Date, lastModifiedDate: Date, createdBy: string, lastModifiedBy: string, email: string, fullName: string, role: string, totalsProject: number, avatarId: number, department: string, academicYear: number, major: string, className: string, avatarUrl: string, facebookUrl: string, githubUrl: string, status: boolean) {
         super(id, createdDate, lastModifiedDate, createdBy, lastModifiedBy);
         this.email = email;
         this.fullName = fullName;
@@ -27,5 +28,6 @@ export class User extends BaseDTO {
         this.avatarUrl = avatarUrl;
         this.facebookUrl = facebookUrl;
         this.githubUrl = githubUrl;
+        this.status = status;
     }
 }

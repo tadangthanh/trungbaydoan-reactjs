@@ -2,10 +2,11 @@ import Cookies from "js-cookie";
 import { AuthenticationRequest } from "../model/AuthenticationRequest";
 import { UserRegister } from "../model/UserRegister";
 import { ResetPassword } from "../model/ResetPassword";
-const baseUrl = "http://localhost:8080/api/v1";
+import { apiUrl } from "./CommonApi";
+
 
 export async function login(request: AuthenticationRequest): Promise<any> {
-    const url = baseUrl + "/auth/login";
+    const url = apiUrl + "/auth/login";
     const response = await fetch(url, { method: "POST", body: JSON.stringify(request), headers: { "Content-Type": "application/json" } });
     if (!response.ok) {
         console.log(response.statusText);
@@ -19,7 +20,7 @@ const saveTokenAndRefreshToken = (token: string, refreshToken: string): void => 
     Cookies.set('refreshToken', refreshToken, { expires: 7 });
 }
 export const requestResetPassword = async (email: string): Promise<any> => {
-    const url = baseUrl + "/users/forgot-password?email=" + email;
+    const url = apiUrl + "/users/forgot-password?email=" + email;
     const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" } });
     if (!response.ok) {
         console.log(response.statusText);
@@ -27,7 +28,7 @@ export const requestResetPassword = async (email: string): Promise<any> => {
     return await response.json();
 }
 export const resetPassword = async (resetPassword: ResetPassword): Promise<any> => {
-    const url = baseUrl + "/users/reset-password";
+    const url = apiUrl + "/users/reset-password";
     const response = await fetch(url,
         {
             method: "POST",
@@ -42,7 +43,7 @@ export const resetPassword = async (resetPassword: ResetPassword): Promise<any> 
     return await response.json();
 }
 export async function register(request: UserRegister): Promise<any> {
-    const url = baseUrl + "/users/register";
+    const url = apiUrl + "/users/register";
     const response = await fetch(url,
         {
             method: "POST",
@@ -57,7 +58,7 @@ export async function register(request: UserRegister): Promise<any> {
     return await response.json();
 }
 export async function verifyEmail(code: string): Promise<any> {
-    const url = baseUrl + "/auth/verify?code=" + code;
+    const url = apiUrl + "/auth/verify?code=" + code;
     const response = await fetch(url,
         {
             method: "POST",

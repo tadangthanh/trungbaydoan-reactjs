@@ -1,16 +1,14 @@
-import { getBaseUrl, request } from "../CommonApi"
-
-const baseUrl = getBaseUrl();
+import { apiUrl, request } from "../CommonApi"
 export const getNotificationByUserId = async (userId: number, page: number, pageSize: number): Promise<any> => {
-    const url = baseUrl + `/notifications/user/${userId}?page=${page}&size=${pageSize}`;
+    const url = apiUrl + `/notifications/user/${userId}?page=${page}&size=${pageSize}`;
     return await request(url);
 }
 export const seenNotification = async (notificationId: number): Promise<any> => {
-    const url = baseUrl + `/notifications/seen/${notificationId}`;
+    const url = apiUrl + `/notifications/seen/${notificationId}`;
     return await request(url);
 }
 export const countNotificationNotSeen = async (): Promise<any> => {
-    const url = baseUrl + `/notifications/count-not-seen`;
+    const url = apiUrl + `/notifications/count-not-seen`;
     return await request(url);
 }
 

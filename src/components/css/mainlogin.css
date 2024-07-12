@@ -32,12 +32,12 @@
     height: 100%;
 }
 
-.img {
+/* .img {
     margin-top: 10px;
     width: 360px;
     margin-left: 10px;
     height: 110px;
-}
+} */
 
 #codeInput,
 #btn-verify,
@@ -49,12 +49,7 @@
     margin: 0;
 }
 
-img {
-    width: 100px;
-    height: 100px;
-    align-content: center;
-    display: inline-block;
-}
+
 
 .screen__background {
     position: absolute;

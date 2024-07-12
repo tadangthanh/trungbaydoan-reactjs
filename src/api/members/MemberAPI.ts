@@ -1,5 +1,5 @@
-import { request } from "../CommonApi";
+import { apiUrl, request } from "../CommonApi";
 
 export const getMemberByProjectId = async (projectId: number) => {
-    return await request(`http://localhost:8080/api/v1/members/project/${projectId}`);
+    return await request(`${apiUrl}/members/project/${projectId}`);
 }

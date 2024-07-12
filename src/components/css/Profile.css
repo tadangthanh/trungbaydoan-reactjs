@@ -192,3 +192,10 @@
     display: inline-block;
     margin-right: 0.3rem;
 }
+
+#avatar-img {
+    width: 100px;
+    height: 100px;
+    align-content: center;
+    display: inline-block;
+}

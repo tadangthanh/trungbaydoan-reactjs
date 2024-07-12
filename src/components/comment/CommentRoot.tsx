@@ -3,9 +3,9 @@ import { CommentDTO } from "../../model/CommentDTO"
 import { CommentElement } from "./CommentElement";
 import { createComment, deleteComment, getAllCommentChildByParentId } from "../../api/commentAPI/Comment";
 import '../css/comment.css';
-import { getEmailFromToken, verifyToken } from "../../api/CommonApi";
-import { error } from "jquery";
-
+import { getEmailFromToken } from "../../api/CommonApi";
+import logo from '../../assets/img/vnua.png';
+import { Link } from "react-router-dom";
 interface CommentRootProps {
     comment: CommentDTO,
     projectId: number,
@@ -119,7 +119,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
     }
     const [error, setError] = useState('');
     const handleAddComment = () => {
-        const comment = new CommentDTO(0, content, projectId, '', idParent, 0, '', 0, '', '', receiverEmail);
+        const comment = new CommentDTO(0, content, projectId, '', idParent, 0, '', 0, '', '', receiverEmail, '');
         createComment(comment)
             .then(response => {
                 if (response.status !== 200) {
@@ -162,9 +162,14 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                 <div className="content-box mt-2">
                     <div>
                         <div className="d-flex justify-content-between align-items-center mt-2">
-                            <p className={authorEmail === comment.createdBy && isLogin ? "mb-0 text-success" : "mb-0"}>
-                                {comment.authorName}  <span className="time-created-comment"><i className="fa-regular fa-clock"></i> {convertDateTime(comment.createdDate)}</span>
-                            </p>
+                            <div className="d-flex align-items-center">
+                                <img src={comment.authorAvatarUrl ? comment.authorAvatarUrl : logo}
+                                    alt="ád" className="me-1 rounded-circle avatar-sm" />
+                                <p className="mb-0" >
+                                    <Link className={authorEmail === comment.createdBy && isLogin ? "text-success text-decoration-none" : "text-decoration-none"} to={`/profile/${comment.authorEmail}`}> {comment.authorName}</Link>
+
+                                </p>
+                            </div>
 
                             {isLogin && <div className="d-flex">
                                 <button className="btn link-primary" onClick={() => {
@@ -176,10 +181,11 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                                 </div>}
                             </div>}
                         </div>
-                        <div>
+                        <div >
                             <p className="small mb-0">
-                                {isHtml(comment.content) ? convertHmtlToText(comment.content) : comment.content}
+                                <i className="me-2 fa-solid fa-bullhorn"></i> {isHtml(comment.content) ? convertHmtlToText(comment.content) : comment.content}
                             </p>
+                            <span style={{ float: "right" }} className="time-created-comment"><i className="ms-2 fa-regular fa-clock"></i> {convertDateTime(comment.createdDate)}</span>
 
                         </div>
 
@@ -208,7 +214,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                         </label>
                         <div spellCheck={false} contentEditable id="editableDiv" className="form-control" ref={replyBoxRef} onInput={handleInputChange} >
                         </div>
-                        <button onClick={handleAddComment} className="btn btn-success mt-2">gửi</button>
+                        <button onClick={handleAddComment} className="btn me-2 btn-success mt-2"><i className="me-2 fa-regular fa-paper-plane"></i>gửi</button>
                         <button className="btn btn-secondary mt-2" onClick={handleCancelReply}>Hủy</button>
                     </div>}
                     <span className="text-danger" >{error}</span>

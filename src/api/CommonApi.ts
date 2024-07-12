@@ -1,23 +1,22 @@
 import Cookies from "js-cookie";
 import { getRefreshToken, getToken, setRefreshToken, setToken } from "./AuthenticationApi";
-export const getBaseUrl = () => {
-    return 'http://localhost:8080/api/v1';
-}
-export async function request(url: string, retryCount = 0, method = 'GET'): Promise<any> {
+
+export const apiUrl = process.env.REACT_APP_API_URL;
+export async function request(url: string, method = 'GET', retryCount = 0): Promise<Response> {
     try {
         let response = await fetchWithAuthorization(url, method);
         if (response.status === 403 && retryCount < 1) {
             await refreshTokens();
-            return request(url, retryCount + 1);
+            return request(url, method, retryCount + 1);
         }
-        return await response.json();
+        return response;
     } catch (error) {
         console.error('url request:', url, 'Failed to make request:', error);
         throw error;
     }
 }
-export async function requestWithMethod(url: string, method = 'GET', body: any, retryCount = 0): Promise<any> {
 
+export async function requestWithMethod(url: string, method = 'GET', body: any, retryCount = 0): Promise<any> {
     try {
         let response = await fetchWithMethodAuthorization(url, body, method);
         if (response.status === 403 && retryCount < 1) {
@@ -154,11 +153,24 @@ export const getIdFromToken = (): number => {
     }
 }
 
-export const baseAvatarUrl = 'http://localhost:8080/api/v1/users/avatar/view/';
+// export const baseAvatarUrl = 'http://localhost:8080/api/v1/users/avatar/view/';
 export const verifyToken = async (): Promise<any> => {
     const token = getToken();
     try {
-        const url = getBaseUrl() + "/auth/verify-token";
+        const url = apiUrl + "/auth/verify-token";
+        const response = await fetch(url, {
+            headers: { 'Access-Token': token || '' },
+            method: 'POST',
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Failed to verify token:', error);
+    }
+}
+export const verifyAdmin = async (): Promise<any> => {
+    const token = getToken();
+    try {
+        const url = apiUrl + "/auth/verify-admin";
         const response = await fetch(url, {
             headers: { 'Access-Token': token || '' },
             method: 'POST',

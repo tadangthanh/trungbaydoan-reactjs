@@ -4,13 +4,13 @@ import { PreviewCarousel } from "./PreviewCarousel";
 import { useEffect, useRef, useState } from "react";
 import { DocumentDTO } from "../../model/DocumentDTO";
 import { get } from "jquery";
-import { getProjectById } from "../../api/projectAPI/ProjectAPI";
+import { getProjectById, updateProject } from "../../api/projectAPI/ProjectAPI";
 import { ProjectDTO } from "../../model/ProjectDTO";
 import '../css/project-detail.css'
 import { Comment } from "../comment/Comment";
 import { WidgetRight } from "./WidgetRight";
 import { Category } from "../../model/Category";
-import { getAllCategory } from "../../api/categoryAPI/GetAllCategoryAPI";
+import { getAllCategory } from "../../api/categoryAPI/CategoryAPI";
 import { MemberDTO } from "../../model/MemberDTO";
 import { getMemberByProjectId } from "../../api/members/MemberAPI";
 import '../css/ProjectDetail.css'
@@ -20,8 +20,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import { FaArrowUp } from 'react-icons/fa';
-import { getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
+import { deleteDocument, deleteDocuments, getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
 import MyEditor from "../../ckeditor/MyEditor";
+import { Bounce, toast, ToastContainer } from "react-toastify";
 export const ProjectDetail = () => {
     const { id } = useParams();
     const projectId = Number(id);
@@ -139,10 +140,10 @@ export const ProjectDetail = () => {
     }, []);
 
     const handleChangeName = (newName: string) => {
-        setProjectUpdate({ ...project, name: newName });
+        setProjectUpdate({ ...projectUpdate, name: newName });
     }
     const handleChangeContent = (newContent: string) => {
-        setProjectUpdate({ ...project, description: newContent });
+        setProjectUpdate({ ...projectUpdate, description: newContent });
     }
     const handleSetDocumentIds = (id: number) => {
         setDocumentIds(pre => [...pre, id]);
@@ -150,34 +151,92 @@ export const ProjectDetail = () => {
     const handleDeleteDocumentIds = (id: number) => {
         setDocumentIds(pre => pre.filter(dcmId => dcmId !== id));
     }
+    const handleChangeSummary = (newSummary: string) => {
+        setProjectUpdate({ ...projectUpdate, summary: newSummary });
+    }
 
     const [documentIds, setDocumentIds] = useState<number[]>([]);
-
-    const [ids, setIds] = useState<number[]>([]);
-    useEffect(() => {
-
-
-
-    }, [documentIds]);
+    const [idsDelete, setIdsDelete] = useState<number[]>([]);
+    const handleSetIdsDelete = (id: number) => {
+        setIdsDelete(pre => [...pre, id]);
+    }
+    const handleRemoveIdsDelete = (id: number) => {
+        setIdsDelete(pre => pre.filter(dcmId => dcmId !== id));
+    }
     const handleUpdateProject = (id: number) => {
-        const idsDelete: number[] = [];
-
-        Array.from(mapIdUrl.keys()).forEach(key => {
-            if (!projectUpdate.description.includes(key)) {
-                idsDelete.push(mapIdUrl.get(key) as number);
-            }
-        });
-        console.log("idsDelete", idsDelete);
+        const result = window.confirm("Bạn có chắc chắn muốn cập nhật?");
+        if (result) {
+            const documentIdsDelete: number[] = [];
+            let documentIdsAdd: number[] = [...documentIds];
+            Array.from(mapIdUrl.keys()).forEach(key => {
+                if (!projectUpdate.description.includes(key)) {
+                    documentIdsDelete.push(Number(mapIdUrl.get(key)));
+                    documentIdsAdd = documentIdsAdd.filter(id => id !== Number(mapIdUrl.get(key)));
+                }
+            });
+            documentIdsDelete.push(...idsDelete);
+            const pr = { ...projectUpdate, documentIds: documentIdsAdd };
+            updateProject(id, pr).then(res => {
+                if (res.status === 200) {
+                    setIsEditContent(false);
+                    setDocumentIds([]);
+                    setIdsDelete([]);
+                    setMapIdUrl(new Map());
+                    deleteDocuments({ ids: documentIdsDelete }).then(res => {
+                    });
+                    notify("Cập nhật thành công, vui lòng chờ xác nhận từ quản trị viên");
+                    setProject(res.data);
+                    // window.location.reload();
+                } else {
+                    setIsEditContent(false);
+                    setDocumentIds([]);
+                    setIdsDelete([]);
+                    setMapIdUrl(new Map());
+                    notify("Cập nhật thất bại");
+                    return;
+                }
+            });
+        }
     }
     const [waiting, setWaiting] = useState(false);
     const [isEditContent, setIsEditContent] = useState(false);
+    const handleCancelUpdate = () => {
+        const result = window.confirm("Bạn có chắc chắn muốn huỷ cập nhật?");
+        if (result) {
+            setIsEditContent(false);
+            deleteDocuments({ ids: documentIds }).then(res => {
+                if (res.status === 200) {
+                    setDocumentIds([]);
+                    setIdsDelete([]);
+                    setMapIdUrl(new Map());
+                    toast("Huỷ cập nhật thành công");
+                    return;
+                }
+            });
+        }
+    }
     const handleSetWaiting = (value: boolean) => {
         setWaiting(value);
     }
     const [mapIdUrl, setMapIdUrl] = useState(new Map<string, number>());
+    const notify = (message: string) => toast(
+        message,
+        {
+            position: 'top-center',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: 'light',
+            transition: Bounce,
+        }
+    );
     return (
         <div>
             {status && <div id="content" ref={contentRef}>
+                <ToastContainer />
                 <div id="progress-container" style={{ zIndex: "10000" }}>
                     <div id="progress-bar" ref={progressBar}></div>
                 </div>
@@ -192,6 +251,20 @@ export const ProjectDetail = () => {
                                         <MyEditor
                                             data={project.name}
                                             onChange={handleChangeName}
+                                            uploadImage={false}
+                                            handleSetDocumentIds={handleSetDocumentIds}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                {isEditContent && (
+
+                                    <div style={{ width: '100%', zIndex: '5000', top: '0', position: 'relative' }}>
+                                        <h2>Summary:</h2>
+                                        <MyEditor
+                                            data={project.summary}
+                                            onChange={handleChangeSummary}
                                             uploadImage={false}
                                             handleSetDocumentIds={handleSetDocumentIds}
                                         />
@@ -223,6 +296,7 @@ export const ProjectDetail = () => {
                                     <div style={{ width: '100%', zIndex: '5000', top: '0', position: 'relative' }}>
                                         <h2 className="mt-5">Content:</h2>
                                         <MyEditor
+                                            handleDeleteDocumentIds={handleDeleteDocumentIds}
                                             mapIdUrl={mapIdUrl}
                                             setMapIdUrl={setMapIdUrl}
                                             data={projectUpdate.description}
@@ -237,7 +311,7 @@ export const ProjectDetail = () => {
                                             Cập nhật
                                         </button>
                                         <button
-                                            onClick={() => setIsEditContent(false)}
+                                            onClick={handleCancelUpdate}
                                             className="d-flex m-auto mt-2 btn btn-outline-danger"
                                         >
                                             Huỷ cập nhật
@@ -249,6 +323,9 @@ export const ProjectDetail = () => {
                         </div>
 
                         <WidgetRight
+                            handleCancelUpdate={handleCancelUpdate}
+                            handleRemoveIdsDelete={handleRemoveIdsDelete}
+                            handleSetIdsDelete={handleSetIdsDelete}
                             handleDeleteDocumentIds={handleDeleteDocumentIds}
                             handleSetDocumentIds={handleSetDocumentIds}
                             waiting={waiting}

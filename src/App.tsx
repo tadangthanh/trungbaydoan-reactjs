@@ -17,6 +17,7 @@ import { PageRegister } from './components/login/PageRegister';
 import { PageForgotPassword } from './components/login/PageForgotPassword';
 import { Admin } from './components/admin/Admin';
 import { Header } from './components/common/Header';
+import { HomePage } from './components/project/HomePage';
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -41,6 +42,7 @@ function App() {
         <Header />
         {isLoading && <LoadingSpinner isSuccess={isSuccess} successMessage={successMessage} />}
         <Routes>
+          <Route path="/" element={<HomePage />} />
           <Route path="/admin" element={<Admin startLoading={startLoading} stopLoading={stopLoading} />} />
           <Route path="/forgot-password" element={<PageForgotPassword startLoading={startLoading} stopLoading={stopLoading} />} />
           <Route path="/login" element={<PageLogin startLoading={startLoading} stopLoading={stopLoading} />} />

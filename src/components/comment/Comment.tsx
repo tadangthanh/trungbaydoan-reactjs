@@ -65,7 +65,7 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
     }
     const handleAddComment = () => {
         setLoading(true);
-        const comment = new CommentDTO(0, content, projectId, '', parentCommentId, 0, '', 0, '', '', '');
+        const comment = new CommentDTO(0, content, projectId, '', parentCommentId, 0, '', 0, '', '', '', '');
         createComment(comment)
             .then(response => {
                 if (response.status !== 200) {
@@ -122,7 +122,7 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
             {isLogin && <textarea placeholder="Nhập bình luận..." id="yourComment" className="form-control" value={content} onChange={(e) => { setContent(e.target.value); setError('') }} >
             </textarea>
             }
-            {isLogin && <button onClick={handleAddComment} disabled={content.trim() == ''} className="btn btn-success mt-2">gửi</button>}
+            {isLogin && <button onClick={handleAddComment} disabled={content.trim() == ''} className="btn btn-success mt-2"><i className="me-2 fa-regular fa-paper-plane"></i>gửi</button>}
         </div>
     )
 }

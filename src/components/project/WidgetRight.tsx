@@ -3,7 +3,7 @@ import { Category } from "../../model/Category";
 import { ProjectDTO } from "../../model/ProjectDTO";
 import '../css/WidgetRight.css'
 import { MemberDTO } from "../../model/MemberDTO";
-import { getBaseUrl } from "../../api/CommonApi";
+import { apiUrl } from "../../api/CommonApi";
 import { DocumentDTO } from "../../model/DocumentDTO";
 import { Link } from "react-router-dom";
 import { User } from "../../model/User";
@@ -13,10 +13,13 @@ import { UploadDocument } from "./UploadDocument";
 import { UploadVideo } from "./UploadVideo";
 interface WidgetRightProps {
     categories: Category[];
+    handleSetIdsDelete: (ids: number) => void;
     project: ProjectDTO;
     members: MemberDTO[];
     setIsEditContent: (isEditContent: boolean) => void;
     documents: DocumentDTO[];
+    handleRemoveIdsDelete: (ids: number) => void;
+    handleCancelUpdate: () => void;
     isEditContent: boolean;
     handleSetDocumentIds: (id: number) => void;
     handleDeleteDocumentIds: (id: number) => void;
@@ -24,7 +27,7 @@ interface WidgetRightProps {
     handleSetWaiting: (value: boolean) => void;
     setDocumentIds: (documentIds: number[]) => void;
 }
-export const WidgetRight: React.FC<WidgetRightProps> = ({ handleDeleteDocumentIds, handleSetDocumentIds, handleSetWaiting, waiting, setIsEditContent, setDocumentIds, isEditContent, categories, project, documents, members }) => {
+export const WidgetRight: React.FC<WidgetRightProps> = ({ handleCancelUpdate, handleRemoveIdsDelete, handleSetIdsDelete, handleDeleteDocumentIds, handleSetDocumentIds, handleSetWaiting, waiting, setIsEditContent, setDocumentIds, isEditContent, categories, project, documents, members }) => {
     const chunkArray = (arr: any, chunkSize: any) => {
         const results = [];
         for (let i = 0; i < arr.length; i += chunkSize) {
@@ -83,11 +86,11 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleDeleteDocumentId
             </div>
             {/* <!-- Side widget--> */}
             <div className="card mb-4">
-                <div className="card-header"><i className="me-1 fa-regular fa-file"></i>Tài liệu</div>
+                <div className="card-header"><i className="me-1 fa-regular fa-file"></i>{!isEditContent ? "Tài liệu" : "Tích vào tài liệu cần xóa"}</div>
                 <div className="card-body">
                     <ol id="document-project-detail">
                         {documents.filter(document => document.type !== 'IMAGE' && document.type !== 'VIDEO').map((document, index) => (
-                            <li key={index}><a target="_blank" rel="noopener noreferrer" href={`${getBaseUrl()}/documents/view/${document.id}`}><i className={`me-1 fa-solid fa-file-${getDocumentType(document.mimeType)}`}></i>{document.name}</a>  {isEditContent && <button onClick={() => alert(document.id)} className="btn"><i className="text-danger ms-1 fa-solid fa-trash"></i></button>}</li>
+                            <li key={index}><a target="_blank" rel="noopener noreferrer" href={`${apiUrl}/documents/view/${document.id}`}><i className={`me-1 fa-solid fa-file-${getDocumentType(document.mimeType)}`}></i>{document.name}</a>  {isEditContent && <input value={document.id} onChange={(e) => { e.target.checked ? handleSetIdsDelete(document.id) : handleRemoveIdsDelete(document.id) }} className="form-check-input" type="checkbox" style={{ cursor: 'pointer' }} />}</li>
                         ))}
                     </ol>
                 </div>
@@ -138,7 +141,7 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleDeleteDocumentId
                     </div>
 
                 </div>}
-            <WidgetRightAdmin setIsEditContent={setIsEditContent} isEditContent={isEditContent} />
+            <WidgetRightAdmin handleCancelUpdate={handleCancelUpdate} setIsEditContent={setIsEditContent} isEditContent={isEditContent} />
 
         </div>
     )

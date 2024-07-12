@@ -7,7 +7,6 @@ import { Notification } from "./Notification";
 import logo from '../../assets/img/vnua.png';
 import { getUserByEmail } from "../../api/user/UserAPI";
 import { User } from "../../model/User";
-import { Admin } from "../admin/Admin";
 export const Header = () => {
     const [isLogin, setIsLogin] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
@@ -54,7 +53,7 @@ export const Header = () => {
         <div style={{ position: 'sticky', top: '0', zIndex: '2000' }}>
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div className="container">
-                    <a className="navbar-brand" href="#!">Start Bootstrap</a>
+                    <Link className="navbar-brand" to={`/`}>Home</Link>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                         aria-label="Toggle navigation"><span className="navbar-toggler-icon"></span></button>
@@ -72,7 +71,7 @@ export const Header = () => {
                                         {isLogin ? (
                                             <>
                                                 <Link className="dropdown-item" to={`/profile/${getEmailFromToken()}`}><i className=" me-2 fa-regular fa-user"></i>Profile</Link>
-                                                <Link className="dropdown-item" to={"/admin"}><i className="me-2 fa-solid fa-user-tie"></i>Admin</Link>
+                                                <Link className="dropdown-item" to={"/admin"}><i className="me-2 fa-solid fa-gauge-high"></i>Admin</Link>
                                                 <a className="dropdown-item" onClick={handleLogout}> <i className=" me-2 fa-solid fa-right-from-bracket"></i>Logout</a>
 
                                             </>

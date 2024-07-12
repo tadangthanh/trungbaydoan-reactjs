@@ -287,7 +287,7 @@ export const Profile: React.FC = () => {
                 <div className="row">
                     <div className="col-md-3 border-right">
                         <div className="d-flex flex-column align-items-center text-center p-3 py-5">
-                            <img ref={imgRef} style={{ cursor: 'pointer' }} className="rounded-circle mt-5" width="150px" src={imageUrl ? imageUrl : user.avatarUrl === "" || user.avatarId === undefined ? logo : user.avatarUrl} alt="Profile" />
+                            <img id="avatar-img" ref={imgRef} style={{ cursor: 'pointer' }} className="rounded-circle mt-5" width="150px" src={imageUrl ? imageUrl : user.avatarUrl === "" || user.avatarId === undefined ? logo : user.avatarUrl} alt="Profile" />
                             <span className="font-weight-bold">{user.fullName}</span>
                             <span className="text-black-50">{user.email?.split("@")[0]}</span>
                             {editAvatar && <input onChange={handleFileChange} type="file" className="form-control" />}

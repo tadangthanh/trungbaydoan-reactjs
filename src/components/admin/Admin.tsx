@@ -1,27 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import '../css/Admin.css';
 import { TableProject } from './TableProject';
-import { Link } from 'react-router-dom';
-import { verifyToken } from '../../api/CommonApi';
+import { verifyAdmin, verifyToken } from '../../api/CommonApi';
+import { CategoryAdmin } from './Category';
+import { TableUser } from './TableUser';
 interface AdminProps {
     startLoading: () => void;
     stopLoading: (success: boolean, message: string) => void;
 }
 export const Admin: React.FC<AdminProps> = ({ startLoading, stopLoading }) => {
     const [isLogin, setIsLogin] = useState(false);
+    const [selected, setSelected] = useState('home');
+    const [isAdmin, setIsAdmin] = useState(false);
     useEffect(() => {
-        startLoading();
         verifyToken().then(res => {
             if (res.status === 200) {
                 setIsLogin(true);
-                stopLoading(true, "Đã đăng nhập");
+
             }
-            stopLoading(true, "Chưa đăng nhập");
         })
+        verifyAdmin().then(res => {
+            if (res.status === 200) {
+                setIsAdmin(true);
+            }
+        })
+
     }, []);
     return (
         <div>
-            {isLogin &&
+            {isLogin && isAdmin &&
                 <div>
                     <div className="wrapper">
                         <input type="checkbox" id="btn" hidden />
@@ -31,9 +38,8 @@ export const Admin: React.FC<AdminProps> = ({ startLoading, stopLoading }) => {
                         </label>
                         <nav id="sidebar" style={{ background: 'black' }}>
                             <ul className="list-items">
-                                <li><Link to={"/admin"}><i className="fas fa-home"></i>Trang chủ</Link></li>
-                                <li><Link to={"/admin"}><i className="fa-solid fa-list"></i>Danh mục</Link></li>
-                                <li><Link to={"/admin"}><i className="fa-regular fa-user"></i>Người dùng</Link></li>
+                                <li onClick={() => setSelected("home")} style={{ cursor: 'pointer' }}><a><i className="fas fa-home"></i>Trang chủ</a></li>
+                                <li onClick={() => setSelected("users")} style={{ cursor: 'pointer' }}><a ><i className="fa-regular fa-user"></i>Người dùng</a></li>
                                 <li><a href="#"><i className="fas fa-cog"></i>Settings</a></li>
                                 <li><a href="#"><i className="fas fa-stream"></i>Features</a></li>
                                 <li><a href="#"><i className="fas fa-user"></i>About us</a></li>
@@ -48,7 +54,16 @@ export const Admin: React.FC<AdminProps> = ({ startLoading, stopLoading }) => {
                             </ul>
                         </nav>
                     </div>
-                    <TableProject />
+                    {selected === 'home' &&
+                        <div>
+                            <TableProject />
+                            <CategoryAdmin />
+                        </div>
+                    }
+                    {
+                        selected === 'users' &&
+                        <TableUser />
+                    }
                 </div>
             }
         </div>
