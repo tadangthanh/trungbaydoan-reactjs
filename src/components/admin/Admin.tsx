@@ -4,11 +4,9 @@ import { TableProject } from './TableProject';
 import { verifyAdmin, verifyToken } from '../../api/CommonApi';
 import { CategoryAdmin } from './Category';
 import { TableUser } from './TableUser';
-interface AdminProps {
-    startLoading: () => void;
-    stopLoading: (success: boolean, message: string) => void;
-}
-export const Admin: React.FC<AdminProps> = ({ startLoading, stopLoading }) => {
+import { toast, ToastContainer } from 'react-toastify';
+
+export const Admin: React.FC = () => {
     const [isLogin, setIsLogin] = useState(false);
     const [selected, setSelected] = useState('home');
     const [isAdmin, setIsAdmin] = useState(false);
@@ -16,7 +14,8 @@ export const Admin: React.FC<AdminProps> = ({ startLoading, stopLoading }) => {
         verifyToken().then(res => {
             if (res.status === 200) {
                 setIsLogin(true);
-
+            } else {
+                toast.error("Bạn chưa đăng nhập", { containerId: 'admin' })
             }
         })
         verifyAdmin().then(res => {
@@ -28,6 +27,7 @@ export const Admin: React.FC<AdminProps> = ({ startLoading, stopLoading }) => {
     }, []);
     return (
         <div>
+            <ToastContainer containerId='admin' />
             {isLogin && isAdmin &&
                 <div>
                     <div className="wrapper">

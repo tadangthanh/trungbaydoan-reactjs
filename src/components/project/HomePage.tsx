@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ProjectDTO } from "../../model/ProjectDTO";
 import { getAllProject } from "../../api/projectAPI/ProjectAPI";
 import { PageResponse } from "../../model/PageResponse";
-import { Bounce, toast, ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { ProjectHomePage } from "./ProjectHomePage";
 import { Category } from "../../model/Category";
 import { AcademyYearDTO } from "../../model/AcademyYearDTO";
@@ -31,21 +31,9 @@ export const HomePage: React.FC = () => {
                 setAcademyYears(res.data)
             }
         })
+        document.title = "Trang chủ";
     }, []);
-    const notify = (message: string) => toast(
-        message,
-        {
-            position: 'top-center',
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: true,
-            progress: undefined,
-            theme: 'light',
-            transition: Bounce,
-        }
-    );
+
     const handleGetAllProject = () => {
         getAllProject(page, size, "id", direction, mapParams).then(res => {
             if (res.status === 200) {
@@ -56,6 +44,7 @@ export const HomePage: React.FC = () => {
     }
     const handleChangeCategoryIdSelected = (categoryName: string) => {
         if (categoryName === "") {
+            setCategorySelected("");
             handleRemoveKey("category");
         } else {
             setCategorySelected(categoryName);
@@ -67,8 +56,8 @@ export const HomePage: React.FC = () => {
         handleGetAllProject();
     }, [mapParams, direction, size, page]);
 
-    const handleSort = (e: any) => {
-        setDirection(e.target.value);
+    const handleSort = (direction: string) => {
+        setDirection(direction);
     }
     const handleChangeAcademyYear = (e: any) => {
         if (e.target.value === "") {
@@ -94,9 +83,15 @@ export const HomePage: React.FC = () => {
             handleRemoveKey("search");
         }
     }
+    const handleChangeSearch = (e: any) => {
+        const search = e.target.value;
+        if (search?.trim() === "") {
+            handleRemoveKey("search");
+        }
+    }
     return (
         <div>
-            <ToastContainer />
+            <ToastContainer containerId='home-page' />
             <header className="bg-dark py-5">
                 <div className="container px-4 px-lg-5 my-5">
                     <div className="text-center text-white">
@@ -113,42 +108,49 @@ export const HomePage: React.FC = () => {
                         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
                             <span className="navbar-toggler-icon"></span>
                         </button>
+
                         <div className="collapse navbar-collapse" id="navbarScroll">
                             <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" >
                                 <li className="nav-item">
-                                    <label htmlFor='admin-filter-select' className="nav-link">
-                                        <i className="me-1 fa-solid fa-filter"></i>Khóa
-                                    </label>
-                                    <select name="" value={academyYearSelected} onChange={(e) => handleChangeAcademyYear(e)} id="admin-filter-select">
-                                        <option value="">Tất cả</option>
-                                        {
-                                            academyYears.map((academyYear, index) => <option key={index} value={academyYear.number}>{academyYear.number}</option>)
-                                        }
-                                    </select>
+                                    <div className="dropdown">
+                                        <button className="btn dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Sắp xếp
+                                        </button>
+                                        <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                            <li ><a className="dropdown-item" onClick={(e) => { e.preventDefault(); handleSort("DESC") }} href="#">Mới nhất{direction === "DESC" && <i className="text-success ms-5 fa-solid fa-check"></i>}</a></li>
+                                            <li><a className="dropdown-item" onClick={(e) => { e.preventDefault(); handleSort("ASC") }} href="#">Cũ nhất{direction === "ASC" && <i className="text-success ms-5 fa-solid fa-check"></i>}</a></li>
+                                        </ul>
+                                    </div>
                                 </li>
                                 <li className="nav-item">
-                                    <label htmlFor='admin-sort' className="nav-link">
-                                        <i className="ms-2 me-1 fa-solid fa-sort"></i>Xắp xếp
-                                    </label>
-                                    <select name="" onChange={(e) => handleSort(e)}>
-                                        <option value="DESC">Mới nhất</option>
-                                        <option value="ASC">Cũ nhất</option>
-                                    </select>
+                                    <div className="dropdown">
+                                        <button className="btn dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Khoá
+                                        </button>
+                                        <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                            <li><a className="dropdown-item" onClick={(e) => { e.preventDefault(); handleChangeAcademyYear({ target: { value: "" } }) }} href="#">Tất cả{academyYearSelected === "" && <i className="text-success ms-5 fa-solid fa-check"></i>}</a></li>
+                                            {
+                                                academyYears.map((academyYear, index) => <li key={index}><a className="dropdown-item" onClick={(e) => { e.preventDefault(); handleChangeAcademyYear({ target: { value: academyYear.number } }) }} href="#">{academyYear.number}{academyYearSelected === academyYear.number && <i className="text-success ms-5 fa-solid fa-check"></i>}</a></li>)
+                                            }
+                                        </ul>
+                                    </div>
                                 </li>
                                 <li className="nav-item">
-                                    <label htmlFor='admin-sort' className="nav-link">
-                                        <i className="me-2 fa-solid fa-list"></i>Thể loại
-                                    </label>
-                                    <select name="" value={categorySelected} onChange={(e) => handleChangeCategoryIdSelected(e.target.value)}>
-                                        <option value="">Tất cả</option>
-                                        {
-                                            categories.map((category, index) => <option key={index} value={category.name}>{category.name}</option>)
-                                        }
-                                    </select>
+                                    <div className="dropdown">
+                                        <button className="btn dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Thể loại
+                                        </button>
+                                        <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                            <li><a className="dropdown-item" onClick={(e) => { e.preventDefault(); handleChangeCategoryIdSelected("") }} href="#">Tất cả{categorySelected === "" && <i className="text-success ms-5 fa-solid fa-check"></i>}</a></li>
+                                            {
+                                                categories.map((category, index) => <li key={index}><a className="dropdown-item" onClick={(e) => { e.preventDefault(); handleChangeCategoryIdSelected(category.name) }} href="#">{category.name}{categorySelected === category.name && <i className="text-success ms-5 fa-solid fa-check"></i>}</a></li>)
+                                            }
+                                        </ul>
+                                    </div>
                                 </li>
                             </ul>
                             <form className="d-flex">
-                                <input ref={searchRef} className="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+                                <input ref={searchRef} onChange={handleChangeSearch} className="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
                                 <button onClick={handleSearch} className="btn btn-outline-success" type="submit">Search</button>
                             </form>
                         </div>

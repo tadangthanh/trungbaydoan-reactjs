@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/img/vnua.png';
 import { login } from '../../api/AuthenticationApi';
-interface Props {
-    startLoading: () => void;
-    stopLoading: (success?: boolean, message?: string) => void;
-}
-export const PageLogin: React.FC<Props> = ({ startLoading, stopLoading }) => {
+import { toast, ToastContainer } from 'react-toastify';
+
+export const PageLogin: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -17,13 +15,16 @@ export const PageLogin: React.FC<Props> = ({ startLoading, stopLoading }) => {
             const response = await login(request);
             if (response.error) {
                 setError(response.message);
+                toast.error(response.message, { containerId: 'page-login' });
                 focusFirstInputField();
             } else {
-                console.log(response);
+                toast.success('Đăng nhập thành công', { containerId: 'page-login' });
+                window.location.href = '/';
             }
         } catch (error) {
             console.error('Login error:', error);
             setError('Đăng nhập thất bại !.');
+            toast.error('Đăng nhập thất bại !.', { containerId: 'page-login' });
         }
     };
     const focusFirstInputField = () => {
@@ -36,6 +37,7 @@ export const PageLogin: React.FC<Props> = ({ startLoading, stopLoading }) => {
 
     return (
         <div className="container">
+            <ToastContainer containerId='page-login' />
             <div className="row justify-content-center">
                 <div className="col-xl-10 col-lg-12 col-md-9">
                     <div className="card o-hidden border-0 shadow-lg my-5">

@@ -8,6 +8,7 @@ import { deleteDocument } from "../../api/documentAPI/DocumentAPI";
 import { getEmailFromToken } from "../../api/CommonApi";
 import { DocumentDTO } from "../../model/DocumentDTO";
 import { DocumentComponent } from "./DocumentComponent";
+import { toast, ToastContainer } from "react-toastify";
 interface UploadDocumentProps {
     label: string;
     documentIds: number[];
@@ -42,6 +43,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
                 checkFileName(selectedFiles[i].name.split(".")[0]);
                 if (!documentTypes.includes(selectedFiles[i].type)) {
                     setError("Chỉ chấp nhận file pdf, word, excel");
+                    toast.error("Chỉ chấp nhận file pdf, word, excel", { containerId: 'upload-document' });
                     return;
                 }
             }
@@ -51,6 +53,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
         for (let i = 0; i < documentDTO.length; i++) {
             if (documentDTO[i].name === fileName) {
                 setError("File đã tồn tại");
+                toast.error("File đã tồn tại", { containerId: 'upload-document' });
                 return false;
             }
         }
@@ -80,7 +83,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
 
             if (response.status !== 200) {
                 handleSetWaiting(false);
-                alert("Upload failed: " + result.message);
+                toast.error(result.message, { containerId: 'upload-document' });
                 setLoading(false);
                 setIsUpload(false);
                 setDocumentDTO([]);
@@ -93,11 +96,10 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
             setIsUpload(false);
             setDocumentDTO([...documentDTO, ...result.data]);
             setLoading(false);
-
-            console.log('File uploaded successfully');
+            toast.success('Upload file thành công', { containerId: 'upload-document' });
         } catch (error) {
             handleSetWaiting(false);
-            console.error('Error uploading file', error);
+            toast.error('Upload file thất bại', { containerId: 'upload-document' });
             setLoading(false);
         }
     };
@@ -107,7 +109,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
         deleteDocument(idRemove)
             .then(response => {
                 if (response.status !== 200) {
-                    alert(response.message);
+                    toast.error(response.message, { containerId: 'upload-document' });
                     setLoading(false);
                     return;
                 }
@@ -115,10 +117,11 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
                 handleDeleteDocumentIds(idRemove);
                 clearFile();
                 setLoading(false);
+                toast.success('Xóa file thành công', { containerId: 'upload-document' });
             })
             .catch(error => {
                 setLoading(false);
-                console.log(error);
+                toast.error('Xóa file thất bại', { containerId: 'upload-document' });
             });
 
     }
@@ -135,6 +138,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
     }
     return (
         <div className="upload-container mt-5">
+            <ToastContainer containerId='upload-document' />
             <label className="mb-4 text-center">{label}<i className="mr-2 fa-solid fa-cloud-arrow-up"></i></label>
             <div className="upload-file-area">
                 {!isUpload && <input accept=".pdf,.doc,.docx,.xls,.xlsx" ref={inputRef} type="file" multiple onChange={handleFileChange} />}

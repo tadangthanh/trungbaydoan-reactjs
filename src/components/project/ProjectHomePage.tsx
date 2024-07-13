@@ -44,7 +44,7 @@ export const ProjectHomePage: React.FC<ProjectHomePageProps> = ({ handleChangeCa
                                         return (
 
                                             <div className={`carousel-item ${index === 0 ? 'active' : ''}`} key={document.id}>
-                                                <img
+                                                <img loading="lazy"
                                                     src={`${document.url}`}
                                                     className="d-block w-100" alt="..." style={{ objectFit: 'cover', height: '100%' }} />
                                             </div>
@@ -53,7 +53,7 @@ export const ProjectHomePage: React.FC<ProjectHomePageProps> = ({ handleChangeCa
                                 })
                             }
                         </div>
-                        {documents.filter(document => document.type === 'IMAGE').length > 1 &&
+                        {/* {documents.filter(document => document.type === 'IMAGE').length > 1 &&
                             <div>
                                 <button style={{ height: '100px', margin: 'auto' }} className="carousel-control-prev" type="button"
                                     data-bs-target={`#carouselExampleControls${project?.id}`} data-bs-slide="prev">
@@ -66,7 +66,7 @@ export const ProjectHomePage: React.FC<ProjectHomePageProps> = ({ handleChangeCa
                                     <span className="visually-hidden">Next</span>
                                 </button>
                             </div>
-                        }
+                        } */}
                     </div>
                 </div>
                 <div className="col-md-6 col-lg-6 col-xl-6">
@@ -75,7 +75,7 @@ export const ProjectHomePage: React.FC<ProjectHomePageProps> = ({ handleChangeCa
                         <div className="text-danger mb-1 me-2">
                             {members.map((member, index) => {
                                 return (
-                                    index < 5 ? <Link key={member.id} title={member.memberName} to={`/profile/${member.email}`}><img src={member.avatarUrl ? member.avatarUrl : logo} alt="avatar" className="rounded-circle" style={{ width: '30px', height: '30px' }} /></Link> : "..."
+                                    index < 4 ? <Link className="text-decoration-none" key={member.id} title={member.memberName} to={`/profile/${member.email}`}>{member.memberName}, </Link> : "..."
                                 )
                             })}
                         </div>
@@ -96,9 +96,9 @@ export const ProjectHomePage: React.FC<ProjectHomePageProps> = ({ handleChangeCa
                         <span className="text-primary"> : </span>
                         <span>{new Date(project.createdDate).toLocaleString()}</span>
                         <span className="text-primary"> • </span>
-                        <span>For men</span>
-                        <span className="text-primary"> • </span>
-                        <span>Casual<br /></span>
+                        <span>Khóa</span>
+                        <span className="text-primary"> : </span>
+                        <span>{project.academicYear}</span>
                     </div>
                     <p className="text-truncate mb-4 mb-md-0">
                         {convertHtmlToText(project.summary)}

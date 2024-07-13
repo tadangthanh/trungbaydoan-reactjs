@@ -6,6 +6,7 @@ import '../css/comment.css';
 import { getEmailFromToken } from "../../api/CommonApi";
 import logo from '../../assets/img/vnua.png';
 import { Link } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
 interface CommentRootProps {
     comment: CommentDTO,
     projectId: number,
@@ -29,7 +30,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
         return `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
     }
     const [reply, setReply] = useState<CommentDTO[]>([]);
-    const [page, setPage] = useState(0);
+    const [page, setPage] = useState(1);
     const [hastNext, setHasNext] = useState(true);
     const [idParent, setIdParent] = useState(0);
     const [replyTo, setReplyTo] = useState('');
@@ -42,20 +43,18 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
     useEffect(() => {
         getAllCommentChildByParentId(comment.id, page, 5)
             .then(response => {
-                const data = response.data;
-                setHasNext(data.hasNext)
-                setReply([...reply, ...data.items]);
-                setLoading(false);
+                if (response.status === 200) {
+                    const data = response.data;
+                    setHasNext(data.hasNext)
+                    setReply([...reply, ...data.items]);
+                } else if (response.status !== 204) {
+                    toast.error(response.message, { containerId: 'comment-root' })
+                }
             })
-            .catch(error => {
-                setLoading(false);
-                console.log(error);
-            });
     }, [page]);
     const handleGetCommentChild = () => {
         setPage(page + 1);
         setError('');
-        setLoading(true);
     }
     const handleReply = (replyTo: string, content: string, authorEmail: string, idCommentReply: number) => {
         setError('');
@@ -106,7 +105,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
         } else {
             setHasNext(true);
             setReply([]);
-            setPage(0);
+            setPage(1);
         }
     }
 
@@ -122,8 +121,8 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
         const comment = new CommentDTO(0, content, projectId, '', idParent, 0, '', 0, '', '', receiverEmail, '');
         createComment(comment)
             .then(response => {
-                if (response.status !== 200) {
-                    console.log(response.message)
+                if (response.status !== 201) {
+                    toast.error(response.message, { containerId: 'comment-root' })
                 }
                 const data = response.data;
                 setReply([...reply, data]);
@@ -132,8 +131,8 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
             })
             .catch(error => {
                 setError('Có lỗi xảy ra khi thêm bình luận');
+                toast.error('Có lỗi xảy ra khi thêm bình luận', { containerId: 'comment-root' })
                 setIdParent(0);
-                console.log(error);
             });
     }
     const handleDeleteComment = (id: number) => {
@@ -142,7 +141,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
             deleteComment(id)
                 .then(response => {
                     if (response.status !== 200) {
-                        console.log(response.message)
+                        toast.error(response.message, { containerId: 'comment-root' })
                     }
                     setIdParent(0);
                     setComments(comments.filter(comment => comment.id !== id));
@@ -158,6 +157,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
     }
     return (
         <div id={`${comment.id}`} className={`justify-content-between ${idSelected === `${comment.id}` ? 'selected-comment' : ''}`}>
+            <ToastContainer containerId='comment-root' />
             <div>
                 <div className="content-box mt-2">
                     <div>
@@ -173,7 +173,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
 
                             {isLogin && <div className="d-flex">
                                 <button className="btn link-primary" onClick={() => {
-                                    handleReply("@" + comment?.authorName + ": ", comment?.content, comment?.authorEmail, comment?.id);
+                                    handleReply("@" + comment.authorName + ": ", comment.content, comment.authorEmail, comment.id);
                                 }}><i className="fas fa-reply fa-xs"></i><span className="small"> reply ({comment.totalReply})</span></button>
 
                                 {authorEmail === comment.createdBy && <div className="d-flex justify-content-end delete-btn" style={{ padding: '0 1rem 0 0' }}>
@@ -185,7 +185,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                             <p className="small mb-0">
                                 <i className="me-2 fa-solid fa-bullhorn"></i> {isHtml(comment.content) ? convertHmtlToText(comment.content) : comment.content}
                             </p>
-                            <span style={{ float: "right" }} className="time-created-comment"><i className="ms-2 fa-regular fa-clock"></i> {convertDateTime(comment.createdDate)}</span>
+                            <span className="time-created-comment"><i className="ms-2 fa-regular fa-clock"></i> {convertDateTime(comment.createdDate)}</span>
 
                         </div>
 
@@ -207,7 +207,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
 
                     <div className="d-flex justify-content-between"> {hastNext && comment.totalReply !== 0 && <button className="pe-auto d-inline-block mt-2 btn link-primary" onClick={handleGetCommentChild}>Xem tất cả </button>}
                         {loading && <div className="loader"></div>}
-                        {page !== 0 && <button onClick={showLessComment} className="pe-auto d-inline-block mt-2 btn link-primary">Hiển thị ít hơn</button>}
+                        {page !== 1 && <button onClick={showLessComment} className="pe-auto d-inline-block mt-2 btn link-primary">Hiển thị ít hơn</button>}
                     </div>
                     {idParent !== 0 && <div className="form-group">
                         <label htmlFor="exampleFormControlTextarea1">Trả lời <span className="highlight">{replyTo}</span>

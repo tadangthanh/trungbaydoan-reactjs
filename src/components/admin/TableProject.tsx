@@ -31,20 +31,7 @@ export const TableProject: React.FC = () => {
     const [isReject, setIsReject] = useState(false);
     const checkboxRefs = useRef<HTMLInputElement[]>([]);
     const selectAllInput = useRef<HTMLInputElement>(null);
-    const notify = (message: string) => toast(
-        message,
-        {
-            position: 'top-center',
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: true,
-            progress: undefined,
-            theme: 'light',
-            transition: Bounce,
-        }
-    );
+
     useEffect(() => {
         handleUnSelectAll();
         getAllData();
@@ -65,6 +52,8 @@ export const TableProject: React.FC = () => {
                         setDocuments(res.data);
                     }
                 });
+            } else {
+                toast.error(res.message, { containerId: 'table-project-admin' })
             }
         })
     }
@@ -136,14 +125,14 @@ export const TableProject: React.FC = () => {
             if (isDelete) {
                 deleteProjectByIds({ projectIds: idsSelected, reason: deleteReason }).then(res => {
                     if (res.status === 200) {
-                        notify("Xóa thành công")
+                        toast.success(res.message, { containerId: 'table-project-admin' })
                         setProjects(projects.filter(project => !idsSelected.includes(project.id)));
                         setMembers(members.filter(member => !idsSelected.includes(member.projectId)));
                         setDocuments(documents.filter(document => !idsSelected.includes(document.projectId)));
                         setIsSelect(false);
                         handleUnSelectAll();
                     } else {
-                        notify("Xóa không thành công");
+                        toast.error(res.message, { containerId: 'table-project-admin' })
                     }
                 });
                 setIsDelete(false);
@@ -158,9 +147,9 @@ export const TableProject: React.FC = () => {
                         setProjects(pre => pre.map(project => idsSelected.includes(project.id) ? { ...project, projectStatus: "REJECTED" } : project))
                         setIsSelect(false);
                         handleUnSelectAll()
-                        notify("Từ chối thành công")
+                        toast.success(res.message, { containerId: 'table-project-admin' })
                     } else {
-                        toast("Từ chối không thành công")
+                        toast.error(res.message, { containerId: 'table-project-admin' })
                     }
                 });
                 setIsReject(false);
@@ -220,9 +209,9 @@ export const TableProject: React.FC = () => {
                 setProjects(pre => pre.map(project => projectIds.includes(project.id) ? { ...project, projectStatus: "APPROVED" } : project))
                 setIsSelect(false);
                 handleUnSelectAll()
-                notify("Phê duyệt thành công")
+                toast.success(res.message, { containerId: 'table-project-admin' })
             } else {
-                toast("Phê duyệt không thành công")
+                toast.error(res.message, { containerId: 'table-project-admin' })
             }
         });
     }
@@ -260,9 +249,9 @@ export const TableProject: React.FC = () => {
         activeProjectByIds({ projectIds: [projectId], reason: "" }).then(res => {
             if (res.status === 200) {
                 setProjects(pre => pre.map(project => project.id === projectId ? { ...project, active: true } : project))
-                notify("thành công")
+                toast.success(res.message, { containerId: 'table-project-admin' })
             } else {
-                notify("không thành công")
+                toast.error(res.message, { containerId: 'table-project-admin' })
             }
         });
     }
@@ -270,16 +259,16 @@ export const TableProject: React.FC = () => {
         inactiveProjectByIds({ projectIds: [projectId], reason: "" }).then(res => {
             if (res.status === 200) {
                 setProjects(pre => pre.map(project => project.id === projectId ? { ...project, active: false } : project))
-                notify("thành công")
+                toast.success(res.message, { containerId: 'table-project-admin' })
             } else {
-                notify("không thành công")
+                toast.error(res.message, { containerId: 'table-project-admin' })
             }
         });
     }
 
     return (
         <div className="content container">
-            <ToastContainer />
+            <ToastContainer containerId='table-project-admin' />
             <nav className="navbar navbar-expand-lg navbar-light ">
                 <div className="container-fluid">
                     <span className="navbar-brand">Danh sách đồ án</span>

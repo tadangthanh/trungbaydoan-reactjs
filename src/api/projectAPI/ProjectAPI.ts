@@ -60,3 +60,6 @@ export const createProject = async (project: ProjectCreate): Promise<any> => {
     const response = requestWithPost(url, project);
     return response;
 }
+export const getAllProjectPending = async (email: String, page: number, pageSize: number) => {
+    return await request(`${apiUrl}/projects/pending/${email}?page=${page}&size=${pageSize}`);
+}

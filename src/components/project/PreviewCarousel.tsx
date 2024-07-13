@@ -19,7 +19,7 @@ export const PreviewCarousel: React.FC<PreviewCarouselProps> = ({ documents, vid
                             if (document.type === 'IMAGE') {
                                 return (
                                     <div className={`carousel-item ${index === 0 ? 'active' : ''}`} key={document.id}>
-                                        <img title="Click vào để xem ảnh" onClick={() => handleMediaClick('IMAGE', document.url)}
+                                        <img loading="lazy" title="Click vào để xem ảnh" onClick={() => handleMediaClick('IMAGE', document.url)}
                                             src={`${document.url}`}
                                             className="d-block w-100" alt="..." style={{ objectFit: 'cover', cursor: 'pointer', height: '100%' }} />
                                     </div>

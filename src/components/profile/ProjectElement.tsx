@@ -16,7 +16,9 @@ export const ProjectElement: React.FC<ProjectElementProps> = ({ project }) => {
     const [members, setMembers] = useState<MemberDTO[]>([]);
     useEffect(() => {
         getMemberByProjectId(project.id).then(res => {
-            setMembers(res.data);
+            if (res.status === 200) {
+                setMembers(res.data);
+            }
         });
     }, [project.id]);
     const convertDateTime = (dateTimeString: string): string => {
@@ -68,7 +70,7 @@ export const ProjectElement: React.FC<ProjectElementProps> = ({ project }) => {
                     <div className="d-flex">
                         <div className="avatar-group float-start flex-grow-1 task-assigne">
                             {members.map((member, index) => {
-                                return (<div key={member.id} className="avatar-group-item">
+                                return (<div key={index} className="avatar-group-item">
                                     <Link to={`/profile/${member.email}`} className="d-inline-block"
                                         title={member.memberName}
                                         data-bs-toggle="tooltip" data-bs-placement="top"
@@ -76,7 +78,6 @@ export const ProjectElement: React.FC<ProjectElementProps> = ({ project }) => {
                                         data-bs-original-title="Terrell Soto">
                                         <img src={member.avatarUrl ? member.avatarUrl : logo}
                                             alt="ád" className="rounded-circle avatar-sm" />
-
                                     </Link>
                                 </div>)
                             })}

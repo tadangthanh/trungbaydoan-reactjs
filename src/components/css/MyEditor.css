@@ -7,3 +7,8 @@
     z-index: 10000 !important;
     /* Đặt z-index cao để đảm bảo nó luôn ở trên cùng */
 }
+
+.ck-editor__main {
+    position: relative !important;
+    z-index: 9000 !important;
+}

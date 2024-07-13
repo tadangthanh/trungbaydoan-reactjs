@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+
 export const Page404 = () => {
     return (
         <section className="py-3 py-md-5 min-vh-100 d-flex justify-content-center align-items-center">
@@ -12,7 +15,7 @@ export const Page404 = () => {
                             </h2>
                             <h3 className="h2 mb-2">Oops! You're lost.</h3>
                             <p className="mb-5">The page you are looking for was not found.</p>
-                            <a className="btn bsb-btn-5xl btn-dark rounded-pill px-5 fs-6 m-0" href="#!" role="button">Back to Home</a>
+                            <Link className="btn bsb-btn-5xl btn-dark rounded-pill px-5 fs-6 m-0" to='/'>Back to Home</Link>
                         </div>
                     </div>
                 </div>

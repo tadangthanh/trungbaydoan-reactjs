@@ -16,31 +16,18 @@ export const TableUser: React.FC = () => {
     const [direction, setDirection] = useState("DESC")
     const [pageResponse, setPageResponse] = useState({} as PageResponse);
     const [size, setSize] = useState(10);
-    const notify = (message: string) => toast(
-        message,
-        {
-            position: 'top-center',
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: true,
-            progress: undefined,
-            theme: 'light',
-            transition: Bounce,
-        }
-    );
+
     useEffect(() => {
         getAllData();
     }, [page, search, direction, size]);
     const getAllData = () => {
         getAllUserByAdmin(page, size, "id", direction, searchField, search).then(res => {
             if (res.status === 200) {
-                console.log(res.data);
-
                 setPageResponse(res);
                 setUsers(res.data.items);
                 const projectIds = res.data.items.map((project: ProjectDTO) => project.id);
+            } else {
+                toast.error(res.message, { containerId: 'table-user-admin' })
             }
         })
     }
@@ -68,9 +55,9 @@ export const TableUser: React.FC = () => {
         activeUserByIds(userId).then(res => {
             if (res.status === 200) {
                 setUsers(pre => pre.map(user => user.id === userId ? { ...user, status: true } : user))
-                notify("thành công")
+                toast.success(res.message, { containerId: 'table-user-admin' })
             } else {
-                notify("không thành công")
+                toast.error(res.message, { containerId: 'table-user-admin' })
             }
         });
     }
@@ -78,16 +65,16 @@ export const TableUser: React.FC = () => {
         inactiveUserByIds(userId).then(res => {
             if (res.status === 200) {
                 setUsers(pre => pre.map(user => user.id === userId ? { ...user, status: false } : user))
-                notify("thành công")
+                toast.success(res.message, { containerId: 'table-user-admin' })
             } else {
-                notify("không thành công")
+                toast.error(res.message, { containerId: 'table-user-admin' })
             }
         });
     }
 
     return (
         <div className="content container">
-            <ToastContainer />
+            <ToastContainer containerId='table-user-admin' />
             <nav className="navbar navbar-expand-lg navbar-light ">
                 <div className="container-fluid">
                     <span className="navbar-brand">Danh sách User</span>

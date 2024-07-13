@@ -11,33 +11,19 @@ export const CategoryAdmin: React.FC = () => {
             if (res.status === 200) {
                 setCategories(res.data);
             } else {
-                toast.error("Lỗi khi lấy category từ server");
+                toast.error(res.message, { containerId: 'category' })
             }
         });
     }, []);
-    const notify = (message: string) => toast(
-        message,
-        {
-            position: 'top-center',
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: true,
-            progress: undefined,
-            theme: 'light',
-            transition: Bounce,
-        }
-    );
     const inputRef = useRef<HTMLInputElement>(null);
     const handleAddCategory = () => {
         const category = { id: 0, name: name, createdDate: new Date(), lastModifiedDate: new Date(), createdBy: '', lastModifiedBy: '' }
         createCategory(category).then(res => {
             if (res.status === 201) {
-                notify("Thêm category thành công");
+                toast.success(res.message, { containerId: 'category' });
                 setCategories([...categories, res.data]);
             } else {
-                toast.error("Lỗi khi thêm category");
+                toast.error(res.message, { containerId: 'category' });
             }
             setName('');
             inputRef.current?.focus();
@@ -48,11 +34,11 @@ export const CategoryAdmin: React.FC = () => {
         if (result) {
             deleteCategory(id).then(res => {
                 if (res.status === 204) {
-                    notify("Xóa category thành công");
+                    toast.success(res.message, { containerId: 'category' });
                     const newCategories = categories.filter(c => c.id !== id);
                     setCategories(newCategories);
                 } else {
-                    toast.error("Lỗi khi xóa category");
+                    toast.error(res.message, { containerId: 'category' })
                 }
             }
             )
@@ -60,7 +46,7 @@ export const CategoryAdmin: React.FC = () => {
     }
     return (
         <div className="content container">
-            <ToastContainer />
+            <ToastContainer containerId='category' />
             <h2>Category</h2>
             <div className="dropdown">
                 <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">

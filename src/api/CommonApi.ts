@@ -2,21 +2,23 @@ import Cookies from "js-cookie";
 import { getRefreshToken, getToken, setRefreshToken, setToken } from "./AuthenticationApi";
 
 export const apiUrl = process.env.REACT_APP_API_URL;
-export async function request(url: string, method = 'GET', retryCount = 0): Promise<Response> {
+export const apiWsUrl = process.env.REACT_APP_WS_URL;
+export async function request(url: string, method = 'GET', retryCount = 0): Promise<any> {
     try {
         let response = await fetchWithAuthorization(url, method);
         if (response.status === 403 && retryCount < 1) {
             await refreshTokens();
             return request(url, method, retryCount + 1);
         }
-        return response;
+
+        return await response.json();
     } catch (error) {
-        console.error('url request:', url, 'Failed to make request:', error);
-        throw error;
+        // console.error('url request:', url, 'Failed to make request:', error);
+        // throw error;
     }
 }
-
 export async function requestWithMethod(url: string, method = 'GET', body: any, retryCount = 0): Promise<any> {
+
     try {
         let response = await fetchWithMethodAuthorization(url, body, method);
         if (response.status === 403 && retryCount < 1) {
@@ -25,8 +27,8 @@ export async function requestWithMethod(url: string, method = 'GET', body: any, 
         }
         return await response.json();
     } catch (error) {
-        console.error('url request:', url, 'Failed to make request:', error);
-        throw error;
+        // console.error('url request:', url, 'Failed to make request:', error);
+        // throw error;
     }
 }
 export async function requestWithPost(url: string, body: any, retryCount = 0): Promise<any> {
@@ -38,8 +40,8 @@ export async function requestWithPost(url: string, body: any, retryCount = 0): P
         }
         return await response.json();
     } catch (error) {
-        console.error('Failed to make request post:', error);
-        throw error;
+        // console.error('Failed to make request post:', error);
+        // throw error;
     }
 
 }
@@ -53,8 +55,8 @@ export async function requestWithPostFile(url: string, body: FormData, retryCoun
         }
         return await response.json();
     } catch (error) {
-        console.error('Failed to make request post:', error);
-        throw error;
+        // console.error('Failed to make request post:', error);
+        // throw error;
     }
 
 }

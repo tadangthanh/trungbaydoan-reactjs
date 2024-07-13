@@ -13,13 +13,14 @@ import Button from '@mui/material/Button';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
-import { getAllProjectByUserEmail, getProjectsByMentorEmail } from '../../api/projectAPI/ProjectAPI';
+import { getAllProjectByUserEmail, getAllProjectPending, getProjectsByMentorEmail } from '../../api/projectAPI/ProjectAPI';
 import { FaArrowUp } from 'react-icons/fa';
-import { TopNavBar } from '../common/TopNavBar';
+import { toast, ToastContainer } from 'react-toastify';
+
 export const Profile: React.FC = () => {
     const { email } = useParams() as any;
     const [error, setError] = useState<string>('');
-    const [file, setFile] = useState<File>();
+    const [file, setFile] = useState<File | null>(null);
     const [user, setUser] = useState<User>({} as User);
     const [editAvatar, setEditAvatar] = useState(false);
     const [projects, setProjects] = useState<ProjectDTO[]>([] as ProjectDTO[]);
@@ -30,11 +31,11 @@ export const Profile: React.FC = () => {
     useEffect(() => {
         getUserByEmail(email).then(res => {
             if (res.status !== 200) {
+                toast.error(res.message, { containerId: 'profile' });
                 window.location.href = "/error-not-found";
             }
             setUser(res.data);
             setRole(res.data.role);
-            console.log("res", res.data);
             document.title = res.data.fullName;
         });
     }, [email]);
@@ -42,7 +43,7 @@ export const Profile: React.FC = () => {
         if (role === 'ROLE_TEACHER') {
             getProjectsByMentorEmail(email, page, 6).then(res => {
                 if (res.status !== 200) {
-                    alert("Lỗi tải dữ liệu");
+                    toast.error(res.message, { containerId: 'profile' });
                     return;
                 }
                 setHasNext(res.data.hasNext);
@@ -51,7 +52,7 @@ export const Profile: React.FC = () => {
         } else {
             getAllProjectByUserEmail(email, page, 6).then(res => {
                 if (res.status !== 200) {
-                    alert("Lỗi tải dữ liệu");
+                    toast.error(res.message, { containerId: 'profile' });
                     return;
                 }
                 setHasNext(res.data.hasNext);
@@ -63,7 +64,7 @@ export const Profile: React.FC = () => {
         if (role === 'ROLE_TEACHER') {
             getProjectsByMentorEmail(email, page, 6).then(res => {
                 if (res.status !== 200) {
-                    alert("Lỗi tải dữ liệu");
+                    toast.error(res.message, { containerId: 'profile' });
                     return;
                 }
                 setHasNext(res.data.hasNext);
@@ -72,7 +73,7 @@ export const Profile: React.FC = () => {
         } else {
             getAllProjectByUserEmail(email, page, 6).then(res => {
                 if (res.status !== 200) {
-                    alert("Lỗi tải dữ liệu");
+                    toast.error(res.message, { containerId: 'profile' });
                     return;
                 }
                 setHasNext(res.data.hasNext);
@@ -102,6 +103,7 @@ export const Profile: React.FC = () => {
             ];
             if (!documentTypes.includes(selectedFile?.type)) {
                 setError("Chỉ chấp nhận file ảnh");
+                toast.error("Chỉ chấp nhận file ảnh", { containerId: 'profile' });
                 return;
             }
             const imageUrl = URL.createObjectURL(selectedFile); // Tạo đường dẫn URL cho file
@@ -110,16 +112,20 @@ export const Profile: React.FC = () => {
         }
     };
     const handleCancelUpload = () => {
-        setFile(undefined);
+        setFile(null);
         setError('');
         setEditAvatar(false);
     }
     const handleUpload = () => {
         uploadAvatar(file as File).then(res => {
             if (res.status !== 200) {
-                alert("Upload ảnh đại diện thất bại");
+                toast.error(res.message, { containerId: 'profile' });
                 handleCancelUpload();
+                setFile(null);
                 return;
+            }
+            if (res.status === 200) {
+                toast.success("Upload ảnh thành công", { containerId: 'profile' });
             }
             setUser({ ...user, avatarUrl: res.data.avatarUrl });
             handleCancelUpload();
@@ -185,10 +191,12 @@ export const Profile: React.FC = () => {
         getCodeVerify(getEmailFromToken()).then(res => {
             if (res.status === 200) {
                 setTimeLeft(60);
+                toast.success("Mã xác nhận đã được gửi đến email của bạn", { containerId: 'profile' });
                 setIsCode(true);
                 setLabelCode("nhập mã của bạn");
             } else {
                 setPasswordError(res.message);
+                toast.error(res.message, { containerId: 'profile' });
                 setIsCode(false);
                 setConfirmPassword('');
                 setNewPassword('');
@@ -207,11 +215,12 @@ export const Profile: React.FC = () => {
         changePassword(user.id, updateNewPassword).then(res => {
             if (res.status === 204) {
                 deleteToken();
-                alert("Đổi mật khẩu thành công");
+                toast.success(res.message, { containerId: 'profile' })
                 window.location.href = '/login';
             } else {
                 setCode('');
                 setIsCode(false);
+                toast.error(res.message, { containerId: 'profile' })
                 setConfirmPassword('');
                 setNewPassword('');
                 setCurrentPassword('');
@@ -254,21 +263,23 @@ export const Profile: React.FC = () => {
         }
         if (!checkExistFacebookUrl(userUpdate.facebookUrl)) {
             setSocialNetWorkError("Link facebook không hợp lệ");
+            toast.error("Link facebook không hợp lệ", { containerId: 'profile' });
             return;
         }
         if (!checkExistGithubUrl(userUpdate.githubUrl)) {
+            toast.error("Link github không hợp lệ", { containerId: 'profile' });
             setSocialNetWorkError("Link github không hợp lệ");
             return;
         }
         updateProfile(user.id, userUpdate).then(res => {
-            console.log("res", res)
             if (res.status === 200) {
                 setUser(res.data);
                 setSocialNetWorkError('');
                 setIsEditSocialNetwork(false);
-                alert("Cập nhật thông tin thành công");
+                toast.success(res.message, { containerId: 'profile' });
             } else {
                 setSocialNetWorkError(res.message);
+                toast.error(res.message, { containerId: 'profile' });
             }
         })
     }
@@ -282,6 +293,7 @@ export const Profile: React.FC = () => {
     }
     return (
         <div>
+            <ToastContainer containerId='profile' />
             <div ref={refTop}></div>
             <div className="container rounded bg-white mt-5 mb-5">
                 <div className="row">
@@ -295,8 +307,8 @@ export const Profile: React.FC = () => {
                             <span className='mt-2'>{file && !error && <button onClick={handleUpload} className='btn btn-secondary'>upload</button>}{editAvatar && <button onClick={handleCancelUpload} className='btn btn-danger'>cancel</button>}</span>
                             <span className='text-danger'>{error}</span>
                             <div id='social-network'>
-                                {user.facebookUrl && <a target='_blank' href={user.facebookUrl}> <i className="fa-brands fa-facebook"></i>Facebook</a>}
-                                {user.githubUrl && <a target='_blank' href={user.githubUrl}><i className="fa-brands fa-github"></i>Github</a>}
+                                {user.facebookUrl !== '' && <a target='_blank' href={user.facebookUrl}> <i className="fa-brands fa-facebook"></i>Facebook</a>}
+                                {user.githubUrl !== '' && <a target='_blank' href={user.githubUrl}><i className="fa-brands fa-github"></i>Github</a>}
                             </div>
                         </div>
                     </div>
@@ -336,11 +348,11 @@ export const Profile: React.FC = () => {
                                     <div>
                                         <div className="col-md-12 ">
                                             <label className="label"><i className="fab fa-fw fa-facebook me-2 text-facebook"></i>Facebook</label>
-                                            <input onChange={handleFacebookChange} type="text" className="form-control" placeholder="" aria-label="Facebook" value={user.facebookUrl ? user.facebookUrl : ""} />
+                                            <input onChange={handleFacebookChange} type="text" className="form-control" aria-label="Facebook" value={user.facebookUrl !== '' ? user.facebookUrl : ""} />
                                         </div>
                                         <div className="col-md-12 ">
                                             <label className="label"><i className="fab fa-fw fa-github me-2 text-github"></i>Github</label>
-                                            <input onChange={handleGithubChange} type="text" className="form-control" placeholder="" aria-label="Github" value={user.githubUrl ? user.githubUrl : ""} />
+                                            <input onChange={handleGithubChange} type="text" className="form-control" aria-label="Github" value={user.githubUrl !== '' ? user.githubUrl : ""} />
                                         </div>
                                     </div>
                                 }
@@ -406,6 +418,7 @@ export const Profile: React.FC = () => {
                             hasNext && <div className='d-flex align-items-center flex-column'><a style={{ cursor: 'pointer', color: 'blue' }} onClick={handleShowMore}>Hiển thị thêm <i className="fa-solid fa-caret-down"></i></a></div>
                         }
                     </div>
+
                 </div>
             </div>
             <Dialog style={{ zIndex: '4000' }} open={isOpen} onClose={handleClose} maxWidth="lg" fullWidth>

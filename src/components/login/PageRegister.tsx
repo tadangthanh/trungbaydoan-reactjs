@@ -3,11 +3,9 @@ import logo from '../../assets/img/vnua.png';
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { register, verifyEmail } from "../../api/AuthenticationApi";
-interface Props {
-    startLoading: () => void;
-    stopLoading: (success?: boolean, message?: string) => void;
-}
-export const PageRegister: React.FC<Props> = ({ startLoading, stopLoading }) => {
+import { toast, ToastContainer } from "react-toastify";
+
+export const PageRegister: React.FC = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -16,28 +14,26 @@ export const PageRegister: React.FC<Props> = ({ startLoading, stopLoading }) => 
     const [error, setError] = useState('');
     const [showCodeInput, setShowCodeInput] = useState(false);
     const handleRegister = async (e: any) => {
-        startLoading();
         e.preventDefault();
         try {
             if (password !== passwordConfirm) {
-                stopLoading(false);
                 setError('Mật khẩu không khớp');
+                toast.error('Mật khẩu không khớp', { containerId: 'page-register' });
                 return;
             }
             const request = { email, password, passwordConfirm };
             const response = await register(request);
             if (response.status !== 201) {
                 setError(response.message);
+                console.log(response);
+                toast.error(response.message, { containerId: 'page-register' });
                 focusFirstInputField();
-                stopLoading(false);
                 return;
             }
             setShowCodeInput(true);
-            stopLoading(false);
-
         } catch (error) {
             setError('Đăng kí thất bại');
-            stopLoading(false);
+            toast.error('Đăng kí thất bại', { containerId: 'page-register' });
         }
     };
     const focusFirstInputField = () => {
@@ -47,23 +43,19 @@ export const PageRegister: React.FC<Props> = ({ startLoading, stopLoading }) => 
         }
     }
     const handleVerify = async (e: any) => {
-        startLoading();
         e.preventDefault();
         try {
-
             const response = await verifyEmail(code);
             if (response.status !== 200) {
                 setError(response.message);
+                toast.error(response.message, { containerId: 'page-register' });
                 focusFirstInputField();
-                stopLoading(false);
                 return;
             }
-            stopLoading(true, "Đăng ký thành công, quay trở lại đăng nhập trong vài giây");
-            alert('Đăng ký thành công');
+            toast.success('Xác nhận thành công', { containerId: 'page-register' });
             navigate('/login2');
         } catch (error) {
             setError('Xác nhận thất bại');
-            stopLoading(false);
         }
     }
     useEffect(() => {
@@ -82,6 +74,7 @@ export const PageRegister: React.FC<Props> = ({ startLoading, stopLoading }) => 
     }, []);
     return (
         <div className="container">
+            <ToastContainer containerId='page-register' />
             <div className="card o-hidden border-0 shadow-lg my-5">
                 <div className="card-body p-0">
                     <div className="row">

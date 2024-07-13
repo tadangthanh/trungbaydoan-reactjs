@@ -7,6 +7,10 @@ export const seenNotification = async (notificationId: number): Promise<any> => 
     const url = apiUrl + `/notifications/seen/${notificationId}`;
     return await request(url);
 }
+export const seenAllNotification = async (userEmail: string): Promise<any> => {
+    const url = apiUrl + `/notifications/seen-all/${userEmail}`;
+    return await request(url);
+}
 export const countNotificationNotSeen = async (): Promise<any> => {
     const url = apiUrl + `/notifications/count-not-seen`;
     return await request(url);

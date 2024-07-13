@@ -3,7 +3,7 @@ import { Category } from "../../model/Category";
 import { ProjectDTO } from "../../model/ProjectDTO";
 import '../css/WidgetRight.css'
 import { MemberDTO } from "../../model/MemberDTO";
-import { apiUrl } from "../../api/CommonApi";
+import { apiUrl, getEmailFromToken, verifyAdmin, verifyToken } from "../../api/CommonApi";
 import { DocumentDTO } from "../../model/DocumentDTO";
 import { Link } from "react-router-dom";
 import { User } from "../../model/User";
@@ -11,6 +11,7 @@ import { getMentorsByProjectId } from "../../api/projectAPI/ProjectAPI";
 import { WidgetRightAdmin } from "./WidgetRightAdmin";
 import { UploadDocument } from "./UploadDocument";
 import { UploadVideo } from "./UploadVideo";
+import { getUserByEmail } from "../../api/user/UserAPI";
 interface WidgetRightProps {
     categories: Category[];
     handleSetIdsDelete: (ids: number) => void;
@@ -35,6 +36,21 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleCancelUpdate, ha
         }
         return results;
     };
+    const [isLogin, setIsLogin] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [memberRole, setMemberRole] = useState(members.filter(member => member.email === getEmailFromToken())[0]?.role);
+    useEffect(() => {
+        verifyToken().then(res => {
+            if (res.status === 200) {
+                setIsLogin(true);
+                verifyAdmin().then(res => {
+                    if (res.status === 200) {
+                        setIsAdmin(true);
+                    }
+                });
+            }
+        })
+    }, []);
     const [mentors, setMentors] = useState<User[]>([]);
     useEffect(() => {
         getMentorsByProjectId(project.id || 0).then(res => {
@@ -141,7 +157,7 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleCancelUpdate, ha
                     </div>
 
                 </div>}
-            <WidgetRightAdmin handleCancelUpdate={handleCancelUpdate} setIsEditContent={setIsEditContent} isEditContent={isEditContent} />
+            {(isAdmin || memberRole === "ROLE_LEADER") && isLogin && <WidgetRightAdmin isAdmin={isAdmin} memberRole={memberRole} project={project} handleCancelUpdate={handleCancelUpdate} setIsEditContent={setIsEditContent} isEditContent={isEditContent} />}
 
         </div>
     )

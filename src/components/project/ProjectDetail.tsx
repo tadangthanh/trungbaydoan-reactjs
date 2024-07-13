@@ -41,6 +41,9 @@ export const ProjectDetail = () => {
         getProjectById(projectId).then(res => {
             if (res.status !== 200) {
                 window.location.href = "/error-not-found";
+            } else if (res.status === 404) {
+                toast.error("Không tìm thấy đồ án hoặc đồ án chưa được duyệt", { containerId: 'project-detail' });
+                window.location.href = "/error-not-found";
             }
             setProject({ ...project, ...res.data });
             setProjectUpdate({ ...project, ...res.data });
@@ -184,7 +187,7 @@ export const ProjectDetail = () => {
                     setMapIdUrl(new Map());
                     deleteDocuments({ ids: documentIdsDelete }).then(res => {
                     });
-                    notify("Cập nhật thành công, vui lòng chờ xác nhận từ quản trị viên");
+                    toast.success(res.message, { containerId: 'project-detail' })
                     setProject(res.data);
                     // window.location.reload();
                 } else {
@@ -192,7 +195,7 @@ export const ProjectDetail = () => {
                     setDocumentIds([]);
                     setIdsDelete([]);
                     setMapIdUrl(new Map());
-                    notify("Cập nhật thất bại");
+                    toast.error(res.message, { containerId: 'project-detail' })
                     return;
                 }
             });
@@ -209,7 +212,7 @@ export const ProjectDetail = () => {
                     setDocumentIds([]);
                     setIdsDelete([]);
                     setMapIdUrl(new Map());
-                    toast("Huỷ cập nhật thành công");
+                    toast.info("Huỷ cập nhật thành công", { containerId: 'project-detail' });
                     return;
                 }
             });
@@ -236,7 +239,7 @@ export const ProjectDetail = () => {
     return (
         <div>
             {status && <div id="content" ref={contentRef}>
-                <ToastContainer />
+                <ToastContainer containerId='project-detail' />
                 <div id="progress-container" style={{ zIndex: "10000" }}>
                     <div id="progress-bar" ref={progressBar}></div>
                 </div>
@@ -249,6 +252,7 @@ export const ProjectDetail = () => {
                                     <div style={{ width: '100%', zIndex: '5000', top: '0', position: 'relative' }}>
                                         <h2>Title:</h2>
                                         <MyEditor
+                                            maxContentLength={100}
                                             data={project.name}
                                             onChange={handleChangeName}
                                             uploadImage={false}
@@ -263,6 +267,7 @@ export const ProjectDetail = () => {
                                     <div style={{ width: '100%', zIndex: '5000', top: '0', position: 'relative' }}>
                                         <h2>Summary:</h2>
                                         <MyEditor
+                                            maxContentLength={200}
                                             data={project.summary}
                                             onChange={handleChangeSummary}
                                             uploadImage={false}
@@ -296,7 +301,6 @@ export const ProjectDetail = () => {
                                     <div style={{ width: '100%', zIndex: '5000', top: '0', position: 'relative' }}>
                                         <h2 className="mt-5">Content:</h2>
                                         <MyEditor
-                                            handleDeleteDocumentIds={handleDeleteDocumentIds}
                                             mapIdUrl={mapIdUrl}
                                             setMapIdUrl={setMapIdUrl}
                                             data={projectUpdate.description}

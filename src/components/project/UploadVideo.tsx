@@ -6,6 +6,7 @@ import '../css/uploadfile.css';
 import { DocumentResponse } from "../../model/DocumentResponse";
 import { deleteDocument, uploadFile } from "../../api/documentAPI/DocumentAPI";
 import { getEmailFromToken } from "../../api/CommonApi";
+import { toast, ToastContainer } from "react-toastify";
 interface UploadVideoProps {
     label: string;
     documentIds: number[];
@@ -36,6 +37,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
             const videoTypes = ["video/mp4", "video/avi", "video/mkv", "video/mov"];
             if (!videoTypes.includes(event.target.files[0]?.type)) {
                 setError("Chỉ chấp nhận file video có định dạng mp4, avi, mkv, mov");
+                toast.error("Chỉ chấp nhận file video có định dạng mp4, avi, mkv, mov", { containerId: 'upload-video' });
                 return;
             }
         }
@@ -45,7 +47,6 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
     }, [file]);
     useEffect(() => {
         if (isConnected || stompClient) {
-            // alert("Đã kết nối với server");
             return;
         };
         const socket = new SockJS('http://localhost:8080/ws?token=' + getToken());
@@ -57,14 +58,11 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
         client.connect(headers, () => {
             setIsConnected(true);
             setStompClient(client);
-            console.log("Đã kết nối với server!!!!!!!!!!!");
             client.subscribe('/user/topic/upload-progress', (message) => {
                 const receivedProgress = parseInt(message.body);
                 setProgress(receivedProgress);
             });
         }, (error) => {
-            // Xử lý lỗi kết nối tại đây
-            console.error('không thể kết nối tới websocket:', error);
             setIsConnected(false);
         });
 
@@ -72,7 +70,6 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
             if (stompClient) {
                 stompClient.disconnect(() => {
                     setIsConnected(false);
-                    alert("Ngắt kết nối với server");
                 });
             }
         };
@@ -87,7 +84,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
         uploadFile(formData).then(response => {
             if (response.status !== 201) {
                 handleSetWaiting(false);
-                alert("Upload failed: " + response.message);
+                toast.error(response.message, { containerId: 'upload-video' });
                 setLoading(false);
                 setIsUpload(false);
                 setDocumentResponse({ id: 0, url: '' });
@@ -100,10 +97,12 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
             setIsUpload(false);
             setDocumentResponse(response.data);
             setLoading(false);
+            toast.success(response.message, { containerId: 'upload-video' });
         }).catch(error => {
             setLoading(false);
             handleSetWaiting(false);
             setIsUpload(false);
+            toast.error('Upload file thất bại', { containerId: 'upload-video' });
         });
     };
 
@@ -114,7 +113,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
         deleteDocument(documentResponse.id)
             .then(response => {
                 if (response.status !== 200) {
-                    alert(response.message);
+                    toast.error(response.message, { containerId: 'upload-video' });
                     setLoading(false);
                     return;
                 }
@@ -122,6 +121,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
                 handleDeleteDocumentIds(documentResponse.id);
                 setDocumentResponse({ id: 0, url: '' });
                 clearFile();
+                toast.success(response.message, { containerId: 'upload-video' });
                 setLoading(false);
             })
     }
@@ -134,6 +134,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
     }
     return (
         <div className="upload-container mt-5">
+            <ToastContainer containerId='upload-video' />
             <label className="mb-4 text-center">{label}<i className="mr-2 fa-solid fa-cloud-arrow-up"></i></label>
             <div className="upload-file-area">
                 {!documentResponse.url && !isUpload && <input accept="video/*" ref={inputRef} type="file" onChange={handleFileChange} />}

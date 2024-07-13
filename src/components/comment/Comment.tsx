@@ -4,6 +4,7 @@ import { createComment, getAllCommentByProjectId, getCommentByCommentIdAndProjec
 import { CommentRoot } from "./CommentRoot";
 import { useLocation, useParams } from "react-router-dom";
 import { verifyToken } from "../../api/CommonApi";
+import { toast, ToastContainer } from "react-toastify";
 interface CommentProps {
     projectId: number;
 }
@@ -19,6 +20,7 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
             myElement?.setAttribute('style', '');
             getCommentByCommentIdAndProjectId(Number(commentId), projectId).then(response => {
                 if (response.status !== 200) {
+                    toast.error(response.message)
                     return;
                 }
                 setComments([...comments, response.data]);
@@ -40,50 +42,37 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
     const [page, setPage] = useState(1);
     const [hastNext, setHasNext] = useState(true);
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
     useEffect(() => {
         getAllCommentByProjectId(projectId, page, 5)
             .then(response => {
                 const data = response.data;
-                if (response.status !== 200) {
+                if (response.status === 200) {
+                    setHasNext(data.hasNext)
+                    setComments([...comments, ...data.items]);
+                } else if (response.status !== 204) {
+                    toast.error(response.message, { containerId: 'comment' })
                     setHasNext(false)
-                    setLoading(false);
                     return;
                 }
-                setHasNext(data.hasNext)
-                setComments([...comments, ...data.items]);
-                setLoading(false);
+
             })
-            .catch(error => {
-                setLoading(false);
-                console.log(error);
-            });
     }, [page]);
     const getAllComment = () => {
         setPage(page + 1);
-        setLoading(true);
     }
     const handleAddComment = () => {
-        setLoading(true);
         const comment = new CommentDTO(0, content, projectId, '', parentCommentId, 0, '', 0, '', '', '', '');
         createComment(comment)
             .then(response => {
-                if (response.status !== 200) {
-                    console.log(response.message)
+                if (response.status !== 201) {
+                    toast.error(response.message, { containerId: 'comment' })
                     setError('Không thể thêm bình luận');
-                    setLoading(false);
                 }
                 setError('');
                 const data = response.data;
                 setComments([...comments, data]);
                 setContent('');
-                setLoading(false);
             })
-            .catch(error => {
-                setLoading(false);
-                setError('Không thể thêm bình luận');
-                console.log(error);
-            });
     }
     const [isLogin, setIsLogin] = useState(false);
     useEffect(() => {
@@ -95,6 +84,7 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
     }, []);
     return (
         <div>
+            <ToastContainer containerId='comment' />
             <div className="card">
                 <div className="card-body p-4">
                     <h4 className="text-center mb-4 pb-2">Bình luận<i className="ms-2 fa-solid fa-comment"></i></h4>
@@ -114,7 +104,6 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
             </div>
             <div className="d-flex justify-content-between">
                 {hastNext && comments.length > 0 && <button className="pe-auto d-inline-block mt-2 btn link-primary" onClick={getAllComment}>Xem thêm bình luận</button>}
-                {loading && <div className="loader"></div>}
                 <span className="text-danger">{error}</span>
             </div>
             <label htmlFor="yourComment"> Bình luận của bạn: </label>

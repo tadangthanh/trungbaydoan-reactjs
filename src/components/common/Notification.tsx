@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ProjectLinkNotification } from "./CustomeToastNotification";
-import { countNotificationNotSeen, getNotificationByUserId, seenNotification } from "../../api/notification/NotificationAPI";
-import { getEmailFromToken, getIdFromToken } from "../../api/CommonApi";
+import { countNotificationNotSeen, getNotificationByUserId, seenAllNotification, seenNotification } from "../../api/notification/NotificationAPI";
+import { apiWsUrl, getEmailFromToken, getIdFromToken } from "../../api/CommonApi";
 import { NotificationDTO } from "../../model/NotificationDTO";
 import { getToken } from "../../api/AuthenticationApi";
 import SockJS from "sockjs-client";
@@ -27,7 +27,7 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
         if (isConnected || stompClient) {
             return;
         };
-        const socket = new SockJS('http://localhost:8080/ws?token=' + getToken());
+        const socket = new SockJS(`${apiWsUrl}?token=${getToken()}`);
         const client = over(socket);
         const headers = {
             Authorization: `Bearer ${getToken()}`
@@ -39,7 +39,8 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
             console.log("Đã kết nối với server!!!!!!!!!!!");
             client.subscribe('/user/topic/notification', (data) => {
                 const notification = JSON.parse(data.body);
-                notify(notification.projectId, notification.commentId, notification.message, notification.id);
+                // notify(notification.projectId, notification.commentId, notification.message, notification.id);
+                toast.info(notification.message, { containerId: 'notification' })
                 setNotifications(prevNotifications => {
                     const updatedNotifications = [...prevNotifications, notification];
                     return updatedNotifications.sort((a, b) => b.id - a.id);
@@ -56,7 +57,6 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
             if (stompClient) {
                 stompClient.disconnect(() => {
                     setIsConnected(false);
-                    alert("Ngắt kết nối với server");
                 });
             }
         };
@@ -70,14 +70,23 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
     const [page, setPage] = useState(1);
     useEffect(() => {
         getNotificationByUserId(getIdFromToken(), page, 5).then(res => {
-            setNotifications(prevNotifications => [...prevNotifications, ...res.data.items]);
-            setHasNext(res.data.hasNext);
+            if (res.status === 200) {
+                setNotifications(prevNotifications => [...prevNotifications, ...res.data.items]);
+                setHasNext(res.data.hasNext);
+            } else if (res.status !== 204) {
+                toast.error(res.message, { containerId: 'notification' });
+            }
+
         });
     }, [page]);
 
     useEffect(() => {
         countNotificationNotSeen().then(res => {
-            setUnreadCount(res.data);
+            if (res.status === 200) {
+                setUnreadCount(res.data);
+            } else {
+                toast.error(res.message, { containerId: 'notification' });
+            }
         });
     }, [notifications]);
 
@@ -118,19 +127,31 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
         seenNotification(id).then(res => {
             if (res.status === 204) {
                 setNotifications(prevNotifications => prevNotifications.map(notification => notification.id === id ? { ...notification, seen: true } : notification));
+            } else {
+                toast.error(res.message, { containerId: 'notification' })
             }
         });
     };
+    const handleSeenAll = () => {
+        setUnreadCount(0);
+        seenAllNotification(getEmailFromToken()).then(res => {
+            if (res.status === 204) {
+                setNotifications(prevNotifications => prevNotifications.map(notification => ({ ...notification, seen: true })));
+            } else {
+                toast.error(res.message, { containerId: 'notification' });
+            }
+        });
+    }
     return (
         <div>
-            <ToastContainer />
+            <ToastContainer containerId={`notification`} />
             <div className="notification-menu" onMouseOut={() => setIsNewNotification(false)}>
                 <a className={`nav-link ${isNewNotification ? 'blink' : ''}`} href="#" id="notificationToggle" onClick={handleNotificationClick}>
                     <i className="fa-regular fa-bell"></i>
                     {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
                 </a>
                 <div className={`dropdown-menu ${showNotificationMenu ? 'show' : ''}`} aria-labelledby="notificationToggle">
-                    <div className="dropdown-header">Thông báo</div>
+                    <div className="dropdown-header">Thông báo | <span onClick={handleSeenAll} style={{ cursor: 'pointer' }}>đánh dấu đã đọc <i className="ms-2 fa-solid fa-check-double"></i></span></div>
                     {notifications.map((notification, index) => (
                         (
                             notification.projectId ?
@@ -144,7 +165,7 @@ export const Notification: React.FC<NotificationProps> = ({ userId }) => {
                                     <i className="fa-solid fa-book"></i>
                                     {notification.message}
                                     <span className="created-date-notification">{convertDateTime(notification.createdDate)}</span>
-                                </Link> : <span className="notification-item ">
+                                </Link> : <span key={index} className="notification-item ">
                                     <i className="fa-solid fa-book"></i>
                                     {notification.message}
                                     <span className="created-date-notification">{convertDateTime(notification.createdDate)}</span>

@@ -3,16 +3,17 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import React, { useEffect, useState } from 'react';
 import { apiUrl, requestWithPostFile } from '../api/CommonApi';
 import '../../src/components/css/MyEditor.css';
+import { toast, ToastContainer } from 'react-toastify';
 interface MyEditorProps {
     data: string;
     onChange: (event: any) => void;
     uploadImage: boolean;
     handleSetDocumentIds(id: number): void;
-    handleDeleteDocumentIds?(id: number): void;
     mapIdUrl?: Map<string, number>;
+    maxContentLength?: number;
     setMapIdUrl?: React.Dispatch<React.SetStateAction<Map<string, number>>>;
 }
-const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, handleDeleteDocumentIds, data, onChange, uploadImage, handleSetDocumentIds }) => {
+const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, data, maxContentLength, onChange, uploadImage, handleSetDocumentIds }) => {
     const replaceIframeWithOembed = (data: string) => {
         const doc = new DOMParser().parseFromString(data, 'text/html');
         const iframes = doc.querySelectorAll('iframe');
@@ -36,7 +37,16 @@ const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, handleDelete
             element.style.width = '50%';
         })
     }, [dataTemp]);
+    const [error, setError] = useState<string>('');
     const onChangeDataTemp = (dataTemp: string) => {
+        if (maxContentLength && dataTemp.length > maxContentLength) {
+            setError(`Nội dung không được vượt quá ${maxContentLength} ký tự`);
+            return;
+        } else {
+            const element = document.getElementsByClassName("ck-editor__main")[0] as HTMLElement;
+            element.style.border = "";
+            setError('');
+        }
         const observer = new MutationObserver((mutationsList) => {
             for (let mutation of mutationsList) {
                 if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
@@ -129,9 +139,11 @@ const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, handleDelete
             formData.append('file', file);
 
             try {
-                const response = await requestWithPostFile('http://localhost:8080/api/v1/documents/upload', formData);
+                const response = await requestWithPostFile(`${apiUrl}/documents/upload`, formData);
                 if (response.status !== 201) {
-                    alert("Upload failed");
+                    toast.error(response.message, { containerId: 'my-editor' });
+                } else {
+                    // toast.success(response.message)
                 }
                 handleSetDocumentIds(response.data.id);
                 return {
@@ -141,7 +153,7 @@ const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, handleDelete
                 };
             } catch (error: any) {
                 if (error.name === 'AbortError') {
-                    console.log('Upload aborted');
+                    toast.error("Upload bị hủy", { containerId: 'my-editor' });
                 } else {
                     console.error('Error during file upload', error);
                     throw error;
@@ -165,7 +177,7 @@ const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, handleDelete
     }
     return (
         <div id='project-editor-content'>
-            <a onClick={() => console.log("mapurl", mapIdUrl)}>clickme</a>
+            <ToastContainer containerId='my-editor' />
             <CKEditor
                 editor={Editor}
                 data={dataTemp}
@@ -205,6 +217,7 @@ const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, handleDelete
                     onChangeDataTemp(data)
                 }}
             />
+            <span className='text-danger'>{error}</span>
         </div>
     );
 }

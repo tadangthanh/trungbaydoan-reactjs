@@ -3,22 +3,19 @@ import '../css/addproject.css';
 import { Category } from '../../model/Category';
 import { findAllStudentByEmail, findAllTeacherByEmail } from '../../api/user/UserAPI';
 import { ProjectCreate } from '../../model/ProjectCreate';
-import { User } from '../../model/User';
 import MyEditor from '../../ckeditor/MyEditor';
 import DateInput from '../date/DateInput';
 import InputSuggestion from '../input/InputSuggestion';
 import { UploadVideo } from './UploadVideo';
 import { UploadDocument } from './UploadDocument';
-import { upload } from '@testing-library/user-event/dist/upload';
 import { verifyToken } from '../../api/CommonApi';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '../common/Header';
-import { data } from 'jquery';
 import { deleteDocument, deleteDocumentAnonymous } from '../../api/documentAPI/DocumentAPI';
 import { getAllCategory } from '../../api/categoryAPI/CategoryAPI';
 import { createProject } from '../../api/projectAPI/ProjectAPI';
+import { toast, ToastContainer } from 'react-toastify';
 
-export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => void, stopLoading: (success?: boolean, message?: string) => void }) => {
+export const AddProject = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [documentIds, setDocumentIds] = useState<number[]>([]);
     const [error, setError] = useState('');
@@ -33,23 +30,13 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     const [categoryId, setCategoryId] = useState(0);
     const [mentorIds, setMentorIds] = useState<number[]>([]);
     const [waiting, setWaiting] = useState<boolean>(false);
-    const [projectCreate, setProjectCreate] = useState<ProjectCreate>({
-        name: '',
-        startDate: new Date(),
-        endDate: new Date(),
-        submissionDate: new Date(),
-        categoryId: 0,
-        mentorIds: [],
-        summary: '',
-        memberIds: [],
-        documentIds: [],
-        description: ''
-    });
+    const [projectCreate, setProjectCreate] = useState<ProjectCreate>({} as ProjectCreate);
     const navigate = useNavigate();
     useEffect(() => {
         verifyToken().then((response: any) => {
             if (response.status !== 200) {
                 navigate('/login');
+                toast.error('Vui lòng đăng nhập', { containerId: 'page-login' });
             }
             setIsLoading(false);
         })
@@ -57,13 +44,15 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     useEffect(() => {
         getAllCategory()
             .then(response => {
-                const data = response.data;
-                setCategories(data);
-                document.title = "Thêm đồ án";
-            })
-            .catch(error => {
-                console.log(error);
-            });
+                if (response.status === 200) {
+                    const data = response.data;
+                    setCategories(data);
+                    document.title = "Thêm đồ án";
+                } else if (response.status !== 204) {
+                    toast.error('Lỗi không xác định', { containerId: 'add-project' });
+                }
+            }
+            );
     }, []);
     const handleEditorChangeProjectSummary = (newContent: string) => {
         setProjectSummary(newContent);
@@ -78,8 +67,6 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
         setProjectName(newContent);
     };
     const handleSetDocumentIds = (id: number) => {
-        console.log(id);
-
         setDocumentIds(pre => [...pre, id]);
     }
 
@@ -99,12 +86,10 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
         }
         createProject(project).then((response: any) => {
             if (response.status !== 201) {
-                alert(response.message);
+                toast.error(response.message, { containerId: 'add-project' });
                 return;
             }
-            startLoading();
-            stopLoading(true, 'Thêm đồ án thành công');
-            alert('Thêm thành công');
+            toast.success(response.message, { containerId: 'add-project' });
             setProjectName('');
             setProjectSummary('');
             setDescription('');
@@ -115,13 +100,10 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
             setMentorIds([]);
             setMemberIds([]);
             setDocumentIds([]);
-
+            window.location.href = '/';
         }).catch((error: any) => {
-            alert(error.message);
-            startLoading();
-            stopLoading(false, 'Thêm đồ án thất bại');
+            toast.error('Thêm đồ án thất bại', { containerId: 'add-project' });
         });
-        stopLoading();
         const idsDelete = getIdsDocumentDeleted();
         deleteDocumentAnonymous({ ids: idsDelete }).then((response: any) => {
             if (response.status !== 200) {
@@ -148,6 +130,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
     }
     return (
         <div>
+            <ToastContainer containerId='add-project' />
             {!isLoading && <div className="container mt-5 box-add-project">
                 <a className="back-button">
                     <i className="fas fa-arrow-left"></i>
@@ -162,6 +145,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                         </label>
                         <div id='editor'></div>
                         <MyEditor
+                            maxContentLength={100}
                             handleSetDocumentIds={handleSetDocumentIds}
                             data={projectName}
                             onChange={handleEditorChangeProjectName}
@@ -173,6 +157,7 @@ export const AddProject = ({ startLoading, stopLoading }: { startLoading: () => 
                             Bản tóm tắt <span style={{ color: 'red' }}>*</span>
                         </label>
                         <MyEditor
+                            maxContentLength={200}
                             handleSetDocumentIds={handleSetDocumentIds}
                             data={projectSummary}
                             onChange={handleEditorChangeProjectSummary}
