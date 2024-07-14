@@ -2,17 +2,21 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { requestResetPassword, resetPassword } from "../../api/AuthenticationApi";
 import { toast, ToastContainer } from "react-toastify";
+import { Loading } from "../common/LoadingSpinner";
 export const PageForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [code, setCode] = useState('');
     const [showCodeInput, setShowCodeInput] = useState(false);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const handleResetPassword = async (e: any) => {
         e.preventDefault();
+        setLoading(true);
         if (code === '') {
             setError('Vui lòng nhập mã xác nhận');
             toast.error('Vui lòng nhập mã xác nhận', { containerId: 'page-forgot-password' });
+            setLoading(false);
             return;
         }
         try {
@@ -20,20 +24,25 @@ export const PageForgotPassword = () => {
             if (response.status !== 200) {
                 setError(response.message);
                 toast.error(response.message, { containerId: 'page-forgot-password' });
+                setLoading(false);
                 return;
             }
-            navigate('/login');
-            toast.success("Password mới dc gửi vào email của b", { containerId: 'page-login' });
+            setLoading(false);
+            navigate('/login', { state: { message: response.message } });
         } catch (error) {
+            setLoading(false);
             toast.error('Đã xảy ra lỗi', { containerId: 'page-forgot-password' });
             setError('Đã xảy ra lỗi');
         }
+        setLoading(false);
     };
     const createRequest = async (e: any) => {
+        setLoading(true);
         e.preventDefault();
         if (email === '') {
             setError('Vui lòng nhập email');
             toast.error('Vui lòng nhập email', { containerId: 'page-forgot-password' });
+            setLoading(false);
             return;
         }
         try {
@@ -41,36 +50,26 @@ export const PageForgotPassword = () => {
             if (response.status !== 200) {
                 setError(response.message);
                 toast.error(response.message, { containerId: 'page-forgot-password' });
+                setLoading(false);
                 return;
             }
             setShowCodeInput(true);
             toast.success(response.message, { containerId: 'page-forgot-password' });
+            setLoading(false);
         } catch (error) {
             setError('Đã xảy ra lỗi');
             toast.error('Đã xảy ra lỗi', { containerId: 'page-forgot-password' });
+            setLoading(false);
         }
+        setLoading(false);
     }
-    useEffect(() => {
-        const handleKeyPress = (event: any) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                const button = document.querySelector('.login__submit') as HTMLButtonElement;
-                button.click();
-            }
-        };
-        document.addEventListener('keydown', handleKeyPress);
 
-        return () => {
-            document.removeEventListener('keydown', handleKeyPress);
-        };
-    }, []);
     return (
         <div className="container">
+            <Loading loading={loading} />
             <ToastContainer containerId='page-forgot-password' />
             <div className="row justify-content-center">
-
                 <div className="col-xl-10 col-lg-12 col-md-9">
-
                     <div className="card o-hidden border-0 shadow-lg my-5">
                         <div className="card-body p-0">
                             <div className="row">

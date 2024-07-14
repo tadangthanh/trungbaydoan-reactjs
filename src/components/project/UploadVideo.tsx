@@ -7,6 +7,7 @@ import { DocumentResponse } from "../../model/DocumentResponse";
 import { deleteDocument, uploadFile } from "../../api/documentAPI/DocumentAPI";
 import { apiWsUrl } from "../../api/CommonApi";
 import { toast, ToastContainer } from "react-toastify";
+import { Loading } from "../common/LoadingSpinner";
 interface UploadVideoProps {
     label: string;
     documentIds: number[];
@@ -104,6 +105,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
             setIsUpload(false);
             toast.error('Upload file thất bại', { containerId: 'upload-video' });
         });
+        setLoading(false);
     };
 
 
@@ -134,6 +136,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
     }
     return (
         <div className="upload-container mt-5">
+            <Loading loading={loading} />
             <ToastContainer containerId='upload-video' />
             <label className="mb-4 text-center">{label}<i className="mr-2 fa-solid fa-cloud-arrow-up"></i></label>
             <div className="upload-file-area">

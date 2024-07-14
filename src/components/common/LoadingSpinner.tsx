@@ -1,19 +1,18 @@
 import React from 'react';
 import '../css/LoadingSpinner.css';
-interface LoadingSpinnerProps {
-    isSuccess: boolean;
-    successMessage: string;
-}
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ isSuccess, successMessage }) => {
-    return (
-        <div className="overlay">
-            {isSuccess ? (
-                <div className="success-message">{successMessage}</div>
-            ) : (
-                <div className="spinner"></div>
-            )}
-        </div>
-    );
+import { ClipLoader } from 'react-spinners';
+
+interface LoadingProps {
+    loading: boolean;
 }
 
-export default LoadingSpinner;
+export const Loading: React.FC<LoadingProps> = ({ loading }) => {
+    if (!loading) return null;
+    return (
+        <div className="loading-overlay">
+            <div className="loading-spinner">
+                <ClipLoader size={150} color={"#123abc"} loading={loading} />
+            </div>
+        </div>
+    );
+};

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '../css/Profile.css'
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { changePassword, getCodeVerify, getUserByEmail, updateProfile, uploadAvatar } from '../../api/user/UserAPI';
 import { User } from '../../model/User';
 import logo from '../../assets/img/vnua.png';
@@ -15,6 +15,7 @@ import DialogActions from '@mui/material/DialogActions';
 import { getAllProjectByUserEmail, getProjectsByMentorEmail } from '../../api/projectAPI/ProjectAPI';
 import { FaArrowUp } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
+import { Loading } from '../common/LoadingSpinner';
 
 export const Profile: React.FC = () => {
     const { email } = useParams() as any;
@@ -26,7 +27,9 @@ export const Profile: React.FC = () => {
     const [isLogin, setIsLogin] = useState(false);
     const [hasNext, setHasNext] = useState(false);
     const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(true);
     const [role, setRole] = useState('');
+    const navigate = useNavigate();
     useEffect(() => {
         getUserByEmail(email).then(res => {
             if (res.status !== 200) {
@@ -37,46 +40,59 @@ export const Profile: React.FC = () => {
             setRole(res.data.role);
             document.title = res.data.fullName;
         });
+        setLoading(false);
     }, [email]);
     useEffect(() => {
         if (role === 'ROLE_TEACHER') {
+            setLoading(true);
             getProjectsByMentorEmail(email, page, 6).then(res => {
                 if (res.status !== 200) {
                     toast.error(res.message, { containerId: 'profile' });
+                    setLoading(false);
                     return;
                 }
                 setHasNext(res.data.hasNext);
                 setProjects([...projects, ...res.data.items]);
+                setLoading(false);
             });
         } else {
+            setLoading(true);
             getAllProjectByUserEmail(email, page, 6).then(res => {
                 if (res.status !== 200) {
                     toast.error(res.message, { containerId: 'profile' });
+                    setLoading(false);
                     return;
                 }
                 setHasNext(res.data.hasNext);
                 setProjects([...projects, ...res.data.items]);
+                setLoading(false);
             });
         }
     }, [role, page]);
     useEffect(() => {
         if (role === 'ROLE_TEACHER') {
+            setLoading(true);
             getProjectsByMentorEmail(email, page, 6).then(res => {
                 if (res.status !== 200) {
                     toast.error(res.message, { containerId: 'profile' });
+                    setLoading(false);
                     return;
                 }
                 setHasNext(res.data.hasNext);
                 setProjects(res.data.items);
+                setLoading(false);
             });
         } else {
+            setLoading(true);
             getAllProjectByUserEmail(email, page, 6).then(res => {
                 if (res.status !== 200) {
                     toast.error(res.message, { containerId: 'profile' });
+                    setLoading(false);
                     return;
                 }
                 setHasNext(res.data.hasNext);
                 setProjects(res.data.items);
+                setLoading(false);
             });
         }
     }, [role, email]);
@@ -86,6 +102,7 @@ export const Profile: React.FC = () => {
                 setIsLogin(true);
             }
         })
+        setLoading(false);
     }, [])
     const handleEditAvatar = () => {
         setEditAvatar(!editAvatar);
@@ -116,17 +133,20 @@ export const Profile: React.FC = () => {
         setEditAvatar(false);
     }
     const handleUpload = () => {
+        setLoading(true);
         uploadAvatar(file as File).then(res => {
             if (res.status !== 200) {
                 toast.error(res.message, { containerId: 'profile' });
                 handleCancelUpload();
                 setFile(null);
+                setLoading(false);
                 return;
             }
             if (res.status === 200) {
                 toast.success("Upload ảnh thành công", { containerId: 'profile' });
             }
             setUser({ ...user, avatarUrl: res.data.avatarUrl });
+            setLoading(false);
             handleCancelUpload();
         });
     }
@@ -187,12 +207,14 @@ export const Profile: React.FC = () => {
     const [labelCode, setLabelCode] = useState('Code ?');
     const [code, setCode] = useState('');
     const handleSendCode = () => {
+        setLoading(true);
         getCodeVerify(getEmailFromToken()).then(res => {
             if (res.status === 200) {
                 setTimeLeft(60);
                 toast.success("Mã xác nhận đã được gửi đến email của bạn", { containerId: 'profile' });
                 setIsCode(true);
                 setLabelCode("nhập mã của bạn");
+                setLoading(false);
             } else {
                 setPasswordError(res.message);
                 toast.error(res.message, { containerId: 'profile' });
@@ -201,6 +223,7 @@ export const Profile: React.FC = () => {
                 setNewPassword('');
                 setCurrentPassword('');
                 setLabelCode('Code ?');
+                setLoading(false);
             }
         })
     }
@@ -211,11 +234,13 @@ export const Profile: React.FC = () => {
             confirmPassword: confirmPassword,
             code: code
         }
+        setLoading(true);
         changePassword(user.id, updateNewPassword).then(res => {
             if (res.status === 204) {
                 deleteToken();
                 toast.success(res.message, { containerId: 'profile' })
-                window.location.href = '/login';
+                setLoading(false);
+                navigate('/login', { state: { message: 'Đổi mật khẩu thành công' } });
             } else {
                 setCode('');
                 setIsCode(false);
@@ -223,6 +248,7 @@ export const Profile: React.FC = () => {
                 setConfirmPassword('');
                 setNewPassword('');
                 setCurrentPassword('');
+                setLoading(false);
                 setPasswordError(res.message);
             }
         })
@@ -260,38 +286,24 @@ export const Profile: React.FC = () => {
             githubUrl: user.githubUrl,
             facebookUrl: user.facebookUrl
         }
-        if (!checkExistFacebookUrl(userUpdate.facebookUrl)) {
-            setSocialNetWorkError("Link facebook không hợp lệ");
-            toast.error("Link facebook không hợp lệ", { containerId: 'profile' });
-            return;
-        }
-        if (!checkExistGithubUrl(userUpdate.githubUrl)) {
-            toast.error("Link github không hợp lệ", { containerId: 'profile' });
-            setSocialNetWorkError("Link github không hợp lệ");
-            return;
-        }
+        setLoading(true);
         updateProfile(user.id, userUpdate).then(res => {
             if (res.status === 200) {
                 setUser(res.data);
                 setSocialNetWorkError('');
                 setIsEditSocialNetwork(false);
                 toast.success(res.message, { containerId: 'profile' });
+                setLoading(false);
             } else {
                 setSocialNetWorkError(res.message);
                 toast.error(res.message, { containerId: 'profile' });
+                setLoading(false);
             }
         })
     }
-    const checkExistFacebookUrl = (url: string) => {
-        if (!url) return true;
-        return url?.trim() !== "" && url.includes("facebook.com");
-    }
-    const checkExistGithubUrl = (url: string) => {
-        if (!url) return true;
-        return url.includes("github.com");
-    }
     return (
         <div>
+            <Loading loading={loading} />
             <ToastContainer containerId='profile' />
             <div ref={refTop}></div>
             <div className="container rounded bg-white mt-5 mb-5">

@@ -91,7 +91,7 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleCancelUpdate, ha
                             {chunk.map((category: any, idx: number) => (
                                 <div className="col-sm-6" key={idx}>
                                     <ul className="list-unstyled mb-0">
-                                        <li><a href="#!">{category.name}</a></li>
+                                        <li><a href="#">{category.name}</a></li>
                                     </ul>
                                 </div>
                             ))}

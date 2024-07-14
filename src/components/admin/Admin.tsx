@@ -10,12 +10,14 @@ export const Admin: React.FC = () => {
     const [isLogin, setIsLogin] = useState(false);
     const [selected, setSelected] = useState('home');
     const [isAdmin, setIsAdmin] = useState(false);
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         verifyToken().then(res => {
             if (res.status === 200) {
                 setIsLogin(true);
             } else {
                 toast.error("Bạn chưa đăng nhập", { containerId: 'admin' })
+                setLoading(false);
             }
         })
         verifyAdmin().then(res => {
@@ -23,7 +25,6 @@ export const Admin: React.FC = () => {
                 setIsAdmin(true);
             }
         })
-
     }, []);
     return (
         <div>

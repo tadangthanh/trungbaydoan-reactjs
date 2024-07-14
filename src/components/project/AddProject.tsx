@@ -14,6 +14,7 @@ import { deleteDocument, deleteDocumentAnonymous } from '../../api/documentAPI/D
 import { getAllCategory } from '../../api/categoryAPI/CategoryAPI';
 import { createProject } from '../../api/projectAPI/ProjectAPI';
 import { toast, ToastContainer } from 'react-toastify';
+import { Loading } from '../common/LoadingSpinner';
 
 export const AddProject = () => {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -32,14 +33,16 @@ export const AddProject = () => {
     const [waiting, setWaiting] = useState<boolean>(false);
     const [projectCreate, setProjectCreate] = useState<ProjectCreate>({} as ProjectCreate);
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
+        setLoading(false);
         verifyToken().then((response: any) => {
             if (response.status !== 200) {
-                navigate('/login');
-                toast.error('Vui lòng đăng nhập', { containerId: 'page-login' });
+                navigate('/login', { state: { message: 'Vui lòng đăng nhập' } });
             }
             setIsLoading(false);
         })
+        setLoading(false);
     }, []);
     useEffect(() => {
         getAllCategory()
@@ -53,6 +56,7 @@ export const AddProject = () => {
                 }
             }
             );
+        setLoading(false);
     }, []);
     const handleEditorChangeProjectSummary = (newContent: string) => {
         setProjectSummary(newContent);
@@ -130,6 +134,7 @@ export const AddProject = () => {
     }
     return (
         <div>
+            <Loading loading={loading} />
             <ToastContainer containerId='add-project' />
             {!isLoading && <div className="container mt-5 box-add-project">
                 <a className="back-button">

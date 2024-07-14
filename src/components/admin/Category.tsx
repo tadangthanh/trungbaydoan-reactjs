@@ -3,9 +3,11 @@ import { Category } from "../../model/Category";
 import { toast, ToastContainer } from "react-toastify";
 import { createCategory, deleteCategory, getAllCategory } from "../../api/categoryAPI/CategoryAPI";
 import 'reactjs-popup/dist/index.css';
+import { Loading } from "../common/LoadingSpinner";
 export const CategoryAdmin: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [name, setName] = useState<string>('');
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         getAllCategory().then(res => {
             if (res.status === 200) {
@@ -13,10 +15,12 @@ export const CategoryAdmin: React.FC = () => {
             } else {
                 toast.error(res.message, { containerId: 'category' })
             }
+            setLoading(false);
         });
     }, []);
     const inputRef = useRef<HTMLInputElement>(null);
     const handleAddCategory = () => {
+        setLoading(true);
         const category = { id: 0, name: name, createdDate: new Date(), lastModifiedDate: new Date(), createdBy: '', lastModifiedBy: '' }
         createCategory(category).then(res => {
             if (res.status === 201) {
@@ -25,6 +29,7 @@ export const CategoryAdmin: React.FC = () => {
             } else {
                 toast.error(res.message, { containerId: 'category' });
             }
+            setLoading(false);
             setName('');
             inputRef.current?.focus();
         })
@@ -32,6 +37,7 @@ export const CategoryAdmin: React.FC = () => {
     const handleDeleteCategory = (id: number) => {
         const result = window.confirm("Bạn có chắc chắn muốn xóa ?");
         if (result) {
+            setLoading(true);
             deleteCategory(id).then(res => {
                 if (res.status === 204) {
                     toast.success(res.message, { containerId: 'category' });
@@ -40,12 +46,14 @@ export const CategoryAdmin: React.FC = () => {
                 } else {
                     toast.error(res.message, { containerId: 'category' })
                 }
+                setLoading(false)
             }
             )
         }
     }
     return (
         <div className="content container">
+            <Loading loading={loading} />
             <ToastContainer containerId='category' />
             <h2>Category</h2>
             <div className="dropdown">

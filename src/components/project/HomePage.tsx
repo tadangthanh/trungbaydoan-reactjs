@@ -2,13 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { ProjectDTO } from "../../model/ProjectDTO";
 import { getAllProject } from "../../api/projectAPI/ProjectAPI";
 import { PageResponse } from "../../model/PageResponse";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { ProjectHomePage } from "./ProjectHomePage";
 import { Category } from "../../model/Category";
 import { AcademyYearDTO } from "../../model/AcademyYearDTO";
 import { getAllAcademyYear } from "../../api/AcademyAPI/AcademyYearAPI";
 import { getAllCategory } from "../../api/categoryAPI/CategoryAPI";
+import { Loading } from "../common/LoadingSpinner";
+import { useLocation } from "react-router-dom";
 export const HomePage: React.FC = () => {
+    const [loading, setLoading] = useState(true);
     const [projects, setProjects] = useState<ProjectDTO[]>([]);
     const [page, setPage] = useState(1);
     const [direction, setDirection] = useState("DESC")
@@ -19,6 +22,12 @@ export const HomePage: React.FC = () => {
     const [academyYears, setAcademyYears] = useState([] as AcademyYearDTO[]);
     const [academyYearSelected, setAcademyYearSelected] = useState("");
     const [mapParams, setMapParams] = useState(new Map<string, string>());
+    const location = useLocation();
+    useEffect(() => {
+        if (location.state) {
+            toast.success(location.state.message, { containerId: 'home-page' });
+        }
+    }, [location])
     useEffect(() => {
         handleGetAllProject();
         getAllCategory().then(res => {
@@ -31,15 +40,18 @@ export const HomePage: React.FC = () => {
                 setAcademyYears(res.data)
             }
         })
+        setLoading(false);
         document.title = "Trang chủ";
     }, []);
 
     const handleGetAllProject = () => {
+        setLoading(true);
         getAllProject(page, size, "id", direction, mapParams).then(res => {
             if (res.status === 200) {
                 setProjects(res.data.items);
                 setPageResponse(res);
             }
+            setLoading(false);
         });
     }
     const handleChangeCategoryIdSelected = (categoryName: string) => {
@@ -91,6 +103,7 @@ export const HomePage: React.FC = () => {
     }
     return (
         <div>
+            <Loading loading={loading} />
             <ToastContainer containerId='home-page' />
             <header className="bg-dark py-5">
                 <div className="container px-4 px-lg-5 my-5">

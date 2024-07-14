@@ -6,6 +6,7 @@ import { apiUrl } from "../../api/CommonApi";
 import { DocumentDTO } from "../../model/DocumentDTO";
 import { DocumentComponent } from "./DocumentComponent";
 import { toast, ToastContainer } from "react-toastify";
+import { Loading } from "../common/LoadingSpinner";
 interface UploadDocumentProps {
     label: string;
     documentIds: number[];
@@ -99,6 +100,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
             toast.error('Upload file thất bại', { containerId: 'upload-document' });
             setLoading(false);
         }
+        setLoading(false);
     };
 
     const handleRemoveDocument = (idRemove: number) => {
@@ -135,6 +137,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
     }
     return (
         <div className="upload-container mt-5">
+            <Loading loading={loading} />
             <ToastContainer containerId='upload-document' />
             <label className="mb-4 text-center">{label}<i className="mr-2 fa-solid fa-cloud-arrow-up"></i></label>
             <div className="upload-file-area">

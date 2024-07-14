@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { register, verifyEmail } from "../../api/AuthenticationApi";
 import { toast, ToastContainer } from "react-toastify";
+import { Loading } from "../common/LoadingSpinner";
 
 export const PageRegister: React.FC = () => {
     const navigate = useNavigate();
@@ -10,14 +11,17 @@ export const PageRegister: React.FC = () => {
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
     const [code, setCode] = useState('');
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showCodeInput, setShowCodeInput] = useState(false);
     const handleRegister = async (e: any) => {
+        setLoading(true);
         e.preventDefault();
         try {
             if (password !== passwordConfirm) {
                 setError('Mật khẩu không khớp');
                 toast.error('Mật khẩu không khớp', { containerId: 'page-register' });
+                setLoading(false);
                 return;
             }
             const request = { email, password, passwordConfirm };
@@ -27,13 +31,16 @@ export const PageRegister: React.FC = () => {
                 console.log(response);
                 toast.error(response.message, { containerId: 'page-register' });
                 focusFirstInputField();
+                setLoading(false);
                 return;
             }
+            toast.success(response.message, { containerId: 'page-register' });
             setShowCodeInput(true);
         } catch (error) {
             setError('Đăng kí thất bại');
             toast.error('Đăng kí thất bại', { containerId: 'page-register' });
         }
+        setLoading(false);
     };
     const focusFirstInputField = () => {
         const input = document.querySelector('input');
@@ -42,6 +49,7 @@ export const PageRegister: React.FC = () => {
         }
     }
     const handleVerify = async (e: any) => {
+        setLoading(true);
         e.preventDefault();
         try {
             const response = await verifyEmail(code);
@@ -49,30 +57,21 @@ export const PageRegister: React.FC = () => {
                 setError(response.message);
                 toast.error(response.message, { containerId: 'page-register' });
                 focusFirstInputField();
+                setLoading(false);
                 return;
             }
-            toast.success('Xác nhận thành công', { containerId: 'page-register' });
-            navigate('/login');
+            navigate('/login', { state: { message: 'Đăng ký thành công' } });
         } catch (error) {
             setError('Xác nhận thất bại');
         }
+        setLoading(false);
     }
     useEffect(() => {
-        const handleKeyPress = (event: any) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                const button = document.querySelector('.login__submit') as HTMLButtonElement;
-                button.click();
-            }
-        };
-        document.addEventListener('keydown', handleKeyPress);
-
-        return () => {
-            document.removeEventListener('keydown', handleKeyPress);
-        };
-    }, []);
+        focusFirstInputField();
+    }, [])
     return (
         <div className="container">
+            <Loading loading={loading} />
             <ToastContainer containerId='page-register' />
             <div className="card o-hidden border-0 shadow-lg my-5">
                 <div className="card-body p-0">
@@ -116,7 +115,7 @@ export const PageRegister: React.FC = () => {
                                                 }} />
                                         </div>}
                                     </div>
-                                    <span className='text-danger text-center mb-2'>{error}</span>
+                                    <div className='text-danger text-center mb-2'>{error}</div>
                                     {
                                         !showCodeInput && <a href="#" onClick={handleRegister} className="btn btn-primary btn-user btn-block">
                                             Đăng ký

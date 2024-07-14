@@ -9,9 +9,11 @@ import { PageResponse } from '../../model/PageResponse';
 import { activeProjectByIds, approveProjectByIds, deleteProjectByIds, getAllProjectByAdmin, getDocumentsByProjectIds, getMembersByProjectIds, inactiveProjectByIds, rejectPRojectByIds } from '../../api/projectAPI/ProjectAPI';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Loading } from '../common/LoadingSpinner';
 
 export const TableProject: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [deleteReason, setDeleteReason] = useState("");
     const [actionResult, setActionResult] = useState<string>("");
     const [selectedProjectIdReject, setSelectedProjectIdReject] = useState<number | null>(null);
@@ -37,6 +39,7 @@ export const TableProject: React.FC = () => {
         getAllData();
     }, [page, search, direction, size]);
     const getAllData = () => {
+        setLoading(true);
         getAllProjectByAdmin(page, size, "id", direction, searchField, search).then(res => {
             if (res.status === 200) {
                 setPageResponse(res);
@@ -46,14 +49,17 @@ export const TableProject: React.FC = () => {
                     if (res.status === 200) {
                         setMembers(res.data);
                     }
+                    setLoading(false);
                 });
                 getDocumentsByProjectIds(projectIds).then(res => {
                     if (res.status === 200) {
                         setDocuments(res.data);
                     }
+                    setLoading(false);
                 });
             } else {
                 toast.error(res.message, { containerId: 'table-project-admin' })
+                setLoading(false);
             }
         })
     }
@@ -123,6 +129,7 @@ export const TableProject: React.FC = () => {
     const handleSubmit = () => {
         if (idsSelected.length > 0) {
             if (isDelete) {
+                setLoading(true);
                 deleteProjectByIds({ projectIds: idsSelected, reason: deleteReason }).then(res => {
                     if (res.status === 200) {
                         toast.success(res.message, { containerId: 'table-project-admin' })
@@ -134,14 +141,17 @@ export const TableProject: React.FC = () => {
                     } else {
                         toast.error(res.message, { containerId: 'table-project-admin' })
                     }
+                    setLoading(false);
                 });
                 setIsDelete(false);
                 setShowModal(false);
                 setDeleteReason("");
                 setIdsSelected([]);
+                setLoading(false);
                 return;
             }
             if (isReject) {
+                setLoading(true);
                 rejectPRojectByIds({ projectIds: idsSelected, reason: deleteReason }).then(res => {
                     if (res.status === 200) {
                         setProjects(pre => pre.map(project => idsSelected.includes(project.id) ? { ...project, projectStatus: "REJECTED" } : project))
@@ -151,11 +161,13 @@ export const TableProject: React.FC = () => {
                     } else {
                         toast.error(res.message, { containerId: 'table-project-admin' })
                     }
+                    setLoading(false);
                 });
                 setIsReject(false);
                 setShowModal(false);
                 setDeleteReason("");
                 setIdsSelected([]);
+                setLoading(false);
                 return;
             }
 
@@ -204,6 +216,7 @@ export const TableProject: React.FC = () => {
         setIsReject(false);
     }
     const handleApprove = (projectIds: number[], reason: string) => {
+        setLoading(true);
         approveProjectByIds({ projectIds: projectIds, reason: reason }).then(res => {
             if (res.status === 200) {
                 setProjects(pre => pre.map(project => projectIds.includes(project.id) ? { ...project, projectStatus: "APPROVED" } : project))
@@ -213,6 +226,7 @@ export const TableProject: React.FC = () => {
             } else {
                 toast.error(res.message, { containerId: 'table-project-admin' })
             }
+            setLoading(false);
         });
     }
     const handleDeleteSelected = () => {
@@ -246,6 +260,7 @@ export const TableProject: React.FC = () => {
     };
 
     const handleActive = (projectId: number) => {
+        setLoading(true);
         activeProjectByIds({ projectIds: [projectId], reason: "" }).then(res => {
             if (res.status === 200) {
                 setProjects(pre => pre.map(project => project.id === projectId ? { ...project, active: true } : project))
@@ -253,9 +268,11 @@ export const TableProject: React.FC = () => {
             } else {
                 toast.error(res.message, { containerId: 'table-project-admin' })
             }
+            setLoading(false);
         });
     }
     const handleInactive = (projectId: number) => {
+        setLoading(true);
         inactiveProjectByIds({ projectIds: [projectId], reason: "" }).then(res => {
             if (res.status === 200) {
                 setProjects(pre => pre.map(project => project.id === projectId ? { ...project, active: false } : project))
@@ -263,11 +280,13 @@ export const TableProject: React.FC = () => {
             } else {
                 toast.error(res.message, { containerId: 'table-project-admin' })
             }
+            setLoading(false);
         });
     }
 
     return (
         <div className="content container">
+            <Loading loading={loading} />
             <ToastContainer containerId='table-project-admin' />
             <nav className="navbar navbar-expand-lg navbar-light ">
                 <div className="container-fluid">

@@ -5,11 +5,13 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { User } from '../../model/User';
 import { activeUserByIds, getAllUserByAdmin, inactiveUserByIds } from '../../api/user/UserAPI';
+import { Loading } from '../common/LoadingSpinner';
 
 export const TableUser: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
     const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("")
     const [searchField, setSearchField] = useState("")
     const [direction, setDirection] = useState("DESC")
@@ -20,6 +22,7 @@ export const TableUser: React.FC = () => {
         getAllData();
     }, [page, search, direction, size]);
     const getAllData = () => {
+        setLoading(true);
         getAllUserByAdmin(page, size, "id", direction, searchField, search).then(res => {
             if (res.status === 200) {
                 setPageResponse(res);
@@ -28,12 +31,13 @@ export const TableUser: React.FC = () => {
             } else {
                 toast.error(res.message, { containerId: 'table-user-admin' })
             }
+            setLoading(false);
         })
     }
     const searchRef = React.createRef<HTMLInputElement>();
     const handleSearch = (e: any) => {
         e.preventDefault();
-        setSearchField("name")
+        setSearchField("fullName")
         setSearch(searchRef.current?.value || "");
     }
     const handleFilter = (e: any) => {
@@ -51,6 +55,7 @@ export const TableUser: React.FC = () => {
         setSearchField("status")
     }
     const handleActive = (userId: number) => {
+        setLoading(true);
         activeUserByIds(userId).then(res => {
             if (res.status === 200) {
                 setUsers(pre => pre.map(user => user.id === userId ? { ...user, status: true } : user))
@@ -58,9 +63,11 @@ export const TableUser: React.FC = () => {
             } else {
                 toast.error(res.message, { containerId: 'table-user-admin' })
             }
+            setLoading(false);
         });
     }
     const handleInActive = (userId: number) => {
+        setLoading(true);
         inactiveUserByIds(userId).then(res => {
             if (res.status === 200) {
                 setUsers(pre => pre.map(user => user.id === userId ? { ...user, status: false } : user))
@@ -68,11 +75,13 @@ export const TableUser: React.FC = () => {
             } else {
                 toast.error(res.message, { containerId: 'table-user-admin' })
             }
+            setLoading(false);
         });
     }
 
     return (
         <div className="content container">
+            <Loading loading={loading} />
             <ToastContainer containerId='table-user-admin' />
             <nav className="navbar navbar-expand-lg navbar-light ">
                 <div className="container-fluid">

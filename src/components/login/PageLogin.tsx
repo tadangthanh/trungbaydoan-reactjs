@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { login } from '../../api/AuthenticationApi';
 import { toast, ToastContainer } from 'react-toastify';
+import { Loading } from '../common/LoadingSpinner';
 
 export const PageLogin: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const location = useLocation();
+    useEffect(() => {
+        if (location.state) {
+            toast.success(location.state.message, { containerId: 'page-login' });
+        }
+    }, [location])
     const handleLogin = async (e: any) => {
+        setLoading(true);
         e.preventDefault();
         try {
             const request = { email, password };
@@ -16,15 +26,18 @@ export const PageLogin: React.FC = () => {
                 setError(response.message);
                 toast.error(response.message, { containerId: 'page-login' });
                 focusFirstInputField();
+                setLoading(false);
             } else {
-                toast.success('Đăng nhập thành công', { containerId: 'page-login' });
-                window.location.href = '/';
+                setLoading(false);
+                navigate('/', { state: { message: 'Đăng nhập thành công' } });
             }
         } catch (error) {
+            setLoading(false);
             console.error('Login error:', error);
             setError('Đăng nhập thất bại !.');
             toast.error('Đăng nhập thất bại !.', { containerId: 'page-login' });
         }
+        setLoading(false);
     };
     const focusFirstInputField = () => {
         const input = document.querySelector('input');
@@ -33,9 +46,9 @@ export const PageLogin: React.FC = () => {
         }
     }
 
-
     return (
         <div className="container">
+            <Loading loading={loading} />
             <ToastContainer containerId='page-login' />
             <div className="row justify-content-center">
                 <div className="col-xl-10 col-lg-12 col-md-9">

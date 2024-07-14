@@ -21,6 +21,7 @@ import { FaArrowUp } from 'react-icons/fa';
 import { deleteDocuments, getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
 import MyEditor from "../../ckeditor/MyEditor";
 import { Bounce, toast, ToastContainer } from "react-toastify";
+import { Loading } from "../common/LoadingSpinner";
 export const ProjectDetail = () => {
     const { id } = useParams();
     const projectId = Number(id);
@@ -30,10 +31,16 @@ export const ProjectDetail = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [status, setStatus] = useState(false);
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         getAllDocumentByProjectId(projectId).then(res => {
-            setDocuments(res.data);
+            if (res.status === 200) {
+                setDocuments(res.data);
+            } else {
+                toast.error("error", { containerId: 'project-detail' });
+            }
         });
+        setLoading(false);
     }, [projectId]);
     useEffect(() => {
         getProjectById(projectId).then(res => {
@@ -48,16 +55,19 @@ export const ProjectDetail = () => {
             setStatus(true);
             document.title = convertHtmlToText(res.data.name);
         });
+        setLoading(false);
     }, [projectId]);
     useEffect(() => {
         getMemberByProjectId(projectId).then(res => {
             setMembers(res.data);
         });
+        setLoading(false);
     }, [projectId]);
     useEffect(() => {
         getAllCategory().then(res => {
             setCategories(res.data);
         });
+        setLoading(false);
     }, []);
 
     const convertHtmlToText = (html: string) => {
@@ -167,6 +177,7 @@ export const ProjectDetail = () => {
     const handleUpdateProject = (id: number) => {
         const result = window.confirm("Bạn có chắc chắn muốn cập nhật?");
         if (result) {
+            setLoading(true);
             const documentIdsDelete: number[] = [];
             let documentIdsAdd: number[] = [...documentIds];
             Array.from(mapIdUrl.keys()).forEach(key => {
@@ -187,6 +198,7 @@ export const ProjectDetail = () => {
                     });
                     toast.success(res.message, { containerId: 'project-detail' })
                     setProject(res.data);
+                    setLoading(false);
                     // window.location.reload();
                 } else {
                     setIsEditContent(false);
@@ -194,9 +206,11 @@ export const ProjectDetail = () => {
                     setIdsDelete([]);
                     setMapIdUrl(new Map());
                     toast.error(res.message, { containerId: 'project-detail' })
+                    setLoading(false);
                     return;
                 }
             });
+            setLoading(false);
         }
     }
     const [waiting, setWaiting] = useState(false);
@@ -204,12 +218,14 @@ export const ProjectDetail = () => {
     const handleCancelUpdate = () => {
         const result = window.confirm("Bạn có chắc chắn muốn huỷ cập nhật?");
         if (result) {
+            setLoading(true);
             setIsEditContent(false);
             deleteDocuments({ ids: documentIds }).then(res => {
                 if (res.status === 200) {
                     setDocumentIds([]);
                     setIdsDelete([]);
                     setMapIdUrl(new Map());
+                    setLoading(true);
                     toast.info("Huỷ cập nhật thành công", { containerId: 'project-detail' });
                     return;
                 }
@@ -220,23 +236,10 @@ export const ProjectDetail = () => {
         setWaiting(value);
     }
     const [mapIdUrl, setMapIdUrl] = useState(new Map<string, number>());
-    const notify = (message: string) => toast(
-        message,
-        {
-            position: 'top-center',
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: true,
-            progress: undefined,
-            theme: 'light',
-            transition: Bounce,
-        }
-    );
     return (
         <div>
             {status && <div id="content" ref={contentRef}>
+                <Loading loading={loading} />
                 <ToastContainer containerId='project-detail' />
                 <div id="progress-container" style={{ zIndex: "10000" }}>
                     <div id="progress-bar" ref={progressBar}></div>
