@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ProjectDTO } from "../../model/ProjectDTO";
-import logo from '../../assets/img/vnua.png';
 import { PageResponse } from '../../model/PageResponse';
-import { Bounce, ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { User } from '../../model/User';
 import { activeUserByIds, getAllUserByAdmin, inactiveUserByIds } from '../../api/user/UserAPI';

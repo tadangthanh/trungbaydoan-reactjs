@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Import BrowserRouter, Routes, and Route
-import LoadingSpinner from './components/common/LoadingSpinner';
 import { AddProject } from './components/project/AddProject';
 import { ProjectDetail } from './components/project/ProjectDetail';
 import { Page404 } from './components/common/Page404';

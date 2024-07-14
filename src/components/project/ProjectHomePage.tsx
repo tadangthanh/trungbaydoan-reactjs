@@ -5,7 +5,6 @@ import { getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
 import { MemberDTO } from "../../model/MemberDTO";
 import { getMemberByProjectId } from "../../api/members/MemberAPI";
 import { Link } from "react-router-dom";
-import logo from '../../assets/img/vnua.png';
 
 interface ProjectHomePageProps {
     project: ProjectDTO;

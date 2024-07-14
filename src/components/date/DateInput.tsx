@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const DateInput = ({ label, value, onChange }: { label: any, value: any, onChange: any }) => {
     const [day, setDay] = useState('');

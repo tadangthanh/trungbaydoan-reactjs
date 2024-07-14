@@ -7,7 +7,7 @@ import { Notification } from "./Notification";
 import logo from '../../assets/img/vnua.png';
 import { getUserByEmail } from "../../api/user/UserAPI";
 import { User } from "../../model/User";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { ProjectDTO } from "../../model/ProjectDTO";
 import { getAllProjectPending } from "../../api/projectAPI/ProjectAPI";
 import { PageResponse } from "../../model/PageResponse";

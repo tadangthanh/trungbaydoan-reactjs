@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ProjectDTO } from "../../model/ProjectDTO";
 import { getAllProject } from "../../api/projectAPI/ProjectAPI";
 import { PageResponse } from "../../model/PageResponse";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { ProjectHomePage } from "./ProjectHomePage";
 import { Category } from "../../model/Category";
 import { AcademyYearDTO } from "../../model/AcademyYearDTO";

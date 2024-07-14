@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Category } from "../../model/Category";
-import { Bounce, toast, ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { createCategory, deleteCategory, getAllCategory } from "../../api/categoryAPI/CategoryAPI";
 import 'reactjs-popup/dist/index.css';
 export const CategoryAdmin: React.FC = () => {

@@ -5,7 +5,7 @@ import { getToken } from "../../api/AuthenticationApi";
 import '../css/uploadfile.css';
 import { DocumentResponse } from "../../model/DocumentResponse";
 import { deleteDocument, uploadFile } from "../../api/documentAPI/DocumentAPI";
-import { apiWsUrl, getEmailFromToken } from "../../api/CommonApi";
+import { apiWsUrl } from "../../api/CommonApi";
 import { toast, ToastContainer } from "react-toastify";
 interface UploadVideoProps {
     label: string;

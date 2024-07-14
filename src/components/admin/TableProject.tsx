@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { DocumentDTO } from '../../model/DocumentDTO';
 import { PageResponse } from '../../model/PageResponse';
 import { activeProjectByIds, approveProjectByIds, deleteProjectByIds, getAllProjectByAdmin, getDocumentsByProjectIds, getMembersByProjectIds, inactiveProjectByIds, rejectPRojectByIds } from '../../api/projectAPI/ProjectAPI';
-import { Bounce, ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export const TableProject: React.FC = () => {

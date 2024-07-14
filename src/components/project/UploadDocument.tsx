@@ -1,11 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import SockJS from 'sockjs-client';
-import { over } from 'stompjs';
 import { getToken } from "../../api/AuthenticationApi";
 import '../css/uploadfile.css';
-import { DocumentResponse } from "../../model/DocumentResponse";
 import { deleteDocument } from "../../api/documentAPI/DocumentAPI";
-import { apiUrl, getEmailFromToken } from "../../api/CommonApi";
+import { apiUrl } from "../../api/CommonApi";
 import { DocumentDTO } from "../../model/DocumentDTO";
 import { DocumentComponent } from "./DocumentComponent";
 import { toast, ToastContainer } from "react-toastify";

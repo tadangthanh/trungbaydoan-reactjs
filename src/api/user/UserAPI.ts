@@ -1,5 +1,5 @@
 
-import { apiUrl, getEmailFromToken, request, requestWithMethod, requestWithPost, requestWithPostFile } from "../CommonApi";
+import { apiUrl, getEmailFromToken, request, requestWithPost, requestWithPostFile } from "../CommonApi";
 import { UpdatePasswordDTO } from '../../model/UpdatePasswordDTO';
 export async function findAllTeacherByEmail(email: string, emailsToIgnore: string[]): Promise<any> {
     const url = apiUrl + "/users/find-teacher-email?email=" + email;

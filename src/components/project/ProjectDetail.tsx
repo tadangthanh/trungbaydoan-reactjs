@@ -1,9 +1,7 @@
-import { useLocation, useParams } from "react-router-dom"
-import { Header } from "../common/Header";
+import { useParams } from "react-router-dom"
 import { PreviewCarousel } from "./PreviewCarousel";
 import { useEffect, useRef, useState } from "react";
 import { DocumentDTO } from "../../model/DocumentDTO";
-import { get } from "jquery";
 import { getProjectById, updateProject } from "../../api/projectAPI/ProjectAPI";
 import { ProjectDTO } from "../../model/ProjectDTO";
 import '../css/project-detail.css'
@@ -20,7 +18,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import { FaArrowUp } from 'react-icons/fa';
-import { deleteDocument, deleteDocuments, getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
+import { deleteDocuments, getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
 import MyEditor from "../../ckeditor/MyEditor";
 import { Bounce, toast, ToastContainer } from "react-toastify";
 export const ProjectDetail = () => {

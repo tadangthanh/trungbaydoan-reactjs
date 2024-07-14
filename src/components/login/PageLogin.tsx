@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../../assets/img/vnua.png';
 import { login } from '../../api/AuthenticationApi';
 import { toast, ToastContainer } from 'react-toastify';
 

@@ -1,8 +1,8 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CommentDTO } from "../../model/CommentDTO";
 import { createComment, getAllCommentByProjectId, getCommentByCommentIdAndProjectId } from "../../api/commentAPI/Comment";
 import { CommentRoot } from "./CommentRoot";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { verifyToken } from "../../api/CommonApi";
 import { toast, ToastContainer } from "react-toastify";
 interface CommentProps {

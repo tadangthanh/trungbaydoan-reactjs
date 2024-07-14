@@ -38,8 +38,8 @@ export const Admin: React.FC = () => {
                         </label>
                         <nav id="sidebar" style={{ background: 'black' }}>
                             <ul className="list-items">
-                                <li onClick={() => setSelected("home")} style={{ cursor: 'pointer' }}><a><i className="fas fa-home"></i>Trang chủ</a></li>
-                                <li onClick={() => setSelected("users")} style={{ cursor: 'pointer' }}><a ><i className="fa-regular fa-user"></i>Người dùng</a></li>
+                                <li onClick={() => setSelected("home")} style={{ cursor: 'pointer' }}><i className="fas fa-home"></i>Trang chủ</li>
+                                <li onClick={() => setSelected("users")} style={{ cursor: 'pointer' }}><i className="fa-regular fa-user"></i>Người dùng</li>
                                 <li><a href="#"><i className="fas fa-cog"></i>Settings</a></li>
                                 <li><a href="#"><i className="fas fa-stream"></i>Features</a></li>
                                 <li><a href="#"><i className="fas fa-user"></i>About us</a></li>

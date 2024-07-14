@@ -11,7 +11,6 @@ import { getMentorsByProjectId } from "../../api/projectAPI/ProjectAPI";
 import { WidgetRightAdmin } from "./WidgetRightAdmin";
 import { UploadDocument } from "./UploadDocument";
 import { UploadVideo } from "./UploadVideo";
-import { getUserByEmail } from "../../api/user/UserAPI";
 interface WidgetRightProps {
     categories: Category[];
     handleSetIdsDelete: (ids: number) => void;

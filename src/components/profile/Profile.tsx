@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '../css/Profile.css'
-import { Header } from '../common/Header';
 import { useParams } from 'react-router-dom';
 import { changePassword, getCodeVerify, getUserByEmail, updateProfile, uploadAvatar } from '../../api/user/UserAPI';
 import { User } from '../../model/User';
@@ -13,7 +12,7 @@ import Button from '@mui/material/Button';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
-import { getAllProjectByUserEmail, getAllProjectPending, getProjectsByMentorEmail } from '../../api/projectAPI/ProjectAPI';
+import { getAllProjectByUserEmail, getProjectsByMentorEmail } from '../../api/projectAPI/ProjectAPI';
 import { FaArrowUp } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 
@@ -284,12 +283,12 @@ export const Profile: React.FC = () => {
         })
     }
     const checkExistFacebookUrl = (url: string) => {
-        if (url?.trim() === "") return true;
-        return url.trim() !== "" && url.toLowerCase().includes("facebook.com");
+        if (!url) return true;
+        return url?.trim() !== "" && url.includes("facebook.com");
     }
     const checkExistGithubUrl = (url: string) => {
-        if (url?.trim() === "") return true;
-        return url.toLowerCase().includes("github.com");
+        if (!url) return true;
+        return url.includes("github.com");
     }
     return (
         <div>
