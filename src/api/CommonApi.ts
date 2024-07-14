@@ -3,6 +3,8 @@ import { getRefreshToken, getToken, setRefreshToken, setToken } from "./Authenti
 
 export const apiUrl = process.env.REACT_APP_API_URL;
 export const apiWsUrl = process.env.REACT_APP_WS_URL;
+// export const apiUrl = "http://localhost:8080/api/v1";
+// export const apiWsUrl = "http://localhost:8080/ws";
 export async function request(url: string, method = 'GET', retryCount = 0): Promise<any> {
     try {
         let response = await fetchWithAuthorization(url, method);
@@ -105,7 +107,7 @@ async function fetchWithMethodAuthorization(url: string, body: any, method = 'GE
 
 export async function refreshTokens() {
     try {
-        const url = "http://localhost:8080/api/v1/auth/refresh";
+        const url = `${apiUrl}/auth/refresh`;
         const response = await fetch(url, {
             headers: {
                 'Refresh-Token': getRefreshToken() as string,

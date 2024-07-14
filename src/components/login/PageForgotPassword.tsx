@@ -22,8 +22,8 @@ export const PageForgotPassword = () => {
                 toast.error(response.message, { containerId: 'page-forgot-password' });
                 return;
             }
-            toast.success(response.message, { containerId: 'page-forgot-password' });
             navigate('/login');
+            toast.success("Password mới dc gửi vào email của b", { containerId: 'page-login' });
         } catch (error) {
             toast.error('Đã xảy ra lỗi', { containerId: 'page-forgot-password' });
             setError('Đã xảy ra lỗi');

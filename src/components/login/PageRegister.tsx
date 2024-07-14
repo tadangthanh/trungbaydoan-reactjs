@@ -53,7 +53,7 @@ export const PageRegister: React.FC = () => {
                 return;
             }
             toast.success('Xác nhận thành công', { containerId: 'page-register' });
-            navigate('/login2');
+            navigate('/login');
         } catch (error) {
             setError('Xác nhận thất bại');
         }

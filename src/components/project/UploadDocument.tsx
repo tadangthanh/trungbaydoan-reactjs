@@ -5,7 +5,7 @@ import { getToken } from "../../api/AuthenticationApi";
 import '../css/uploadfile.css';
 import { DocumentResponse } from "../../model/DocumentResponse";
 import { deleteDocument } from "../../api/documentAPI/DocumentAPI";
-import { getEmailFromToken } from "../../api/CommonApi";
+import { apiUrl, getEmailFromToken } from "../../api/CommonApi";
 import { DocumentDTO } from "../../model/DocumentDTO";
 import { DocumentComponent } from "./DocumentComponent";
 import { toast, ToastContainer } from "react-toastify";
@@ -72,7 +72,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
             formData.append('files', file);
         });
         try {
-            const response = await fetch('http://localhost:8080/api/v1/documents/uploadAll', {
+            const response = await fetch(`${apiUrl}/documents/uploadAll`, {
                 method: 'POST',
                 body: formData,
                 headers: {

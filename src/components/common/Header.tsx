@@ -77,8 +77,6 @@ export const Header = () => {
             getUserByEmail(getEmailFromToken()).then(res => {
                 if (res.status === 200) {
                     setUser(res.data);
-                } else {
-                    toast.error(res.message, { containerId: 'header' });
                 }
             });
         }

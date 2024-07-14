@@ -5,7 +5,7 @@ import { getToken } from "../../api/AuthenticationApi";
 import '../css/uploadfile.css';
 import { DocumentResponse } from "../../model/DocumentResponse";
 import { deleteDocument, uploadFile } from "../../api/documentAPI/DocumentAPI";
-import { getEmailFromToken } from "../../api/CommonApi";
+import { apiWsUrl, getEmailFromToken } from "../../api/CommonApi";
 import { toast, ToastContainer } from "react-toastify";
 interface UploadVideoProps {
     label: string;
@@ -49,7 +49,7 @@ export const UploadVideo: React.FC<UploadVideoProps> = ({ handleDeleteDocumentId
         if (isConnected || stompClient) {
             return;
         };
-        const socket = new SockJS('http://localhost:8080/ws?token=' + getToken());
+        const socket = new SockJS(`${apiWsUrl}?token=${getToken()}`);
         const client = over(socket);
         const headers = {
             Authorization: `Bearer ${getToken()}`
