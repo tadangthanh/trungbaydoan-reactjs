@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Raleway:400,700");
+/* @import url("https://fonts.googleapis.com/css?family=Raleway:400,700");
 
 * {
     box-sizing: border-box;
@@ -12,7 +12,6 @@
 .login-container {
     text-align: center;
     display: flex;
-    /* background: linear-gradient(90deg, #d4f4c5, #ffff); */
     align-items: center;
     justify-content: center;
     min-height: 100vh;
@@ -32,12 +31,6 @@
     height: 100%;
 }
 
-/* .img {
-    margin-top: 10px;
-    width: 360px;
-    margin-left: 10px;
-    height: 110px;
-} */
 
 #codeInput,
 #btn-verify,
@@ -165,7 +158,6 @@
     text-decoration: none;
     font-size: 1em;
     color: black;
-    /* margin-left: 125px; */
 }
 
 
@@ -216,4 +208,4 @@
 
 .social-login__icon:hover {
     transform: scale(1.5);
-}
+} */

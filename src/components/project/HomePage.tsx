@@ -15,19 +15,16 @@ export const HomePage: React.FC = () => {
     const [projects, setProjects] = useState<ProjectDTO[]>([]);
     const [page, setPage] = useState(1);
     const [direction, setDirection] = useState("DESC")
-    const [size, setSize] = useState(10);
+    const [size, setSize] = useState(3);
     const [categories, setCategories] = useState([] as Category[]);
     const [pageResponse, setPageResponse] = useState({} as PageResponse);
     const [categorySelected, setCategorySelected] = useState("");
     const [academyYears, setAcademyYears] = useState([] as AcademyYearDTO[]);
     const [academyYearSelected, setAcademyYearSelected] = useState("");
-    const [mapParams, setMapParams] = useState(new Map<string, string>());
+    const [search, setSearch] = useState("");
+    const [searchField, setSearchField] = useState("");
     const location = useLocation();
-    useEffect(() => {
-        if (location.state) {
-            toast.success(location.state.message, { containerId: 'home-page' });
-        }
-    }, [location])
+
     useEffect(() => {
         handleGetAllProject();
         getAllCategory().then(res => {
@@ -46,27 +43,29 @@ export const HomePage: React.FC = () => {
 
     const handleGetAllProject = () => {
         setLoading(true);
-        getAllProject(page, size, "id", direction, mapParams).then(res => {
+        getAllProject(page, size, "id", direction, searchField, search).then(res => {
             if (res.status === 200) {
                 setProjects(res.data.items);
                 setPageResponse(res);
             }
-            setLoading(false);
-        });
+        }).finally(() => setLoading(false));
     }
     const handleChangeCategoryIdSelected = (categoryName: string) => {
         if (categoryName === "") {
             setCategorySelected("");
-            handleRemoveKey("category");
+            setSearchField("name");
+            setSearch("");
         } else {
+            setPage(1);
+            setSearchField("category");
+            setSearch(categoryName);
             setCategorySelected(categoryName);
-            setMapParams(new Map(mapParams.set("category", categoryName)));
         }
 
     }
     useEffect(() => {
         handleGetAllProject();
-    }, [mapParams, direction, size, page]);
+    }, [searchField, search, direction, size, page]);
 
     const handleSort = (direction: string) => {
         setDirection(direction);
@@ -74,44 +73,48 @@ export const HomePage: React.FC = () => {
     const handleChangeAcademyYear = (e: any) => {
         if (e.target.value === "") {
             setAcademyYearSelected("");
-            handleRemoveKey("academyYear");
+            setSearchField("name");
+            setSearch("");
         } else {
+            setPage(1);
+            setSearchField("academyYear");
+            setSearch(e.target.value);
             setAcademyYearSelected(e.target.value);
-            setMapParams(new Map(mapParams.set("academyYear", e.target.value)));
         }
-    }
-    const handleRemoveKey = (key: string) => {
-        const newMap = new Map(mapParams);
-        newMap.delete(key);
-        setMapParams(newMap);
     }
     const searchRef = useRef<HTMLInputElement>(null);
     const handleSearch = (e: any) => {
         e.preventDefault();
         const search = searchRef.current?.value;
         if (search) {
-            setMapParams(new Map(mapParams.set("search", search)));
-        } else {
-            handleRemoveKey("search");
+            setPage(1);
+            setSearch(search);
+            setSearchField("name");
         }
     }
     const handleChangeSearch = (e: any) => {
         const search = e.target.value;
         if (search?.trim() === "") {
-            handleRemoveKey("search");
+            setSearch("");
+            setSearchField("name");
         }
     }
+    useEffect(() => {
+        if (location.state) {
+            toast.success(location.state.message, { containerId: 'home-page' });
+            if (location.state.categoryName) {
+                setTimeout(() => {
+                    handleChangeCategoryIdSelected(location.state.categoryName);
+                }, 2000);
+            }
+        }
+    }, [location]);
     return (
         <div>
             <Loading loading={loading} />
             <ToastContainer containerId='home-page' />
-            <header className="bg-dark py-5">
-                <div className="container px-4 px-lg-5 my-5">
-                    <div className="text-center text-white">
-                        <h1 className="display-4 fw-bolder">Shop in style</h1>
-                        <p className="lead fw-normal text-white-50 mb-0">With this shop hompeage template</p>
-                    </div>
-                </div>
+            <header className="d-none d-sm-block bg-light py-5 text-center ">
+                <img style={{ objectFit: 'contain' }} src="https://fita.vnua.edu.vn/wp-content/uploads/2014/06/slogan-vi.png" alt="" />
             </header>
             <div className="container">
 

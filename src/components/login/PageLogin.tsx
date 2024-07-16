@@ -17,6 +17,11 @@ export const PageLogin: React.FC = () => {
         }
     }, [location])
     const handleLogin = async (e: any) => {
+        if (!email || !password) {
+            setError('Vui lòng nhập đầy đủ thông tin');
+            toast.error('Vui lòng nhập đầy đủ thông tin', { containerId: 'page-login' });
+            return;
+        }
         setLoading(true);
         e.preventDefault();
         try {
@@ -29,7 +34,7 @@ export const PageLogin: React.FC = () => {
                 setLoading(false);
             } else {
                 setLoading(false);
-                navigate('/', { state: { message: 'Đăng nhập thành công' } });
+                window.location.href = '/';
             }
         } catch (error) {
             setLoading(false);

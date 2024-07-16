@@ -5,7 +5,8 @@ import { getAllDocumentByProjectId } from "../../api/documentAPI/DocumentAPI";
 import { MemberDTO } from "../../model/MemberDTO";
 import { getMemberByProjectId } from "../../api/members/MemberAPI";
 import { Link } from "react-router-dom";
-
+import { Loading } from "../common/LoadingSpinner";
+import fita from '../../assets/img/fita.png';
 interface ProjectHomePageProps {
     project: ProjectDTO;
     handleChangeCategoryIdSelected: (categoryName: string) => void;
@@ -13,18 +14,19 @@ interface ProjectHomePageProps {
 export const ProjectHomePage: React.FC<ProjectHomePageProps> = ({ handleChangeCategoryIdSelected, project }) => {
     const [documents, setDocuments] = useState<DocumentDTO[]>([]);
     const [members, setMembers] = useState<MemberDTO[]>([]);
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         getMemberByProjectId(project.id).then(res => {
             setMembers(res.data);
-        });
+        }).finally(() => setLoading(false));
     }, [project.id]);
     useEffect(() => {
         getAllDocumentByProjectId(project.id).then(res => {
             if (res.status === 200) {
                 setDocuments(res.data);
             }
-        })
-    }, []);
+        }).finally(() => setLoading(false));
+    }, [project.id]);
 
     const convertHtmlToText = (html: string) => {
         var doc = new DOMParser().parseFromString(html, 'text/html');
@@ -32,40 +34,35 @@ export const ProjectHomePage: React.FC<ProjectHomePageProps> = ({ handleChangeCa
     };
     return (
         <div className="card-body">
+            <Loading loading={loading} />
             <div className="row">
                 <div className="col-md-12 col-lg-3 col-xl-3 mb-4 mb-lg-0">
                     <div id={`carouselExampleControls${project.id}`} className="carousel slide"
                         style={{ width: '100%', overflow: 'hidden' }}>
                         <div className="carousel-inner" style={{ height: '100%', }}>
+                            {documents.filter(document => document.type === 'IMAGE').length === 0 &&
+                                <div className="carousel-item active" >
+                                    <Link to={`/project/${project.id}`}> <img loading="lazy"
+                                        src={fita}
+                                        className="d-block w-100" alt="..." style={{ objectFit: 'cover', height: '100%' }} /></Link>
+                                </div>
+                            }
                             {
                                 documents.map((document, index) => {
                                     if (document.type === 'IMAGE') {
                                         return (
 
                                             <div className={`carousel-item ${index === 0 ? 'active' : ''}`} key={document.id}>
-                                                <img loading="lazy"
+                                                <Link to={`/project/${project.id}`}> <img loading="lazy"
                                                     src={`${document.url}`}
-                                                    className="d-block w-100" alt="..." style={{ objectFit: 'cover', height: '100%' }} />
+                                                    className="d-block w-100" alt="..." style={{ objectFit: 'cover', height: '100%' }} /></Link>
                                             </div>
                                         )
                                     }
                                 })
                             }
+
                         </div>
-                        {/* {documents.filter(document => document.type === 'IMAGE').length > 1 &&
-                            <div>
-                                <button style={{ height: '100px', margin: 'auto' }} className="carousel-control-prev" type="button"
-                                    data-bs-target={`#carouselExampleControls${project?.id}`} data-bs-slide="prev">
-                                    <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span className="visually-hidden">Previous</span>
-                                </button>
-                                <button style={{ height: '100px', margin: 'auto' }} className="carousel-control-next" type="button"
-                                    data-bs-target={`#carouselExampleControls${project?.id}`} data-bs-slide="next">
-                                    <span className="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span className="visually-hidden">Next</span>
-                                </button>
-                            </div>
-                        } */}
                     </div>
                 </div>
                 <div className="col-md-6 col-lg-6 col-xl-6">
@@ -91,9 +88,9 @@ export const ProjectHomePage: React.FC<ProjectHomePageProps> = ({ handleChangeCa
 
                     </div>
                     <div className="mb-2 text-muted small">
-                        <span>Ngày nộp</span>
+                        <span>Ngày cập nhật mới nhất</span>
                         <span className="text-primary"> : </span>
-                        <span>{new Date(project.createdDate).toLocaleString()}</span>
+                        <span>{new Date(project.lastModifiedDate).toLocaleString()}</span>
                         <span className="text-primary"> • </span>
                         <span>Khóa</span>
                         <span className="text-primary"> : </span>

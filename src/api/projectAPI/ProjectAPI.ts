@@ -48,12 +48,8 @@ export const updateProject = async (projectId: number, project: ProjectDTO) => {
 export const getAllProjectByCategory = async (categoryId: number, page: number, pageSize: number) => {
     return await request(`${apiUrl}/projects/category/${categoryId}?page=${page}&size=${pageSize}`);
 }
-export const getAllProject = async (page: number, pageSize: number, sortBy = 'id', direction = "DESC", map: Map<string, string>) => {
-    const params = new URLSearchParams();
-    map.forEach((value, key) => {
-        params.append(key, value);
-    });
-    return await request(`${apiUrl}/projects?page=${page}&size=${pageSize}&sort=${sortBy}&direction=${direction}&${params.toString()}`);
+export const getAllProject = async (page: number, pageSize: number, sortBy: string, direction = "DESC", searchField: string, search: string) => {
+    return await request(`${apiUrl}/projects?page=${page}&size=${pageSize}&sort=${sortBy}&direction=${direction}&searchField=${searchField}&search=${search}`);
 }
 export const createProject = async (project: ProjectCreate): Promise<any> => {
     const url = apiUrl + "/projects";

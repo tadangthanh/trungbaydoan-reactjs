@@ -12,6 +12,7 @@ import { PageForgotPassword } from './components/login/PageForgotPassword';
 import { Admin } from './components/admin/Admin';
 import { Header } from './components/common/Header';
 import { HomePage } from './components/project/HomePage';
+import { Footer } from './components/common/Footer';
 
 function App() {
 
@@ -30,7 +31,9 @@ function App() {
           <Route path="/error-not-found" element={<Page404 />} />
           <Route path="/add-project" element={<AddProject />} />
         </Routes>
+        <Footer />
       </div>
+
     </Router>
   );
 }

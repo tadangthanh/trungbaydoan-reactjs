@@ -1,6 +1,6 @@
 import Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { apiUrl, requestWithPostFile } from '../api/CommonApi';
 import '../../src/components/css/MyEditor.css';
 import { toast, ToastContainer } from 'react-toastify';
@@ -10,10 +10,11 @@ interface MyEditorProps {
     uploadImage: boolean;
     handleSetDocumentIds(id: number): void;
     mapIdUrl?: Map<string, number>;
+    setContainError?: (error: boolean) => void;
     maxContentLength?: number;
     setMapIdUrl?: React.Dispatch<React.SetStateAction<Map<string, number>>>;
 }
-const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, data, maxContentLength, onChange, uploadImage, handleSetDocumentIds }) => {
+const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setContainError, setMapIdUrl, data, maxContentLength, onChange, uploadImage, handleSetDocumentIds }) => {
     const replaceIframeWithOembed = (data: string) => {
         const doc = new DOMParser().parseFromString(data, 'text/html');
         const iframes = doc.querySelectorAll('iframe');
@@ -29,22 +30,34 @@ const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, data, maxCon
         return doc.body.innerHTML;
     }
     const [dataTemp, setDataTemp] = useState<string>(replaceIframeWithOembed(data));
-
+    const containerEditor = useRef<HTMLDivElement>(null);
     useEffect(() => {
-        const images = document.querySelectorAll('img');
+        const images = document.querySelectorAll('img:not(.img-profile)') as NodeListOf<HTMLElement>;
+        const ckEdit = document.querySelectorAll('.ck-content') as NodeListOf<HTMLElement>;
+        ckEdit.forEach((element) => {
+            element.addEventListener('focus', () => {
+                document.getElementById("header")?.classList.add('d-none');
+            })
+            element.addEventListener('blur', () => {
+                document.getElementById("header")?.classList.remove('d-none');
+            })
+        })
         images.forEach((element, index) => {
             element.style.display = 'flex';
             element.style.width = '50%';
         })
     }, [dataTemp]);
+
     const [error, setError] = useState<string>('');
     const onChangeDataTemp = (dataTemp: string) => {
         if (maxContentLength && dataTemp.length > maxContentLength) {
             setError(`Nội dung không được vượt quá ${maxContentLength} ký tự`);
+            setContainError && setContainError(true);
             return;
         } else {
             const element = document.getElementsByClassName("ck-editor__main")[0] as HTMLElement;
             element.style.border = "";
+            setContainError && setContainError(false);
             setError('');
         }
         const observer = new MutationObserver((mutationsList) => {
@@ -176,7 +189,7 @@ const MyEditor: React.FC<MyEditorProps> = ({ mapIdUrl, setMapIdUrl, data, maxCon
         };
     }
     return (
-        <div id='project-editor-content'>
+        <div id='project-editor-content' ref={containerEditor}>
             <ToastContainer containerId='my-editor' />
             <CKEditor
                 editor={Editor}

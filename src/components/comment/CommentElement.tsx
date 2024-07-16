@@ -3,6 +3,7 @@ import { CommentDTO } from "../../model/CommentDTO"
 import { getEmailFromToken } from "../../api/CommonApi";
 import { deleteComment } from "../../api/commentAPI/Comment";
 import { toast, ToastContainer } from "react-toastify";
+import { Loading } from "../common/LoadingSpinner";
 
 interface CommentElementProps {
     comment: CommentDTO,
@@ -16,17 +17,22 @@ interface CommentElementProps {
 }
 
 export const CommentElement: React.FC<CommentElementProps> = ({ idSelected, isLogin, comment, setReply, reply, convertDateTime, handleReply }) => {
+    const [loading, setLoading] = useState(false);
     const [authorEmail, setAuthorEmail] = useState(getEmailFromToken());
     const handleDeleteComment = (id: number) => {
         const result = window.confirm("Bạn muốn xóa bình luận này?");
         if (result) {
+            setLoading(true);
             deleteComment(id)
                 .then(response => {
-                    if (response.status !== 200) {
-                        toast.error(response.message, { containerId: 'comment-element' })
+                    if (response.status !== 204) {
+                        toast.error(response.message, { containerId: 'project-detail' })
                     }
+                    toast.success(response.message, { containerId: 'project-detail' })
                     const data = response.data;
                     setReply(reply.filter(comment => comment.id !== id));
+                }).finally(() => {
+                    setLoading(false);
                 })
         }
     }
@@ -36,6 +42,7 @@ export const CommentElement: React.FC<CommentElementProps> = ({ idSelected, isLo
 
     return (
         <div>
+            <Loading loading={loading} />
             <ToastContainer containerId='comment-element' />
             <div className={`comment-child ${idSelected === `${comment.id}` ? 'selected-comment' : ''}`} id={`${comment.id}`}>
                 <div className="flex-grow-1 flex-shrink-1">

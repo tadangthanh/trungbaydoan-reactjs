@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+
 export default function InputSuggestion({ placeholder, label, required, data, setData, request, idPrefix }: { placeholder: string, label: string, data: any, setData: any, request: any, idPrefix: string, required: boolean }) {
     const [emailInput, setEmailInput] = useState('');
     const [idAdd, setIdAdd] = useState(0);
@@ -20,8 +21,7 @@ export default function InputSuggestion({ placeholder, label, required, data, se
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedEmail(emailInput);
-        }, 150); // Adjust the delay as needed
-
+        }, 150);
         return () => {
             clearTimeout(handler);
         };

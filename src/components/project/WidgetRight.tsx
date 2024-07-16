@@ -5,7 +5,7 @@ import '../css/WidgetRight.css'
 import { MemberDTO } from "../../model/MemberDTO";
 import { apiUrl, getEmailFromToken, verifyAdmin, verifyToken } from "../../api/CommonApi";
 import { DocumentDTO } from "../../model/DocumentDTO";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { User } from "../../model/User";
 import { getMentorsByProjectId } from "../../api/projectAPI/ProjectAPI";
 import { WidgetRightAdmin } from "./WidgetRightAdmin";
@@ -38,6 +38,7 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleCancelUpdate, ha
     const [isLogin, setIsLogin] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [memberRole, setMemberRole] = useState(members.filter(member => member.email === getEmailFromToken())[0]?.role);
+    const navigate = useNavigate();
     useEffect(() => {
         verifyToken().then(res => {
             if (res.status === 200) {
@@ -54,9 +55,7 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleCancelUpdate, ha
     useEffect(() => {
         getMentorsByProjectId(project.id || 0).then(res => {
             setMentors(res.data);
-        }).catch(error => {
-            console.log(error);
-        });
+        })
     }, [project.id])
     const chunks = chunkArray(categories, 4);
     const getDocumentType = (mimeType: string): string => {
@@ -69,6 +68,9 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleCancelUpdate, ha
         };
         return mimeTypesMap[mimeType] || 'file';
     };
+    const handleCategory = (categoryName: string) => {
+        navigate(`/`, { state: { categoryName: categoryName } });
+    }
     return (
         <div className="col-lg-4">
             {/* <!-- Search widget--> */}
@@ -84,14 +86,14 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleCancelUpdate, ha
             </div>
             {/* <!-- Categories widget--> */}
             <div className="card mb-4">
-                <div className="card-header"><i className="me-1 fa-solid fa-list"></i>Categories</div>
+                <div className="card-header"><i className="me-1 fa-solid fa-list"></i>Danh sách thể loại</div>
                 <div className="card-body">
                     {chunks.map((chunk, index) => (
                         <div className="row mb" key={index}>
                             {chunk.map((category: any, idx: number) => (
                                 <div className="col-sm-6" key={idx}>
                                     <ul className="list-unstyled mb-0">
-                                        <li><a href="#">{category.name}</a></li>
+                                        <li onClick={() => handleCategory(category.name)}><a href="#">{category.name}</a></li>
                                     </ul>
                                 </div>
                             ))}

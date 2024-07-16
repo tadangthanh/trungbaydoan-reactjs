@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import '../css/Header.css';
 import 'react-toastify/dist/ReactToastify.css';
 import { Notification } from "./Notification";
-import logo from '../../assets/img/vnua.png';
+import logo from '../../assets/img/fita.png';
 import { getUserByEmail } from "../../api/user/UserAPI";
 import { User } from "../../model/User";
 import { ToastContainer } from "react-toastify";
 import { ProjectDTO } from "../../model/ProjectDTO";
 import { getAllProjectPending } from "../../api/projectAPI/ProjectAPI";
 import { PageResponse } from "../../model/PageResponse";
+import { Loading } from "./LoadingSpinner";
 export const Header = () => {
     const [isLogin, setIsLogin] = useState(false);
     const [showUserMenu, setShowUserMenu] = useState(false);
@@ -19,6 +20,7 @@ export const Header = () => {
     const [pageResponse, setPageResponse] = useState({} as PageResponse);
     const [email, setEmail] = useState(getEmailFromToken() || '');
     const [hasNext, setHasNext] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [role, setRole] = useState('');
     useEffect(() => {
         verifyToken().then(res => {
@@ -39,12 +41,15 @@ export const Header = () => {
     }, [page]);
     const handleGetProjectPending = () => {
         if (isLogin && email !== '') {
+            setLoading(true);
             getAllProjectPending(email, page, 5).then(res => {
                 if (res.status === 200) {
                     setHasNext(res.data.hasNext);
                     setProjectsPending(res.data.items);
                 }
-            })
+            }).finally(() => {
+                setLoading(false);
+            });
         }
     }
     const convertHtmlToText = (html: string) => {
@@ -88,35 +93,39 @@ export const Header = () => {
 
     }, []);
     return (
-        <div style={{ position: 'sticky', top: '0', zIndex: '2000' }}>
+        <div id="header" style={{ position: 'sticky', top: '0', zIndex: '2000' }}>
+            <Loading loading={loading} />
             <ToastContainer containerId={`header`} />
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div className="container">
-                    <Link className="navbar-brand" to={`/`}>Home</Link>
-                    <Link style={{ float: 'right' }} className="nav-link text-white" to={`/add-project`}>Thêm đồ án</Link>
+                    <Link className="navbar-brand" to={`/`}>Trang chủ</Link>
+
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                         aria-label="Toggle navigation"><span className="navbar-toggler-icon"></span></button>
 
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <ul className="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
+                            <li className="nav-item me-2">
+                                <Link style={{ float: 'right' }} className="nav-link text-white" to={`/add-project`}>Thêm đồ án</Link>
+                            </li>
                             <li className="nav-item me-2 ">
                                 {isLogin && <Notification userId={getIdFromToken()} />}
                             </li>
                             <li className="nav-item item-menu-user">
                                 <div className="user-menu">
                                     <a className="nav-link" href="#" onClick={handleUserClick}>
-                                        <img style={{ width: '23px', height: '23px' }} className="img-profile small rounded-circle" src={user?.avatarUrl && isLogin ? user.avatarUrl : logo} alt="Profile" />
+                                        <img className="img-profile rounded-circle avatar-sm" src={user?.avatarUrl && isLogin ? user.avatarUrl : logo} alt="Profile" />
                                     </a>
-                                    <div className={`dropdown-menu ${showUserMenu ? 'show' : ''}`}>
+                                    <div style={{ position: 'absolute', zIndex: '10000 !important' }} className={`dropdown-menu ${showUserMenu ? 'show' : ''}`}>
                                         {isLogin ? (
                                             <>
-                                                <Link className="dropdown-item" to={`/profile/${getEmailFromToken()}`}><i className=" me-2 fa-regular fa-user"></i>Profile</Link>
+                                                <Link className="dropdown-item" to={`/profile/${getEmailFromToken()}`}><i className=" me-2 fa-regular fa-user"></i>Xem hồ sơ</Link>
                                                 {role === "ROLE_STUDENT" && <button onClick={handleGetProjectPending} type="button" className="dropdown-item" data-toggle="modal" data-target="#exampleModalCenter" ><i className="me-2 fa-solid fa-hourglass-half"></i>Đồ án chờ duyệt</button>}
-                                                <Link className="dropdown-item" to={"/admin"}><i className="me-2 fa-solid fa-gauge-high"></i>Admin</Link>
-                                                <a className="dropdown-item" onClick={handleLogout}> <i className=" me-2 fa-solid fa-right-from-bracket"></i>Logout</a>
+                                                <Link className="dropdown-item" to={"/admin"}><i className="me-2 fa-solid fa-gauge-high"></i>Quản trị viên</Link>
+                                                <a className="dropdown-item" onClick={handleLogout}> <i className=" me-2 fa-solid fa-right-from-bracket"></i>Đăng xuất</a>
                                             </>
-                                        ) : (<Link className="dropdown-item" to="/login">Login</Link>)}
+                                        ) : (<Link className="dropdown-item" to="/login">Đăng nhập</Link>)}
 
 
                                     </div>
@@ -153,8 +162,8 @@ export const Header = () => {
                                                     return (
                                                         <tr key={index}>
                                                             <th scope="row">{project.id}</th>
-                                                            <td>{convertHtmlToText(project.name)}</td>
-                                                            <td>{convertHtmlToText(project.summary)}</td>
+                                                            <td><p className="header-truncate-text">{convertHtmlToText(project.name)}</p></td>
+                                                            <td ><p className="header-truncate-text">{convertHtmlToText(project.summary)}</p></td>
                                                             <td>{project.submissionDate}</td>
                                                             <td>{project.categoryName}</td>
                                                             <td>{project.projectStatus}</td>

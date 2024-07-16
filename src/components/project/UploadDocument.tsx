@@ -45,6 +45,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
                     return;
                 }
             }
+            upload(selectedFiles);
         }
     };
     const checkFileName = (fileName: string) => {
@@ -60,7 +61,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
     useEffect(() => {
         if (!files) setError('');
     }, [files]);
-    const upload = async () => {
+    const upload = async (files: File[]) => {
         if (files.length === 0) return;
         handleSetWaiting(true);
         setIsUpload(true);
@@ -142,7 +143,7 @@ export const UploadDocument: React.FC<UploadDocumentProps> = ({ handleDeleteDocu
             <label className="mb-4 text-center">{label}<i className="mr-2 fa-solid fa-cloud-arrow-up"></i></label>
             <div className="upload-file-area">
                 {!isUpload && <input accept=".pdf,.doc,.docx,.xls,.xlsx" ref={inputRef} type="file" multiple onChange={handleFileChange} />}
-                {!isUpload && !error && !waiting && <button className="btn btn-secondary btn-upload-video" onClick={upload}>Upload</button>}
+                {/* {!isUpload && !error && !waiting && <button className="btn btn-secondary btn-upload-video" onClick={upload}>Upload</button>} */}
             </div>
             {error && <div className="alert alert-danger mt-2">{error}</div>}
             {loading && <div className="loader"></div>}

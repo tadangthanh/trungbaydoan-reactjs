@@ -57,6 +57,7 @@ body {
     /* Màu của thanh trượt và nền của thanh cuộn */
 }
 
+/* 
 .custom-context-menu {
     display: none;
     position: absolute;
@@ -69,4 +70,4 @@ body {
 
 .custom-context-menu.visible {
     display: block;
-}
+} */

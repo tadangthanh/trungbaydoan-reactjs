@@ -175,6 +175,10 @@ export const ProjectDetail = () => {
         setIdsDelete(pre => pre.filter(dcmId => dcmId !== id));
     }
     const handleUpdateProject = (id: number) => {
+        if (projectUpdate.name === '' || projectUpdate.summary === '' || projectUpdate.description === '') {
+            toast.error("Vui lòng nhập đầy đủ thông tin", { containerId: 'project-detail' });
+            return;
+        }
         const result = window.confirm("Bạn có chắc chắn muốn cập nhật?");
         if (result) {
             setLoading(true);
@@ -227,6 +231,7 @@ export const ProjectDetail = () => {
                     setMapIdUrl(new Map());
                     setLoading(true);
                     toast.info("Huỷ cập nhật thành công", { containerId: 'project-detail' });
+                    setLoading(false);
                     return;
                 }
             });
@@ -237,9 +242,9 @@ export const ProjectDetail = () => {
     }
     const [mapIdUrl, setMapIdUrl] = useState(new Map<string, number>());
     return (
-        <div>
+        <div> <Loading loading={loading} />
             {status && <div id="content" ref={contentRef}>
-                <Loading loading={loading} />
+
                 <ToastContainer containerId='project-detail' />
                 <div id="progress-container" style={{ zIndex: "10000" }}>
                     <div id="progress-bar" ref={progressBar}></div>

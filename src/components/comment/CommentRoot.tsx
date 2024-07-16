@@ -4,9 +4,10 @@ import { CommentElement } from "./CommentElement";
 import { createComment, deleteComment, getAllCommentChildByParentId } from "../../api/commentAPI/Comment";
 import '../css/comment.css';
 import { getEmailFromToken } from "../../api/CommonApi";
-import logo from '../../assets/img/vnua.png';
+import logo from '../../assets/img/fita.png';
 import { Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import { Loading } from "../common/LoadingSpinner";
 interface CommentRootProps {
     comment: CommentDTO,
     projectId: number,
@@ -41,6 +42,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
     const [loading, setLoading] = useState(false);
     const [authorEmail, setAuthorEmail] = useState(getEmailFromToken());
     useEffect(() => {
+        setLoading(true);
         getAllCommentChildByParentId(comment.id, page, 5)
             .then(response => {
                 if (response.status === 200) {
@@ -50,6 +52,8 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                 } else if (response.status !== 204) {
                     toast.error(response.message, { containerId: 'comment-root' })
                 }
+            }).finally(() => {
+                setLoading(false);
             })
     }, [page]);
     const handleGetCommentChild = () => {
@@ -57,6 +61,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
         setError('');
     }
     const handleReply = (replyTo: string, content: string, authorEmail: string, idCommentReply: number) => {
+
         setError('');
         setReplyTo(replyTo);
         setIdParent(comment.id);
@@ -118,6 +123,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
     }
     const [error, setError] = useState('');
     const handleAddComment = () => {
+        setLoading(true);
         const comment = new CommentDTO(0, content, projectId, '', idParent, 0, '', 0, '', '', receiverEmail, '');
         createComment(comment)
             .then(response => {
@@ -133,11 +139,14 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                 setError('Có lỗi xảy ra khi thêm bình luận');
                 toast.error('Có lỗi xảy ra khi thêm bình luận', { containerId: 'comment-root' })
                 setIdParent(0);
+            }).finally(() => {
+                setLoading(false);
             });
     }
     const handleDeleteComment = (id: number) => {
         const result = window.confirm("Bạn muốn xóa bình luận này?");
         if (result) {
+            setLoading(true);
             deleteComment(id)
                 .then(response => {
                     if (response.status !== 200) {
@@ -145,6 +154,8 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                     }
                     setIdParent(0);
                     setComments(comments.filter(comment => comment.id !== id));
+                }).finally(() => {
+                    setLoading(false);
                 })
         }
     }
@@ -157,6 +168,7 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
     }
     return (
         <div id={`${comment.id}`} className={`justify-content-between ${idSelected === `${comment.id}` ? 'selected-comment' : ''}`}>
+            <Loading loading={loading} />
             <ToastContainer containerId='comment-root' />
             <div>
                 <div className="content-box mt-2">
@@ -206,7 +218,6 @@ export const CommentRoot: React.FC<CommentRootProps> = ({ isLogin, comment, proj
                     }
 
                     <div className="d-flex justify-content-between"> {hastNext && comment.totalReply !== 0 && <button className="pe-auto d-inline-block mt-2 btn link-primary" onClick={handleGetCommentChild}>Xem tất cả </button>}
-                        {loading && <div className="loader"></div>}
                         {page !== 1 && <button onClick={showLessComment} className="pe-auto d-inline-block mt-2 btn link-primary">Hiển thị ít hơn</button>}
                     </div>
                     {idParent !== 0 && <div className="form-group">

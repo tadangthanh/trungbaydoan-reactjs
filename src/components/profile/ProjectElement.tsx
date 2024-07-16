@@ -3,7 +3,7 @@ import { ProjectDTO } from "../../model/ProjectDTO";
 import { useEffect, useState } from "react";
 import { MemberDTO } from "../../model/MemberDTO";
 import { getMemberByProjectId } from "../../api/members/MemberAPI";
-import logo from '../../assets/img/vnua.png';
+import logo from '../../assets/img/fita.png';
 
 interface ProjectElementProps {
     project: ProjectDTO;
@@ -45,22 +45,18 @@ export const ProjectElement: React.FC<ProjectElementProps> = ({ project }) => {
                             </div>
                         </div>
                         <div className="dropdown ms-2">
-                            <a href="#" className="dropdown-toggle font-size-16 text-muted"
+                            {/* <a href="#" className="dropdown-toggle font-size-16 text-muted"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false">
                                 <i className="mdi mdi-dots-horizontal"></i>
                             </a>
                             <div className="dropdown-menu dropdown-menu-end">
-                                <a className="dropdown-item"
-                                    data-bs-toggle="modal"
-                                    data-bs-target=".bs-example-new-project"
-                                >Edit</a>
                                 <a className="dropdown-item" >Share</a>
                                 <div className="dropdown-divider"></div>
                                 <a className="dropdown-item delete-item"
                                     data-id="project-items-1"
                                 >Delete</a>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                     <div className="mb-4">

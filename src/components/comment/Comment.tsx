@@ -5,12 +5,20 @@ import { CommentRoot } from "./CommentRoot";
 import { useLocation } from "react-router-dom";
 import { verifyToken } from "../../api/CommonApi";
 import { toast, ToastContainer } from "react-toastify";
+import { Loading } from "../common/LoadingSpinner";
 interface CommentProps {
     projectId: number;
 }
 export const Comment: React.FC<CommentProps> = ({ projectId }) => {
+    const [loading, setLoading] = useState(false);
     const location = useLocation();
     const [idSelected, setIdSelected] = useState('');
+    const [comments, setComments] = useState<CommentDTO[]>([]);
+    const [content, setContent] = useState('');
+    const [parentCommentId, setParentCommentId] = useState(0);
+    const [page, setPage] = useState(1);
+    const [hastNext, setHasNext] = useState(true);
+    const [error, setError] = useState('');
     useEffect(() => {
         const searchParams = new URLSearchParams(location.search);
         const commentId = searchParams.get('comment');
@@ -34,15 +42,8 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
             }, 1000);
         }
     }, [location]);
-
-
-    const [comments, setComments] = useState<CommentDTO[]>([]);
-    const [content, setContent] = useState('');
-    const [parentCommentId, setParentCommentId] = useState(0);
-    const [page, setPage] = useState(1);
-    const [hastNext, setHasNext] = useState(true);
-    const [error, setError] = useState('');
     useEffect(() => {
+        setLoading(true);
         getAllCommentByProjectId(projectId, page, 5)
             .then(response => {
                 const data = response.data;
@@ -54,13 +55,16 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
                     setHasNext(false)
                     return;
                 }
-
             })
+            .finally(() => {
+                setLoading(false);
+            });
     }, [page]);
     const getAllComment = () => {
         setPage(page + 1);
     }
     const handleAddComment = () => {
+        setLoading(true);
         const comment = new CommentDTO(0, content, projectId, '', parentCommentId, 0, '', 0, '', '', '', '');
         createComment(comment)
             .then(response => {
@@ -73,6 +77,9 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
                 setComments([...comments, data]);
                 setContent('');
             })
+            .finally(() => {
+                setLoading(false);
+            });
     }
     const [isLogin, setIsLogin] = useState(false);
     useEffect(() => {
@@ -84,6 +91,7 @@ export const Comment: React.FC<CommentProps> = ({ projectId }) => {
     }, []);
     return (
         <div>
+            <Loading loading={loading} />
             <ToastContainer containerId='comment' />
             <div className="card">
                 <div className="card-body p-4">

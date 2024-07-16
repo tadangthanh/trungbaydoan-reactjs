@@ -55,7 +55,7 @@ export const CategoryAdmin: React.FC = () => {
         <div className="content container">
             <Loading loading={loading} />
             <ToastContainer containerId='category' />
-            <h2>Category</h2>
+            <h2>Thể loại</h2>
             <div className="dropdown">
                 <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                     Danh sách thể loại

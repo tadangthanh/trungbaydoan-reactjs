@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { register, verifyEmail } from "../../api/AuthenticationApi";
 import { toast, ToastContainer } from "react-toastify";
 import { Loading } from "../common/LoadingSpinner";
+import { getCodeVerify, resendCode } from "../../api/user/UserAPI";
+import { getEmailFromToken } from "../../api/CommonApi";
 
 export const PageRegister: React.FC = () => {
     const navigate = useNavigate();
@@ -14,7 +16,13 @@ export const PageRegister: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showCodeInput, setShowCodeInput] = useState(false);
+    const [isCode, setIsCode] = useState(false);
     const handleRegister = async (e: any) => {
+        if (!email || !password || !passwordConfirm) {
+            setError('Vui lòng nhập đủ thông tin');
+            toast.error('Vui lòng nhập đủ thông tin', { containerId: 'page-register' });
+            return;
+        }
         setLoading(true);
         e.preventDefault();
         try {
@@ -28,12 +36,12 @@ export const PageRegister: React.FC = () => {
             const response = await register(request);
             if (response.status !== 201) {
                 setError(response.message);
-                console.log(response);
                 toast.error(response.message, { containerId: 'page-register' });
                 focusFirstInputField();
                 setLoading(false);
                 return;
             }
+            setIsCode(true);
             toast.success(response.message, { containerId: 'page-register' });
             setShowCodeInput(true);
         } catch (error) {
@@ -49,6 +57,11 @@ export const PageRegister: React.FC = () => {
         }
     }
     const handleVerify = async (e: any) => {
+        if (!code) {
+            setError('Vui lòng nhập mã xác nhận');
+            toast.error('Vui lòng nhập mã xác nhận', { containerId: 'page-register' });
+            return
+        }
         setLoading(true);
         e.preventDefault();
         try {
@@ -69,6 +82,18 @@ export const PageRegister: React.FC = () => {
     useEffect(() => {
         focusFirstInputField();
     }, [])
+    const handleSendCode = () => {
+        setLoading(true);
+        resendCode(email).then(res => {
+            if (res.status === 200) {
+                toast.success(res.message, { containerId: 'page-register' });
+                setIsCode(true);
+                setLoading(false);
+            }
+        }).finally(() => {
+            setLoading(false);
+        });
+    }
     return (
         <div className="container">
             <Loading loading={loading} />
@@ -115,6 +140,10 @@ export const PageRegister: React.FC = () => {
                                                 }} />
                                         </div>}
                                     </div>
+                                    {isCode && <div className="input-container">
+                                        <span>Bạn không nhận được mã ? </span>
+                                        <span onClick={handleSendCode} style={{ cursor: 'pointer' }} className="link-primary">Gửi lại </span>
+                                    </div>}
                                     <div className='text-danger text-center mb-2'>{error}</div>
                                     {
                                         !showCodeInput && <a href="#" onClick={handleRegister} className="btn btn-primary btn-user btn-block">

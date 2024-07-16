@@ -26,7 +26,7 @@ export const TableProject: React.FC = () => {
     const [documents, setDocuments] = useState<DocumentDTO[]>([])
     const [direction, setDirection] = useState("DESC")
     const [pageResponse, setPageResponse] = useState({} as PageResponse);
-    const [size, setSize] = useState(10);
+    const [size, setSize] = useState(5);
     const [idsSelected, setIdsSelected] = useState<number[]>([]);
     const [isSelect, setIsSelect] = useState(false);
     const [isDelete, setIsDelete] = useState(false);

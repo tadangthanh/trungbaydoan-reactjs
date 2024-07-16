@@ -41,3 +41,6 @@ export const inactiveUserByIds = async (id: number) => {
 export const activeUserByIds = async (id: number) => {
     return await request(`${apiUrl}/users/active/${id}`, "POST");
 }
+export const resendCode = async (email: string) => {
+    return await request(`${apiUrl}/auth/resend-code?email=${email}`, "POST");
+}

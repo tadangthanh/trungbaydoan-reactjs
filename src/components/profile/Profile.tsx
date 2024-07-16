@@ -3,7 +3,7 @@ import '../css/Profile.css'
 import { useNavigate, useParams } from 'react-router-dom';
 import { changePassword, getCodeVerify, getUserByEmail, updateProfile, uploadAvatar } from '../../api/user/UserAPI';
 import { User } from '../../model/User';
-import logo from '../../assets/img/vnua.png';
+import logo from '../../assets/img/fita.png';
 import { deleteToken, getEmailFromToken, verifyToken } from '../../api/CommonApi';
 import { ProjectElement } from './ProjectElement';
 import { ProjectDTO } from '../../model/ProjectDTO';
@@ -125,6 +125,7 @@ export const Profile: React.FC = () => {
             const imageUrl = URL.createObjectURL(selectedFile); // Tạo đường dẫn URL cho file
             setImageUrl(imageUrl); // Cập nhật state để hiển thị ảnh
             setFile(selectedFile);
+            handleUpload(selectedFile);
         }
     };
     const handleCancelUpload = () => {
@@ -132,7 +133,7 @@ export const Profile: React.FC = () => {
         setError('');
         setEditAvatar(false);
     }
-    const handleUpload = () => {
+    const handleUpload = (file: File) => {
         setLoading(true);
         uploadAvatar(file as File).then(res => {
             if (res.status !== 200) {
@@ -315,7 +316,7 @@ export const Profile: React.FC = () => {
                             <span className="text-black-50">{user.email?.split("@")[0]}</span>
                             {editAvatar && <input onChange={handleFileChange} type="file" className="form-control" />}
                             {!editAvatar && isLogin && getEmailFromToken() === email && <span className="btn" onClick={handleEditAvatar} title='thay đổi ảnh đại diện'><i className="fa-regular fa-pen-to-square"></i></span>}
-                            <span className='mt-2'>{file && !error && <button onClick={handleUpload} className='btn btn-secondary'>upload</button>}{editAvatar && <button onClick={handleCancelUpload} className='btn btn-danger'>cancel</button>}</span>
+                            <span className='mt-2'>{editAvatar && <button onClick={handleCancelUpload} className='btn btn-danger'>cancel</button>}</span>
                             <span className='text-danger'>{error}</span>
                             <div id='social-network'>
                                 {user.facebookUrl !== '' && <a target='_blank' href={user.facebookUrl}> <i className="fa-brands fa-facebook"></i>Facebook</a>}

@@ -16,7 +16,7 @@ export const TableUser: React.FC = () => {
     const [searchField, setSearchField] = useState("")
     const [direction, setDirection] = useState("DESC")
     const [pageResponse, setPageResponse] = useState({} as PageResponse);
-    const [size, setSize] = useState(10);
+    const [size, setSize] = useState(5);
 
     useEffect(() => {
         getAllData();

@@ -9,17 +9,19 @@ import InputSuggestion from '../input/InputSuggestion';
 import { UploadVideo } from './UploadVideo';
 import { UploadDocument } from './UploadDocument';
 import { verifyToken } from '../../api/CommonApi';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { deleteDocument, deleteDocumentAnonymous } from '../../api/documentAPI/DocumentAPI';
 import { getAllCategory } from '../../api/categoryAPI/CategoryAPI';
 import { createProject } from '../../api/projectAPI/ProjectAPI';
 import { toast, ToastContainer } from 'react-toastify';
 import { Loading } from '../common/LoadingSpinner';
+import { FaArrowUp } from 'react-icons/fa';
 
 export const AddProject = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [documentIds, setDocumentIds] = useState<number[]>([]);
     const [error, setError] = useState('');
+    const [containError, setContainError] = useState(true);
     const [memberIds, setMemberIds] = useState<number[]>([]);
     const [projectName, setProjectName] = useState('');
     const [projectSummary, setProjectSummary] = useState('');
@@ -44,6 +46,12 @@ export const AddProject = () => {
         })
         setLoading(false);
     }, []);
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
     useEffect(() => {
         getAllCategory()
             .then(response => {
@@ -75,6 +83,13 @@ export const AddProject = () => {
     }
 
     const handleAddProject = (e: any) => {
+        if (!projectName || !projectSummary || !description || !startDate || !endDate || !submissionDate || !categoryId || mentorIds.length === 0) {
+            e.preventDefault();
+            setError('Vui lòng nhập đầy đủ thông tin');
+            toast.error('Vui lòng nhập đầy đủ thông tin', { containerId: 'add-project' });
+            return;
+        }
+        setLoading(true);
         e.preventDefault();
         const project = {
             name: projectName,
@@ -107,6 +122,8 @@ export const AddProject = () => {
             window.location.href = '/';
         }).catch((error: any) => {
             toast.error('Thêm đồ án thất bại', { containerId: 'add-project' });
+        }).finally(() => {
+            setLoading(false);
         });
         const idsDelete = getIdsDocumentDeleted();
         deleteDocumentAnonymous({ ids: idsDelete }).then((response: any) => {
@@ -137,10 +154,8 @@ export const AddProject = () => {
             <Loading loading={loading} />
             <ToastContainer containerId='add-project' />
             {!isLoading && <div className="container mt-5 box-add-project">
-                <a className="back-button">
-                    <i className="fas fa-arrow-left"></i>
-                    Quay lại trang chủ
-                </a>
+                <Link className='back-button' to="/"> <i className="fas fa-arrow-left"></i>
+                    Quay lại trang chủ</Link>
 
                 <h2 id='title'>Thêm đồ án</h2>
                 <form id="projectForm">
@@ -150,6 +165,7 @@ export const AddProject = () => {
                         </label>
                         <div id='editor'></div>
                         <MyEditor
+                            setContainError={setContainError}
                             maxContentLength={100}
                             handleSetDocumentIds={handleSetDocumentIds}
                             data={projectName}
@@ -162,6 +178,7 @@ export const AddProject = () => {
                             Bản tóm tắt <span style={{ color: 'red' }}>*</span>
                         </label>
                         <MyEditor
+                            setContainError={setContainError}
                             maxContentLength={200}
                             handleSetDocumentIds={handleSetDocumentIds}
                             data={projectSummary}
@@ -265,13 +282,34 @@ export const AddProject = () => {
                                 setDocumentIds={setDocumentIds}
                             />
                         </div>
+                        <span id="add-project-error">{error}</span>
                     </div>
-                    <span id="add-project-error">{error}</span>
-                    <button type="submit" onClick={handleAddProject} className="btn btn-info btn-add-project">Thêm Đồ Án
+
+                    <button type="submit" disabled={containError} onClick={handleAddProject} className="btn btn-info btn-add-project">Thêm Đồ Án
                         <i className="button__icon fas fa-chevron-right"></i>
                     </button>
                 </form>
             </div>}
+            <div
+                className="scroll-to-top"
+                onClick={scrollToTop}
+                style={{
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    backgroundColor: '#007bff',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    width: '40px',
+                    height: '40px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    zIndex: 1000
+                }}
+            >
+
+                <FaArrowUp style={{ marginTop: '8px' }} />
+            </div>
         </div>
     );
 }

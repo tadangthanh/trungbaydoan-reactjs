@@ -95,3 +95,16 @@
     color: #007bff;
     text-decoration: none;
 } */
+
+.header-truncate-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    /* Số dòng bạn muốn hiển thị */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1rem !important;
+    font-weight: normal !important;
+
+    white-space: normal;
+}

@@ -39,19 +39,8 @@ export const Admin: React.FC = () => {
                         </label>
                         <nav id="sidebar" style={{ background: 'black' }}>
                             <ul className="list-items">
-                                <li onClick={() => setSelected("home")} style={{ cursor: 'pointer' }}><i className="fas fa-home"></i>Trang chủ</li>
-                                <li onClick={() => setSelected("users")} style={{ cursor: 'pointer' }}><i className="fa-regular fa-user"></i>Người dùng</li>
-                                <li><a href="#"><i className="fas fa-cog"></i>Settings</a></li>
-                                <li><a href="#"><i className="fas fa-stream"></i>Features</a></li>
-                                <li><a href="#"><i className="fas fa-user"></i>About us</a></li>
-                                <li><a href="#"><i className="fas fa-globe-asia"></i>Languages</a></li>
-                                <li><a href="#"><i className="fas fa-envelope"></i>Contact us</a></li>
-                                <div className="icons">
-                                    <a href="#"><i className="fab fa-facebook-f"></i></a>
-                                    <a href="#"><i className="fab fa-twitter"></i></a>
-                                    <a href="#"><i className="fab fa-github"></i></a>
-                                    <a href="#"><i className="fab fa-youtube"></i></a>
-                                </div>
+                                <li onClick={() => setSelected("home")} style={{ cursor: 'pointer', background: '#c48787' }}><i className="fas fa-home"></i>Trang chủ</li>
+                                <li onClick={() => setSelected("users")} style={{ cursor: 'pointer', background: '#c48787' }}><i className="fa-regular fa-user"></i>Người dùng</li>
                             </ul>
                         </nav>
                     </div>
