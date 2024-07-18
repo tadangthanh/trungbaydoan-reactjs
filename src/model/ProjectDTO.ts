@@ -22,9 +22,10 @@ export class ProjectDTO {
     memberNames: string[];
     approverName: string;
     active: boolean;
+    idsTechnology: number[];
 
 
-    constructor(id: number, name: string, description: string, startDate: string, endDate: string, projectStatus: string, submissionDate: string, summary: string, categoryId: number, categoryName: string, documentIds: number[], groupId: number, approverId: number, academicYear: number, mentorIds: number[], mentorNames: string[], createdDate: string, createdBy: string, lastModifiedDate: string, lastModifiedBy: string, memberNames: string[], approverName: string, active: boolean) {
+    constructor(id: number, name: string, description: string, startDate: string, endDate: string, projectStatus: string, submissionDate: string, summary: string, categoryId: number, categoryName: string, documentIds: number[], groupId: number, approverId: number, academicYear: number, mentorIds: number[], mentorNames: string[], createdDate: string, createdBy: string, lastModifiedDate: string, lastModifiedBy: string, memberNames: string[], approverName: string, active: boolean, idsTechnology: number[]) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -48,6 +49,7 @@ export class ProjectDTO {
         this.memberNames = memberNames;
         this.approverName = approverName;
         this.active = active;
+        this.idsTechnology = idsTechnology
     }
 
 }

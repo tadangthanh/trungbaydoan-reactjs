@@ -11,6 +11,8 @@ import { getMentorsByProjectId } from "../../api/projectAPI/ProjectAPI";
 import { WidgetRightAdmin } from "./WidgetRightAdmin";
 import { UploadDocument } from "./UploadDocument";
 import { UploadVideo } from "./UploadVideo";
+import { TechnologyDTO } from "../../model/TechnologyDTO";
+import { getAllTechnology, getAllTechnologyByIdIn } from "../../api/technology/TechnologyAPI";
 interface WidgetRightProps {
     categories: Category[];
     handleSetIdsDelete: (ids: number) => void;
@@ -38,6 +40,15 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleCancelUpdate, ha
     const [isLogin, setIsLogin] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [memberRole, setMemberRole] = useState(members.filter(member => member.email === getEmailFromToken())[0]?.role);
+    const [technologies, setTechnologies] = useState<TechnologyDTO[]>([]);
+
+    useEffect(() => {
+        getAllTechnologyByIdIn(project.idsTechnology || [0]).then(res => {
+            if (res.status === 200) {
+                setTechnologies(res.data);
+            }
+        })
+    }, [])
     const navigate = useNavigate();
     useEffect(() => {
         verifyToken().then(res => {
@@ -155,6 +166,10 @@ export const WidgetRight: React.FC<WidgetRightProps> = ({ handleCancelUpdate, ha
                         <p>{project.academicYear}</p>
                         <label htmlFor=""><i className="me-1 fa-solid fa-calendar-days"></i>Ngày cập nhật gần nhất:</label>
                         <p>{project.lastModifiedDate}</p>
+                        <label htmlFor=""><i className="me-1 fa-solid fa-microchip"></i>Công nghệ sử dụng:</label> <br />
+                        {technologies.map((technology, index) => (
+                            <span key={index}>{technology.name} <i className={`${technology.acronym}`}></i>{index !== technologies.length - 1 && <span>, </span>}</span>
+                        ))}
                     </div>
 
                 </div>}

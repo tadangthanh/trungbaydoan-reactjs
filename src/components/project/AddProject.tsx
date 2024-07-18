@@ -39,17 +39,7 @@ export const AddProject = () => {
     const [idsTechnologySelected, setIdsTechnologySelected] = useState<number[]>([]);
     const [loading, setLoading] = useState(true);
     const handleIdsTechnology = (selected: number[]) => {
-        if (selected.length === 0) {
-            setIdsTechnologySelected([]);
-            return
-        }
-        selected.forEach((id) => {
-            if (!idsTechnologySelected.includes(id)) {
-                setIdsTechnologySelected([...idsTechnologySelected, id]);
-            } else {
-                setIdsTechnologySelected(idsTechnologySelected.filter((item) => item !== id));
-            }
-        })
+        setIdsTechnologySelected(selected);
     }
     useEffect(() => {
         setLoading(false);
@@ -99,56 +89,54 @@ export const AddProject = () => {
 
     const handleAddProject = (e: any) => {
         e.preventDefault();
-        console.log("idsTechnologySelected", idsTechnologySelected);
-
-        // if (!projectName || !projectSummary || !description || !startDate || !endDate || !submissionDate || !categoryId || mentorIds.length === 0) {
-        //     e.preventDefault();
-        //     setError('Vui lòng nhập đầy đủ thông tin');
-        //     toast.error('Vui lòng nhập đầy đủ thông tin', { containerId: 'add-project' });
-        //     return;
-        // }
-        // setLoading(true);
-        // e.preventDefault();
-        // const project = {
-        //     name: projectName,
-        //     summary: projectSummary,
-        //     description: description,
-        //     startDate: new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 1)),
-        //     endDate: new Date(new Date(endDate).setDate(new Date(endDate).getDate() + 1)),
-        //     submissionDate: new Date(new Date(submissionDate).setDate(new Date(submissionDate).getDate() + 1)),
-        //     categoryId: categoryId,
-        //     mentorIds: mentorIds,
-        //     memberIds: memberIds,
-        //     documentIds: documentIds
-        // }
-        // createProject(project).then((response: any) => {
-        //     if (response.status !== 201) {
-        //         toast.error(response.message, { containerId: 'add-project' });
-        //         return;
-        //     }
-        //     toast.success(response.message, { containerId: 'add-project' });
-        //     setProjectName('');
-        //     setProjectSummary('');
-        //     setDescription('');
-        //     setStartDate('');
-        //     setEndDate('');
-        //     setSubmissionDate('');
-        //     setCategoryId(0);
-        //     setMentorIds([]);
-        //     setMemberIds([]);
-        //     setDocumentIds([]);
-        //     window.location.href = '/';
-        // }).catch((error: any) => {
-        //     toast.error('Thêm đồ án thất bại', { containerId: 'add-project' });
-        // }).finally(() => {
-        //     setLoading(false);
-        // });
-        // const idsDelete = getIdsDocumentDeleted();
-        // deleteDocumentAnonymous({ ids: idsDelete }).then((response: any) => {
-        //     if (response.status !== 200) {
-        //         return;
-        //     }
-        // })
+        if (!projectName || !projectSummary || !description || !startDate || !endDate || !submissionDate || !categoryId || mentorIds.length === 0) {
+            e.preventDefault();
+            setError('Vui lòng nhập đầy đủ thông tin');
+            toast.error('Vui lòng nhập đầy đủ thông tin', { containerId: 'add-project' });
+            return;
+        }
+        setLoading(true);
+        const project = {
+            name: projectName,
+            summary: projectSummary,
+            description: description,
+            startDate: new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 1)),
+            endDate: new Date(new Date(endDate).setDate(new Date(endDate).getDate() + 1)),
+            submissionDate: new Date(new Date(submissionDate).setDate(new Date(submissionDate).getDate() + 1)),
+            categoryId: categoryId,
+            mentorIds: mentorIds,
+            memberIds: memberIds,
+            documentIds: documentIds,
+            idsTechnology: idsTechnologySelected
+        }
+        createProject(project).then((response: any) => {
+            if (response.status !== 201) {
+                toast.error(response.message, { containerId: 'add-project' });
+                return;
+            }
+            toast.success(response.message, { containerId: 'add-project' });
+            setProjectName('');
+            setProjectSummary('');
+            setDescription('');
+            setStartDate('');
+            setEndDate('');
+            setSubmissionDate('');
+            setCategoryId(0);
+            setMentorIds([]);
+            setMemberIds([]);
+            setDocumentIds([]);
+            window.location.href = '/';
+        }).catch((error: any) => {
+            toast.error('Thêm đồ án thất bại', { containerId: 'add-project' });
+        }).finally(() => {
+            setLoading(false);
+        });
+        const idsDelete = getIdsDocumentDeleted();
+        deleteDocumentAnonymous({ ids: idsDelete }).then((response: any) => {
+            if (response.status !== 200) {
+                return;
+            }
+        })
     }
 
     const [mapIdUrl, setMapIdUrl] = useState(new Map<string, number>());

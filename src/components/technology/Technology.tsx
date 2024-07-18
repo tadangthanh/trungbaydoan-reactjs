@@ -8,8 +8,6 @@ interface TechnologyProps {
 export const Technology: React.FC<TechnologyProps> = ({ handleIdsTechnology }) => {
     const [technologyOptions, setTechnologyOptions] = useState<TechnologyDTO[]>([]);
     const [selectedTechnologies, setSelectedTechnologies] = useState<TechnologyDTO[]>([]);
-
-
     useEffect(() => {
         getAllTechnology().then((response) => {
             setTechnologyOptions(response.data);
